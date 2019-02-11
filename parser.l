@@ -6,142 +6,145 @@
 %%
     /* Declarations */
 "class" {
-    printf("CLASS");
+    printf("CLASS ");
 }
 "public" {
-    printf("PUBLIC");
+    printf("PUBLIC ");
 }
 "static" {
-    printf("STATIC");
+    printf("STATIC ");
 }
 "void" {
-    printf("VOID");
+    printf("VOID ");
 }
 "main" {
-    printf("MAIN");
+    printf("MAIN ");
+}
+"String" {
+    printf("STRING ");
 }
 "extends" {
-    printf("EXTENDS");
+    printf("EXTENDS ");
 }
 "return" {
-    printf("RETURN");
+    printf("RETURN ");
 }
 
     /* Functions */
 Length {
-    printf("LENGTH");
+    printf("LENGTH ");
 }
 System.out.println {
-    printf("PRINT");
+    printf("PRINT ");
 }
     
     /* Objects */
 this {
-    printf("THIS");
+    printf("THIS ");
 }
 new {
-    printf("NEW");
+    printf("NEW ");
 }
 
     /* Loops and if-statements */
 if {
-    printf("IF");
+    printf("IF ");
 }
 else {
-    printf("ELSE");
+    printf("ELSE ");
 }
 while {
-    printf("WHILE");
+    printf("WHILE ");
 }
 
     /* booleans */
 true {
-    printf("TRUE");
+    printf("TRUE ");
 }
 false {
-    printf("FALSE");
+    printf("FALSE ");
 }
 
     /* Operators */
 = {
-    printf("EQUAL");
+    printf("EQUAL ");
 }
 \+ {
-    printf("PLUS");
+    printf("PLUS ");
 }
 - {
-    printf("MINUS");
+    printf("MINUS ");
 }
 \* {
-    printf("TIMES");
+    printf("TIMES ");
 }
 \/ {
-    printf("SLASH");
+    printf("SLASH ");
 }
 "++" {
-    printf("PLUSPLUS");
+    printf("PLUSPLUS ");
 }
 ! {
-    printf("NOT");
+    printf("NOT ");
 }
 "." {
-    printf("DOT");
+    printf("DOT ");
 }
 
     /* Binary Operators */
 && {
-    printf("AND");
+    printf("AND ");
 }
 "||" {
-    printf("OR");
+    printf("OR ");
 }
 \< {
-    printf("LESS");
+    printf("LESS ");
 }
 \> {
-    printf("GREATER");
+    printf("GREATER ");
 }
 "<=" {
-    printf("LESSTHANEQUAL");
+    printf("LESSTHANEQUAL ");
 }
 ">=" {
-    printf("GREATERTHANEQUAL");
+    printf("GREATERTHANEQUAL ");
 }
 "==" {
-    printf("IS");
+    printf("IS ");
 }
 "!=" {
-    printf("ISNOT");
+    printf("ISNOT ");
 }
 
 
     /* Separators */
 , {
-    printf("COMMA");
+    printf("COMMA ");
 }
 ; {
-    printf("SEMICOLON");
+    printf("SEMICOLON ");
 }
 \( {
-    printf("OPARANTHESIS");
+    printf("OPARANTHESIS ");
 }
 \) {
-    printf("EPARANTHESIS");
+    printf("EPARANTHESIS ");
 }
 "\[" {
-    printf("OBRACK");
+    printf("OBRACK ");
 }
 "\]" {
-    printf("EBRACK");
+    printf("EBRACK ");
 }
 \{ {
-    printf("OBRACE");
+    printf("OBRACE ");
 }
 \} {
-    printf("EBRACE");
+    printf("EBRACE ");
 }
 \" {
-    printf("QUOTE");
+    printf("QUOTE ");
 }
 
     /* heater grammar */
@@ -164,22 +167,30 @@ temperature {
 
     /* Variables */
 [a-zA-Z][a-zA-Z0-9_]* {
-    printf("ID");
+    printf("ID ");
 }
 [0-9]+ {
     yylval=atoi(yytext);
-    printf("INTEGER_LITERAL");
+    printf("INTEGER_LITERAL ");
 }
 \"[^\n^\r]*\" {
-    printf("STRING_LITERAL");
+    printf("STRING_LITERAL ");
 }
 
     /* Null Grammar */
 \n {
     /* ignore end of line */
+    printf("\n");
     yylineno++;
 }
 [ \t]+ { 
     /* ignore whitespace */
 }
+
+    /*Garbage collection */
+. {
+    printf("Err Uncaught String:%s\n",yytext);
+}
+
+
 %%
