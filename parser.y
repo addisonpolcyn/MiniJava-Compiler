@@ -3,10 +3,13 @@
 #include <string.h>
 
 FILE *yyin;
- 
-void yyerror(const char *str)
+
+extern int yylineno, yychar;
+//void yyerror(const char *str)
+yyerror(s)
+char *s;
 {
-        fprintf(stderr,"error: %s\n",str);
+    fprintf(stderr, "Syntax error on line: %d\n", yylineno);
 }
  
 int yywrap()
@@ -14,13 +17,8 @@ int yywrap()
         return 1;
 } 
   
-/*main()
-{
-        yyparse();
-} */
-
 int main(int argc, char **argv) {
-    /* Process command line args*/
+    /* Process file as command line args */
     yyin = fopen(argv[1], "r");
     yyparse();
     fclose(yyin);

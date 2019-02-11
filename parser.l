@@ -22,7 +22,8 @@ temperature {
     return TOKTEMPERATURE;
 }
 \n {
-    /* ignore end of line */;
+    /* ignore end of line */
+    yylineno++;
 }
 [ \t]+ { 
     /* ignore whitespace */
