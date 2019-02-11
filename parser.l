@@ -5,25 +5,25 @@
 
 %%
     /* Declarations */
-class {
+"class" {
     printf("CLASS");
 }
-public {
+"public" {
     printf("PUBLIC");
 }
-static {
+"static" {
     printf("STATIC");
 }
-void {
+"void" {
     printf("VOID");
 }
-main {
+"main" {
     printf("MAIN");
 }
-extends {
+"extends" {
     printf("EXTENDS");
 }
-return {
+"return" {
     printf("RETURN");
 }
 
@@ -72,12 +72,48 @@ false {
 - {
     printf("MINUS");
 }
+\* {
+    printf("TIMES");
+}
+\/ {
+    printf("SLASH");
+}
+"++" {
+    printf("PLUSPLUS");
+}
 ! {
     printf("NOT");
 }
 "." {
     printf("DOT");
 }
+
+    /* Binary Operators */
+&& {
+    printf("AND");
+}
+"||" {
+    printf("OR");
+}
+\< {
+    printf("LESS");
+}
+\> {
+    printf("GREATER");
+}
+"<=" {
+    printf("LESSTHANEQUAL");
+}
+">=" {
+    printf("GREATERTHANEQUAL");
+}
+"==" {
+    printf("IS");
+}
+"!=" {
+    printf("ISNOT");
+}
+
 
     /* Separators */
 , {
@@ -108,12 +144,7 @@ false {
     printf("QUOTE");
 }
 
-    /* Null Grammar */
-[0-9]+ {
-    yylval=atoi(yytext);
-    printf("INTEGER_LITERAL");
-    //return INTEGER_LITERAL;
-}
+    /* heater grammar */
 heat {
     return TOKHEAT;
 }
@@ -130,6 +161,20 @@ hotdog {
 temperature {
     return TOKTEMPERATURE;
 }
+
+    /* Variables */
+[a-zA-Z][a-zA-Z0-9_]* {
+    printf("ID");
+}
+[0-9]+ {
+    yylval=atoi(yytext);
+    printf("INTEGER_LITERAL");
+}
+\"[^\n^\r]*\" {
+    printf("STRING_LITERAL");
+}
+
+    /* Null Grammar */
 \n {
     /* ignore end of line */
     yylineno++;
