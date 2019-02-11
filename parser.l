@@ -4,6 +4,14 @@
 %}
 
 %%
+    /* Comments */
+\/\/[^\n^\r]* {
+    printf("SINGLE_COMMENT");
+}
+"/*"([^*]|\*+[^/*])*\*+"/" {
+    printf("MULTI_COMMENT");
+}
+
     /* Declarations */
 "class" {
     printf("CLASS ");
@@ -19,9 +27,6 @@
 }
 "main" {
     printf("MAIN ");
-}
-"String" {
-    printf("STRING ");
 }
 "extends" {
     printf("EXTENDS ");
@@ -44,6 +49,17 @@ this {
 }
 new {
     printf("NEW ");
+}
+"String" {
+    printf("STRING ");
+}
+
+    /* Primitive Types */
+int {
+    printf("INT ");
+}
+boolean {
+    printf("BOOL");
 }
 
     /* Loops and if-statements */
@@ -68,18 +84,6 @@ false {
     /* Operators */
 = {
     printf("EQUAL ");
-}
-\+ {
-    printf("PLUS ");
-}
-- {
-    printf("MINUS ");
-}
-\* {
-    printf("TIMES ");
-}
-\/ {
-    printf("SLASH ");
 }
 "++" {
     printf("PLUSPLUS ");
@@ -115,6 +119,18 @@ false {
 }
 "!=" {
     printf("ISNOT ");
+}
+\+ {
+    printf("PLUS ");
+}
+- {
+    printf("MINUS ");
+}
+\* {
+    printf("TIMES ");
+}
+\/ {
+    printf("SLASH ");
 }
 
 
