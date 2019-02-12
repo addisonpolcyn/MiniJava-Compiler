@@ -41,49 +41,74 @@ int main(int argc, char **argv) {
 %token COMMA SEMICOLON OPARANTHESIS EPARANTHESIS OBRACK EBRACK OBRACE EBRACE QUOTE /* Separators */
 %token EQUAL PLUSPLUS NOT DOT /* Operators */
 %token AND OR LESS GREATER GREATERTHANEQUAL LESSTHANEQUAL IS ISNOT PLUS MINUS TIMES SLASH /* Binary Operators - op */
+%token ID INTEGER_LITERAL STRING_LITERAL /* Variables */
+
 
 %%
 
-commands: /* empty */
-        | commands command
+Program:
+        MainClass ClassDecl
         ;
 
-command:
-        heat_switch
+MainClass:
+        CLASS ID OBRACE PUBLIC STATIC VOID MAIN OPARANTHESIS STRING OBRACK EBRACK ID EPARANTHESIS
+            OBRACE Statement EBRACE EBRACE
+        ;
+
+ClassDecl:
+        CLASS ID OBRACE VarDecl MethodDecl EBRACE
         |
-        target_set
+        CLASS ID EXTENDS ID OBRACE VarDecl MethodDecl EBRACE
+        ;
+
+VarDecl:
+        Type ID SEMICOLON
+        ;
+
+MethodDecl:
+        PUBLIC Type ID OPARANTHESIS FormalList EPARANTHESIS 
+            OBRACE VarDecl Statement RETURN Exp SEMICOLON EBRACE
+        ;
+
+FormalList:
+        Type ID FormalRest
+        | /* Empty */
+        ;
+
+FormalRest:
+        COMMA Type ID
+        ;
+
+Type:
+        INT
         |
-        ping
+        BOOL
+        |
+        ID
+        |
+        Type OBRACK EBRACK
         ;
 
-heat_switch:
-        TOKHEAT STATE
-        {
-            if($2) {
-                printf("\tHeat turned on\n");
-            } else {
-                printf("\tHeat turned off\n");
-            }
-        }
+Statement:
+        OBRACE Statement EBRACE
+        |
+        IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement
+        |
+        WHILE OPARANTHESIS Exp EPARANTHESIS Statement
+        |
+        PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON
+        |
+        PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
+        |
+        ID EQUAL Exp SEMICOLON
+        |
+        ID Index EQUAL Exp SEMICOLON
         ;
 
-target_set:
-        TOKTARGET TOKTEMPERATURE NUMBER
-        {
-                printf("\tTemperature set to %d\n",$3);
-        }
-        ;
-
-ping:
-        NUMBER
-        {
-                printf("\tnumber\n");
-        }
-	|
-	STATE
-        {
-                printf("\tstate\n");
-        }
+Index:
+        OBRACK Exp EBRACK
+        |
+        Index OBRACK Exp EBRACK 
         ;
 
 Exp:
@@ -97,14 +122,36 @@ Exp:
         |
         OPARANTHESIS Exp EPARANTHESIS
         |
-        /* TBD */
+        ID Index
+        |
+        ID DOT LENGTH
+        |
+        ID Index DOT LENGTH
+        |
+        INTEGER_LITERAL
+        |
+        TRUE
+        |
+        FALSE
+        |
+        Object
+        |
+        Object DOT ID OPARANTHESIS ExpList EPARANTHESIS
         ; 
 
 Object:
+        ID         
         |
+        THIS
+        |
+        NEW ID OPARANTHESIS EPARANTHESIS
+        |
+        NEW Type Index
+        ;
 
 ExpList:
-        | ExpRest Exp
+        ExpRest Exp
+        | /* Empty */
         ;
 
 ExpRest:

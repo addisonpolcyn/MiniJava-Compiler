@@ -228,13 +228,16 @@ temperature {
     /* Variables */
 [a-zA-Z][a-zA-Z0-9_]* {
     printf("ID ");
+    return ID;
 }
 [0-9]+ {
     yylval=atoi(yytext);
     printf("INTEGER_LITERAL ");
+    return INTEGER_LITERAL;
 }
 \"[^\n^\r]*\" {
     printf("STRING_LITERAL ");
+    return STRING_LITERAL;
 }
 
     /* Null Grammar */
