@@ -2,11 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 
-FILE *yyin;
+int yylex();
+void yyerror(char *str);
+int yyparse();
 
 extern int yylineno, yychar;
-//void yyerror(const char *str)
-yyerror(s)
+FILE *yyin;
+
+void yyerror(s)
 char *s;
 {
     fprintf(stderr, "Syntax error on line: %d\n", yylineno);
@@ -28,6 +31,7 @@ int main(int argc, char **argv) {
 %}
 
 %token NUMBER TOKHEAT STATE TOKTARGET TOKTEMPERATURE
+%token AND OR LESS GREATER GREATERTHANEQUAL LESSTHANEQUAL IS ISNOT PLUS MINUS TIMES SLASH /* Binary Operators - op */
 
 %%
 
@@ -39,8 +43,8 @@ command:
         heat_switch
         |
         target_set
-	|
-	ping
+        |
+        ping
         ;
 
 heat_switch:
@@ -72,4 +76,31 @@ ping:
                 printf("\tstate\n");
         }
         ;
+
+op:     /* Binary Operators */
+        AND
+        |
+        OR
+        |
+        LESS
+        |
+        GREATER
+        |
+        GREATERTHANEQUAL
+        |
+        LESSTHANEQUAL
+        |
+        IS
+        |
+        ISNOT
+        |
+        PLUS
+        |
+        MINUS
+        |
+        TIMES
+        |
+        SLASH
+        ;
+
 %%

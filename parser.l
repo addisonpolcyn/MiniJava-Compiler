@@ -98,39 +98,51 @@ false {
     /* Binary Operators */
 && {
     printf("AND ");
+    return AND;
 }
 "||" {
     printf("OR ");
+    return OR;
 }
 \< {
     printf("LESS ");
+    return LESS;
 }
 \> {
     printf("GREATER ");
+    return GREATER;
 }
 "<=" {
     printf("LESSTHANEQUAL ");
+    return LESSTHANEQUAL;
 }
 ">=" {
     printf("GREATERTHANEQUAL ");
+    return GREATERTHANEQUAL;
 }
 "==" {
     printf("IS ");
+    return IS;
 }
 "!=" {
     printf("ISNOT ");
+    return ISNOT;
 }
 \+ {
     printf("PLUS ");
+    return PLUS;
 }
 - {
     printf("MINUS ");
+    return MINUS;
 }
 \* {
     printf("TIMES ");
+    return TIMES;
 }
 \/ {
     printf("SLASH ");
+    return SLASH;
 }
 
 
