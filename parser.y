@@ -1,18 +1,19 @@
 %{
 #include <stdio.h>
 #include <string.h>
-
 int yylex();
-void yyerror(char *str);
+void yyerror(const char *str);
 int yyparse();
 
 extern int yylineno, yychar;
 FILE *yyin;
 
-void yyerror(s)
-char *s;
+//char *s;
+void yyerror(const char *str)
 {
     fprintf(stderr, "Syntax error on line: %d\n", yylineno);
+    fprintf (stderr, "%s\n", str);
+
 }
  
 int yywrap()
@@ -30,6 +31,7 @@ int main(int argc, char **argv) {
 
 %}
 
+%define parse.error verbose
 %token CLASS PUBLIC STATIC VOID MAIN EXTENDS RETURN /* Declarations */
 %token LENGTH PRINT /* Functions */
 %token IF ELSE WHILE /* Loops and if-statements */
@@ -111,6 +113,9 @@ Type:
 
 Statement:
         OBRACE StatementList EBRACE
+        {
+            fprintf(stdout,"Triggered\n");
+        }
         |
         IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement
         |
@@ -121,8 +126,14 @@ Statement:
         PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
         |
         ID EQUAL Exp SEMICOLON
+        {
+            fprintf(stdout,"Triggered\n");
+        }
         |
         ID Index EQUAL Exp SEMICOLON
+        {
+            fprintf(stdout,"Triggered\n");
+        }
         ;
 
 StatementList:
@@ -150,8 +161,14 @@ Exp:
         ID Index
         |
         ID DOT LENGTH
+        {
+            fprintf(stdout,"Triggered\n");
+        }
         |
         ID Index DOT LENGTH
+        {
+            fprintf(stdout,"Triggered\n");
+        }
         |
         INTEGER_LITERAL
         |
@@ -160,12 +177,21 @@ Exp:
         FALSE
         |
         Object
+        {
+            fprintf(stdout,"Triggered\n");
+        }
         |
         Object DOT ID OPARANTHESIS ExpList EPARANTHESIS
+        {
+            fprintf(stdout,"Triggered\n");
+        }
         ; 
 
 Object:
         ID         
+        {
+            fprintf(stdout,"Triggered\n");
+        }
         |
         THIS
         |

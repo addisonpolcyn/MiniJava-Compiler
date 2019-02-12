@@ -2,240 +2,259 @@
 #include <stdio.h>
 #include <string.h>
 #include "y.tab.h"
+#define PRINTDEBUG(x) fprintf(stderr, "\n%s\n", (x)); // comment out print statement to remove the printing
 %}
 
 %option yylineno
 
 %%
+
+
     /* Comments */
 \/\/[^\n^\r]* {
-    //printf("SINGLE_COMMENT");
+    /* Single Comment */
+    PRINTDEBUG(yytext)
 }
 "/*"([^*]|\*+[^/*])*\*+"/" {
-    //printf("MULTI_COMMENT");
+    /* Multi-Comment */
+    PRINTDEBUG(yytext)
 }
+
 
     /* Declarations */
 "class" {
-    //printf("CLASS ");
+    PRINTDEBUG(yytext)
     return CLASS;
 }
 "public" {
-    //printf("PUBLIC ");
+    PRINTDEBUG(yytext)
     return PUBLIC;
 }
 "static" {
-    //printf("STATIC ");
+    PRINTDEBUG(yytext)
     return STATIC;
 }
 "void" {
-    //printf("VOID ");
+    PRINTDEBUG(yytext)
     return VOID;
 }
 "main" {
-    //printf("MAIN ");
+    PRINTDEBUG(yytext)
     return MAIN;
 }
 "extends" {
-    //printf("EXTENDS ");
+    PRINTDEBUG(yytext)
     return EXTENDS;
 }
 "return" {
-    //printf("RETURN ");
+    PRINTDEBUG(yytext)
     return RETURN;
 }
 
+
     /* Functions */
 length {
-    //printf("LENGTH ");
+    PRINTDEBUG(yytext)
     return LENGTH;
 }
 System.out.println {
-    //printf("PRINT ");
+    PRINTDEBUG(yytext)
     return PRINT;
 }
-    
+   
+
     /* Objects */
 this {
-    //printf("THIS ");
+    PRINTDEBUG(yytext)
     return THIS;
 }
 new {
-    //printf("NEW ");
+    PRINTDEBUG(yytext)
     return NEW;
 }
 "String" {
-    //printf("STRING ");
+    PRINTDEBUG(yytext)
     return STRING;
 }
 
+
     /* Primitive Types */
 int {
-    //printf("INT ");
+    PRINTDEBUG(yytext)
     return INT;
 }
 boolean {
-    //printf("BOOL");
+    PRINTDEBUG(yytext)
     return BOOL;
 }
 
+
     /* Loops and if-statements */
 if {
-    //printf("IF ");
+    PRINTDEBUG(yytext)
     return IF;
 }
 else {
-    //printf("ELSE ");
+    PRINTDEBUG(yytext)
     return ELSE;
 }
 while {
-    //printf("WHILE ");
+    PRINTDEBUG(yytext)
     return WHILE;
 }
 
+
     /* booleans */
 true {
-    //printf("TRUE ");
+    PRINTDEBUG(yytext)
     return TRUE;
 }
 false {
-    //printf("FALSE ");
+    PRINTDEBUG(yytext)
     return FALSE;
 }
 
+
     /* Operators */
 = {
-    //printf("EQUAL ");
+    PRINTDEBUG(yytext)
     return EQUAL;
 }
 "++" {
-    //printf("PLUSPLUS ");
+    PRINTDEBUG(yytext)
     return PLUSPLUS;
 }
 ! {
-    //printf("NOT ");
+    PRINTDEBUG(yytext)
     return NOT;
 }
 "." {
-    //printf("DOT ");
+    PRINTDEBUG(yytext)
     return DOT;
 }
 
+
     /* Binary Operators */
 && {
-    //printf("AND ");
+    PRINTDEBUG(yytext)
     return AND;
 }
 "||" {
-    //printf("OR ");
+    PRINTDEBUG(yytext)
     return OR;
 }
 "<=" {
-    //printf("LESSTHANEQUAL ");
+    PRINTDEBUG(yytext)
     return LESSTHANEQUAL;
 }
 ">=" {
-    //printf("GREATERTHANEQUAL ");
+    PRINTDEBUG(yytext)
     return GREATERTHANEQUAL;
 }
 \< {
-    //printf("LESS ");
+    PRINTDEBUG(yytext)
     return LESS;
 }
 \> {
-    //printf("GREATER ");
+    PRINTDEBUG(yytext)
     return GREATER;
 }
 "==" {
-    //printf("IS ");
+    PRINTDEBUG(yytext)
     return IS;
 }
 "!=" {
-    //printf("ISNOT ");
+    PRINTDEBUG(yytext)
     return ISNOT;
 }
 \+ {
-    //printf("PLUS ");
+    PRINTDEBUG(yytext)
     return PLUS;
 }
 - {
-    //printf("MINUS ");
+    PRINTDEBUG(yytext)
     return MINUS;
 }
 \* {
-    //printf("TIMES ");
+    PRINTDEBUG(yytext)
     return TIMES;
 }
 \/ {
-    //printf("SLASH ");
+    PRINTDEBUG(yytext)
     return SLASH;
 }
 
 
     /* Separators */
 , {
-    //printf("COMMA ");
+    PRINTDEBUG(yytext)
     return COMMA;
 }
 ; {
-    //printf("SEMICOLON ");
+    PRINTDEBUG(yytext)
     return SEMICOLON;
 }
 \( {
-    //printf("OPARANTHESIS ");
+    PRINTDEBUG(yytext)
     return OPARANTHESIS;
 }
 \) {
-    //printf("EPARANTHESIS ");
+    PRINTDEBUG(yytext)
     return EPARANTHESIS;
 }
 "\[" {
-    //printf("OBRACK ");
+    PRINTDEBUG(yytext)
     return OBRACK;
 }
 "\]" {
-    //printf("EBRACK ");
+    PRINTDEBUG(yytext)
     return EBRACK;
 }
 \{ {
-    //printf("OBRACE ");
+    PRINTDEBUG(yytext)
     return OBRACE;
 }
 \} {
-    //printf("EBRACE ");
+    PRINTDEBUG(yytext)
     return EBRACE;
 }
 \" {
-    //printf("QUOTE ");
+    PRINTDEBUG(yytext)
     return QUOTE;
 }
 
+
     /* Variables */
 [a-zA-Z][a-zA-Z0-9_]* {
-    //printf("ID ");
+    PRINTDEBUG(yytext)
     return ID;
 }
 [0-9]+ {
+    PRINTDEBUG(yytext)
     yylval=atoi(yytext);
-    //printf("INTEGER_LITERAL ");
     return INTEGER_LITERAL;
 }
 \"[^\n^\r]*\" {
-    //printf("STRING_LITERAL ");
+    PRINTDEBUG(yytext)
     return STRING_LITERAL;
 }
 
+
     /* Null Grammar */
 \n {
+    PRINTDEBUG(yytext)
     /* ignore end of line */
-    //printf("\n");
 }
 [ \t]+ { 
+    PRINTDEBUG(yytext)
     /* ignore whitespace */
 }
+
+
     /*Garbage collection */
 . {
-    //printf("Err Uncaught String:%s\n",yytext);
+    PRINTDEBUG(yytext)
+    printf("garbage\n");
 }
 
 
