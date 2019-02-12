@@ -47,36 +47,60 @@ int main(int argc, char **argv) {
 %%
 
 Program:
-        MainClass ClassDecl
+        MainClass ClassDeclList
         ;
 
 MainClass:
         CLASS ID OBRACE PUBLIC STATIC VOID MAIN OPARANTHESIS STRING OBRACK EBRACK ID EPARANTHESIS
             OBRACE Statement EBRACE EBRACE
+        {
+            
+            fprintf(stdout,"MainClass");
+        }
         ;
 
 ClassDecl:
-        CLASS ID OBRACE VarDecl MethodDecl EBRACE
+        CLASS ID OBRACE VarDeclList MethodDeclList EBRACE
         |
-        CLASS ID EXTENDS ID OBRACE VarDecl MethodDecl EBRACE
+        CLASS ID EXTENDS ID OBRACE VarDeclList MethodDeclList EBRACE
+        ;
+
+ClassDeclList:
+        ClassDeclList ClassDecl
+        | /* Empty */
         ;
 
 VarDecl:
         Type ID SEMICOLON
         ;
 
+VarDeclList:
+        VarDeclList VarDecl
+        | /* Empty */
+        ;
+
 MethodDecl:
         PUBLIC Type ID OPARANTHESIS FormalList EPARANTHESIS 
-            OBRACE VarDecl Statement RETURN Exp SEMICOLON EBRACE
+            OBRACE VarDeclList StatementList RETURN Exp SEMICOLON EBRACE
+        ;
+
+MethodDeclList:
+        MethodDeclList MethodDecl
+        | /* Empty */
         ;
 
 FormalList:
-        Type ID FormalRest
+        Type ID FormalRestList
         | /* Empty */
         ;
 
 FormalRest:
         COMMA Type ID
+        ;
+
+FormalRestList:
+        FormalRestList FormalRest
+        | /* Empty */
         ;
 
 Type:
@@ -90,7 +114,10 @@ Type:
         ;
 
 Statement:
-        OBRACE Statement EBRACE
+        OBRACE StatementList EBRACE
+        {
+            fprintf(stdout,"Statment");
+        }
         |
         IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement
         |
@@ -99,10 +126,18 @@ Statement:
         PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON
         |
         PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
+        {
+            fprintf(stdout,"System.out.println(STRING_LITERAL);");
+        }
         |
         ID EQUAL Exp SEMICOLON
         |
         ID Index EQUAL Exp SEMICOLON
+        ;
+
+StatementList:
+        StatementList Statement
+        | /* Empty */
         ;
 
 Index:
@@ -150,12 +185,17 @@ Object:
         ;
 
 ExpList:
-        ExpRest Exp
+        Exp ExpRestList
         | /* Empty */
         ;
 
 ExpRest:
         COMMA Exp
+        ;
+
+ExpRestList:
+        ExpRestList ExpRest
+        | /* Empty */
         ;
 
 op:     /* Binary Operators */
