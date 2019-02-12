@@ -53,9 +53,9 @@
 
 
     /* Functions */
-length {
+".length" {
     PRINTDEBUG(yytext)
-    return LENGTH;
+    return DOTLENGTH;
 }
 System.out.println {
     PRINTDEBUG(yytext)

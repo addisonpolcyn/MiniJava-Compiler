@@ -1,6 +1,9 @@
 %{
 #include <stdio.h>
 #include <string.h>
+
+#define YYDEBUG 5
+
 int yylex();
 void yyerror(const char *str);
 int yyparse();
@@ -8,7 +11,6 @@ int yyparse();
 extern int yylineno, yychar;
 FILE *yyin;
 
-//char *s;
 void yyerror(const char *str)
 {
     fprintf(stderr, "Syntax error on line: %d\n", yylineno);
@@ -33,7 +35,7 @@ int main(int argc, char **argv) {
 
 %define parse.error verbose
 %token CLASS PUBLIC STATIC VOID MAIN EXTENDS RETURN /* Declarations */
-%token LENGTH PRINT /* Functions */
+%token DOTLENGTH PRINT /* Functions */
 %token IF ELSE WHILE /* Loops and if-statements */
 
 %token THIS NEW STRING /* Objects */
@@ -113,9 +115,6 @@ Type:
 
 Statement:
         OBRACE StatementList EBRACE
-        {
-            fprintf(stdout,"Triggered\n");
-        }
         |
         IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement
         |
@@ -126,14 +125,8 @@ Statement:
         PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
         |
         ID EQUAL Exp SEMICOLON
-        {
-            fprintf(stdout,"Triggered\n");
-        }
         |
         ID Index EQUAL Exp SEMICOLON
-        {
-            fprintf(stdout,"Triggered\n");
-        }
         ;
 
 StatementList:
@@ -160,15 +153,9 @@ Exp:
         |
         ID Index
         |
-        ID DOT LENGTH
-        {
-            fprintf(stdout,"Triggered\n");
-        }
+        ID DOTLENGTH
         |
-        ID Index DOT LENGTH
-        {
-            fprintf(stdout,"Triggered\n");
-        }
+        ID Index DOTLENGTH
         |
         INTEGER_LITERAL
         |
@@ -177,21 +164,12 @@ Exp:
         FALSE
         |
         Object
-        {
-            fprintf(stdout,"Triggered\n");
-        }
         |
         Object DOT ID OPARANTHESIS ExpList EPARANTHESIS
-        {
-            fprintf(stdout,"Triggered\n");
-        }
         ; 
 
 Object:
         ID         
-        {
-            fprintf(stdout,"Triggered\n");
-        }
         |
         THIS
         |
