@@ -15,84 +15,107 @@
     /* Declarations */
 "class" {
     printf("CLASS ");
+    return CLASS;
 }
 "public" {
     printf("PUBLIC ");
+    return PUBLIC;
 }
 "static" {
     printf("STATIC ");
+    return STATIC;
 }
 "void" {
     printf("VOID ");
+    return VOID;
 }
 "main" {
     printf("MAIN ");
+    return MAIN;
 }
 "extends" {
     printf("EXTENDS ");
+    return EXTENDS;
 }
 "return" {
     printf("RETURN ");
+    return RETURN;
 }
 
     /* Functions */
 Length {
     printf("LENGTH ");
+    return LENGTH;
 }
 System.out.println {
     printf("PRINT ");
+    return PRINT;
 }
     
     /* Objects */
 this {
     printf("THIS ");
+    return THIS;
 }
 new {
     printf("NEW ");
+    return NEW;
 }
 "String" {
     printf("STRING ");
+    return STRING;
 }
 
     /* Primitive Types */
 int {
     printf("INT ");
+    return INT;
 }
 boolean {
     printf("BOOL");
+    return BOOL;
 }
 
     /* Loops and if-statements */
 if {
     printf("IF ");
+    return IF;
 }
 else {
     printf("ELSE ");
+    return ELSE;
 }
 while {
     printf("WHILE ");
+    return WHILE;
 }
 
     /* booleans */
 true {
     printf("TRUE ");
+    return TRUE;
 }
 false {
     printf("FALSE ");
+    return FALSE;
 }
 
     /* Operators */
 = {
     printf("EQUAL ");
+    return EQUAL;
 }
 "++" {
     printf("PLUSPLUS ");
+    return PLUSPLUS;
 }
 ! {
     printf("NOT ");
+    return NOT;
 }
 "." {
     printf("DOT ");
+    return DOT;
 }
 
     /* Binary Operators */
@@ -149,30 +172,39 @@ false {
     /* Separators */
 , {
     printf("COMMA ");
+    return COMMA;
 }
 ; {
     printf("SEMICOLON ");
+    return SEMICOLON;
 }
 \( {
     printf("OPARANTHESIS ");
+    return OPARANTHESIS;
 }
 \) {
     printf("EPARANTHESIS ");
+    return EPARANTHESIS;
 }
 "\[" {
     printf("OBRACK ");
+    return OBRACK;
 }
 "\]" {
     printf("EBRACK ");
+    return EBRACK;
 }
 \{ {
     printf("OBRACE ");
+    return OBRACE;
 }
 \} {
     printf("EBRACE ");
+    return EBRACE;
 }
 \" {
     printf("QUOTE ");
+    return QUOTE;
 }
 
     /* heater grammar */

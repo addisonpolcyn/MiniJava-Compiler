@@ -31,6 +31,15 @@ int main(int argc, char **argv) {
 %}
 
 %token NUMBER TOKHEAT STATE TOKTARGET TOKTEMPERATURE
+
+%token CLASS PUBLIC STATIC VOID MAIN EXTENDS RETURN /* Declarations */
+%token LENGTH PRINT /* Functions */
+%token THIS NEW STRING /* Objects */
+%token INT BOOL /* Primitive Types */
+%token IF ELSE WHILE /* Loops and if-statements */
+%token TRUE FALSE /* booleans */
+%token COMMA SEMICOLON OPARANTHESIS EPARANTHESIS OBRACK EBRACK OBRACE EBRACE QUOTE /* Separators */
+%token EQUAL PLUSPLUS NOT DOT /* Operators */
 %token AND OR LESS GREATER GREATERTHANEQUAL LESSTHANEQUAL IS ISNOT PLUS MINUS TIMES SLASH /* Binary Operators - op */
 
 %%
@@ -75,6 +84,31 @@ ping:
         {
                 printf("\tstate\n");
         }
+        ;
+
+Exp:
+        Exp op Exp
+        |
+        NOT Exp
+        |
+        PLUS Exp
+        |
+        MINUS Exp
+        |
+        OPARANTHESIS Exp EPARANTHESIS
+        |
+        /* TBD */
+        ; 
+
+Object:
+        |
+
+ExpList:
+        | ExpRest Exp
+        ;
+
+ExpRest:
+        COMMA Exp
         ;
 
 op:     /* Binary Operators */
