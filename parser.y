@@ -30,19 +30,19 @@ int main(int argc, char **argv) {
 
 %}
 
-%token NUMBER TOKHEAT STATE TOKTARGET TOKTEMPERATURE
-
 %token CLASS PUBLIC STATIC VOID MAIN EXTENDS RETURN /* Declarations */
 %token LENGTH PRINT /* Functions */
-%token THIS NEW STRING /* Objects */
-%token INT BOOL /* Primitive Types */
 %token IF ELSE WHILE /* Loops and if-statements */
+
+%token THIS NEW STRING /* Objects */
+%token ID INTEGER_LITERAL STRING_LITERAL /* Variables */
+%token INT BOOL /* Primitive Types */
 %token TRUE FALSE /* booleans */
-%token COMMA SEMICOLON OPARANTHESIS EPARANTHESIS OBRACK EBRACK OBRACE EBRACE QUOTE /* Separators */
+
 %token EQUAL PLUSPLUS NOT DOT /* Operators */
 %token AND OR LESS GREATER GREATERTHANEQUAL LESSTHANEQUAL IS ISNOT PLUS MINUS TIMES SLASH /* Binary Operators - op */
-%token ID INTEGER_LITERAL STRING_LITERAL /* Variables */
 
+%token COMMA SEMICOLON OPARANTHESIS EPARANTHESIS OBRACK EBRACK OBRACE EBRACE QUOTE /* Separators */
 
 %%
 
@@ -53,10 +53,6 @@ Program:
 MainClass:
         CLASS ID OBRACE PUBLIC STATIC VOID MAIN OPARANTHESIS STRING OBRACK EBRACK ID EPARANTHESIS
             OBRACE Statement EBRACE EBRACE
-        {
-            
-            fprintf(stdout,"MainClass");
-        }
         ;
 
 ClassDecl:
@@ -115,9 +111,6 @@ Type:
 
 Statement:
         OBRACE StatementList EBRACE
-        {
-            fprintf(stdout,"Statment");
-        }
         |
         IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement
         |
@@ -126,9 +119,6 @@ Statement:
         PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON
         |
         PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
-        {
-            fprintf(stdout,"System.out.println(STRING_LITERAL);");
-        }
         |
         ID EQUAL Exp SEMICOLON
         |

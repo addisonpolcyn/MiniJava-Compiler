@@ -4,256 +4,238 @@
 #include "y.tab.h"
 %}
 
+%option yylineno
+
 %%
     /* Comments */
 \/\/[^\n^\r]* {
-    printf("SINGLE_COMMENT");
+    //printf("SINGLE_COMMENT");
 }
 "/*"([^*]|\*+[^/*])*\*+"/" {
-    printf("MULTI_COMMENT");
+    //printf("MULTI_COMMENT");
 }
 
     /* Declarations */
 "class" {
-    printf("CLASS ");
+    //printf("CLASS ");
     return CLASS;
 }
 "public" {
-    printf("PUBLIC ");
+    //printf("PUBLIC ");
     return PUBLIC;
 }
 "static" {
-    printf("STATIC ");
+    //printf("STATIC ");
     return STATIC;
 }
 "void" {
-    printf("VOID ");
+    //printf("VOID ");
     return VOID;
 }
 "main" {
-    printf("MAIN ");
+    //printf("MAIN ");
     return MAIN;
 }
 "extends" {
-    printf("EXTENDS ");
+    //printf("EXTENDS ");
     return EXTENDS;
 }
 "return" {
-    printf("RETURN ");
+    //printf("RETURN ");
     return RETURN;
 }
 
     /* Functions */
 Length {
-    printf("LENGTH ");
+    //printf("LENGTH ");
     return LENGTH;
 }
 System.out.println {
-    printf("PRINT ");
+    //printf("PRINT ");
     return PRINT;
 }
     
     /* Objects */
 this {
-    printf("THIS ");
+    //printf("THIS ");
     return THIS;
 }
 new {
-    printf("NEW ");
+    //printf("NEW ");
     return NEW;
 }
 "String" {
-    printf("STRING ");
+    //printf("STRING ");
     return STRING;
 }
 
     /* Primitive Types */
 int {
-    printf("INT ");
+    //printf("INT ");
     return INT;
 }
 boolean {
-    printf("BOOL");
+    //printf("BOOL");
     return BOOL;
 }
 
     /* Loops and if-statements */
 if {
-    printf("IF ");
+    //printf("IF ");
     return IF;
 }
 else {
-    printf("ELSE ");
+    //printf("ELSE ");
     return ELSE;
 }
 while {
-    printf("WHILE ");
+    //printf("WHILE ");
     return WHILE;
 }
 
     /* booleans */
 true {
-    printf("TRUE ");
+    //printf("TRUE ");
     return TRUE;
 }
 false {
-    printf("FALSE ");
+    //printf("FALSE ");
     return FALSE;
 }
 
     /* Operators */
 = {
-    printf("EQUAL ");
+    //printf("EQUAL ");
     return EQUAL;
 }
 "++" {
-    printf("PLUSPLUS ");
+    //printf("PLUSPLUS ");
     return PLUSPLUS;
 }
 ! {
-    printf("NOT ");
+    //printf("NOT ");
     return NOT;
 }
 "." {
-    printf("DOT ");
+    //printf("DOT ");
     return DOT;
 }
 
     /* Binary Operators */
 && {
-    printf("AND ");
+    //printf("AND ");
     return AND;
 }
 "||" {
-    printf("OR ");
+    //printf("OR ");
     return OR;
 }
 \< {
-    printf("LESS ");
+    //printf("LESS ");
     return LESS;
 }
 \> {
-    printf("GREATER ");
+    //printf("GREATER ");
     return GREATER;
 }
 "<=" {
-    printf("LESSTHANEQUAL ");
+    //printf("LESSTHANEQUAL ");
     return LESSTHANEQUAL;
 }
 ">=" {
-    printf("GREATERTHANEQUAL ");
+    //printf("GREATERTHANEQUAL ");
     return GREATERTHANEQUAL;
 }
 "==" {
-    printf("IS ");
+    //printf("IS ");
     return IS;
 }
 "!=" {
-    printf("ISNOT ");
+    //printf("ISNOT ");
     return ISNOT;
 }
 \+ {
-    printf("PLUS ");
+    //printf("PLUS ");
     return PLUS;
 }
 - {
-    printf("MINUS ");
+    //printf("MINUS ");
     return MINUS;
 }
 \* {
-    printf("TIMES ");
+    //printf("TIMES ");
     return TIMES;
 }
 \/ {
-    printf("SLASH ");
+    //printf("SLASH ");
     return SLASH;
 }
 
 
     /* Separators */
 , {
-    printf("COMMA ");
+    //printf("COMMA ");
     return COMMA;
 }
 ; {
-    printf("SEMICOLON ");
+    //printf("SEMICOLON ");
     return SEMICOLON;
 }
 \( {
-    printf("OPARANTHESIS ");
+    //printf("OPARANTHESIS ");
     return OPARANTHESIS;
 }
 \) {
-    printf("EPARANTHESIS ");
+    //printf("EPARANTHESIS ");
     return EPARANTHESIS;
 }
 "\[" {
-    printf("OBRACK ");
+    //printf("OBRACK ");
     return OBRACK;
 }
 "\]" {
-    printf("EBRACK ");
+    //printf("EBRACK ");
     return EBRACK;
 }
 \{ {
-    printf("OBRACE ");
+    //printf("OBRACE ");
     return OBRACE;
 }
 \} {
-    printf("EBRACE ");
+    //printf("EBRACE ");
     return EBRACE;
 }
 \" {
-    printf("QUOTE ");
+    //printf("QUOTE ");
     return QUOTE;
-}
-
-    /* heater grammar */
-heat {
-    return TOKHEAT;
-}
-on|off {
-    yylval=!strcmp(yytext,"on");
-    return STATE;
-}
-target {
-    return TOKTARGET;
-}
-hotdog {
-    printf("hotdog!\n");
-}
-temperature {
-    return TOKTEMPERATURE;
 }
 
     /* Variables */
 [a-zA-Z][a-zA-Z0-9_]* {
-    printf("ID ");
+    //printf("ID ");
     return ID;
 }
 [0-9]+ {
     yylval=atoi(yytext);
-    printf("INTEGER_LITERAL ");
+    //printf("INTEGER_LITERAL ");
     return INTEGER_LITERAL;
 }
 \"[^\n^\r]*\" {
-    printf("STRING_LITERAL ");
+    //printf("STRING_LITERAL ");
     return STRING_LITERAL;
 }
 
     /* Null Grammar */
 \n {
     /* ignore end of line */
-    printf("\n");
-    yylineno++;
+    //printf("\n");
 }
 [ \t]+ { 
     /* ignore whitespace */
 }
-
     /*Garbage collection */
 . {
-    printf("Err Uncaught String:%s\n",yytext);
+    //printf("Err Uncaught String:%s\n",yytext);
 }
 
 
