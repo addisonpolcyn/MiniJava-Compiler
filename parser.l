@@ -46,7 +46,7 @@
 }
 
     /* Functions */
-Length {
+length {
     //printf("LENGTH ");
     return LENGTH;
 }
