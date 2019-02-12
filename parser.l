@@ -130,14 +130,6 @@ false {
     //printf("OR ");
     return OR;
 }
-\< {
-    //printf("LESS ");
-    return LESS;
-}
-\> {
-    //printf("GREATER ");
-    return GREATER;
-}
 "<=" {
     //printf("LESSTHANEQUAL ");
     return LESSTHANEQUAL;
@@ -145,6 +137,14 @@ false {
 ">=" {
     //printf("GREATERTHANEQUAL ");
     return GREATERTHANEQUAL;
+}
+\< {
+    //printf("LESS ");
+    return LESS;
+}
+\> {
+    //printf("GREATER ");
+    return GREATER;
 }
 "==" {
     //printf("IS ");
