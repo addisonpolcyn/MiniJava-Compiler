@@ -13,7 +13,6 @@
     /* Comments */
 \/\/[^\n^\r]* {
     /* Single Comment */
-    yylineno++;
     PRINTDEBUG(yytext)
 }
 "/*"([^*]|\*+[^/*])*\*+"/" {
@@ -54,9 +53,9 @@
 
 
     /* Functions */
-".length" {
+length {
     PRINTDEBUG(yytext)
-    return DOTLENGTH;
+    return LENGTH;
 }
 System.out.println {
     PRINTDEBUG(yytext)

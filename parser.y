@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 
 %define parse.error verbose
 %token CLASS PUBLIC STATIC VOID MAIN EXTENDS RETURN /* Declarations */
-%token DOTLENGTH PRINT /* Functions */
+%token LENGTH PRINT /* Functions */
 %token IF ELSE WHILE /* Loops and if-statements */
 
 %token THIS NEW STRING /* Objects */
@@ -211,9 +211,9 @@ Root_Exp:
         |
         ID Index
         |
-        ID DOTLENGTH
+        ID DOT LENGTH
         |
-        ID Index DOTLENGTH
+        ID Index DOT LENGTH
         |
         INTEGER_LITERAL
         |
