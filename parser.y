@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 %token INT BOOL /* Primitive Types */
 %token TRUE FALSE /* booleans */
 
-%token EQUAL PLUSPLUS NOT DOT /* Operators */
+%token EQUAL PLUSPLUS  MINUSMINUS NOT DOT /* Operators */
 %token AND OR LESS GREATER GREATERTHANEQUAL LESSTHANEQUAL IS ISNOT PLUS MINUS TIMES SLASH /* Binary Operators - op */
 
 %token COMMA SEMICOLON OPARANTHESIS EPARANTHESIS OBRACK EBRACK OBRACE EBRACE QUOTE /* Separators */
@@ -140,15 +140,73 @@ Index:
         Index OBRACK Exp EBRACK 
         ;
 
-Exp:
-        Exp op Exp
+Exp: 
+        Exp OR T_Exp
         |
-        NOT Exp
+        T_Exp
+        ;
+
+T_Exp:
+        T_Exp AND F_Exp
         |
-        PLUS Exp
+        F_Exp
+        ;
+
+F_Exp:
+        F_Exp IS G_Exp
         |
-        MINUS Exp
+        F_Exp ISNOT G_Exp
         |
+        G_Exp
+        ;
+
+G_Exp:
+        G_Exp LESS H_Exp
+        |
+        G_Exp LESSTHANEQUAL H_Exp
+        |
+        G_Exp GREATER H_Exp
+        |
+        G_Exp GREATERTHANEQUAL H_Exp
+        |
+        H_Exp
+        ;
+
+H_Exp:
+        H_Exp PLUS I_Exp
+        |
+        H_Exp MINUS I_Exp
+        |
+        I_Exp
+        ;
+
+I_Exp:
+        I_Exp TIMES J_Exp
+        |
+        I_Exp SLASH J_Exp
+        |
+        J_Exp
+        ;
+
+J_Exp:
+        PLUSPLUS K_Exp
+        |
+        MINUSMINUS K_Exp
+        |
+        PLUS K_Exp
+        |
+        MINUS K_Exp
+        |
+        NOT K_Exp
+        |
+        K_Exp
+        ;
+
+K_Exp:
+        Root_Exp
+        ;
+
+Root_Exp:
         OPARANTHESIS Exp EPARANTHESIS
         |
         ID Index
@@ -191,32 +249,5 @@ ExpRestList:
         ExpRestList ExpRest
         | /* Empty */
         ;
-
-op:     /* Binary Operators */
-        AND
-        |
-        OR
-        |
-        LESS
-        |
-        GREATER
-        |
-        GREATERTHANEQUAL
-        |
-        LESSTHANEQUAL
-        |
-        IS
-        |
-        ISNOT
-        |
-        PLUS
-        |
-        MINUS
-        |
-        TIMES
-        |
-        SLASH
-        ;
-
 
 %%

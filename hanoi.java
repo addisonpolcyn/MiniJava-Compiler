@@ -7,9 +7,8 @@
 
 class GraphDemo {
 	public static void main(String []a) { {
-                x = star.length;
-                //x = star.create(5, false);
-		x = star.addEdge(0);
+                x = star.create(5, false);
+		x = star.addEdge(0, 1);
 		x = star.addEdge(0, 2);
 		x = star.addEdge(0, 3);
 		x = star.addEdge(0, 4);

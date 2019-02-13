@@ -13,6 +13,7 @@
     /* Comments */
 \/\/[^\n^\r]* {
     /* Single Comment */
+    yylineno++;
     PRINTDEBUG(yytext)
 }
 "/*"([^*]|\*+[^/*])*\*+"/" {
@@ -123,6 +124,10 @@ false {
 "++" {
     PRINTDEBUG(yytext)
     return PLUSPLUS;
+}
+"--" {
+    PRINTDEBUG(yytext)
+    return MINUSMINUS;
 }
 ! {
     PRINTDEBUG(yytext)
