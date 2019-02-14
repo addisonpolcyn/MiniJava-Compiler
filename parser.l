@@ -120,14 +120,6 @@ false {
     PRINTDEBUG(yytext)
     return EQUAL;
 }
-"++" {
-    PRINTDEBUG(yytext)
-    return PLUSPLUS;
-}
-"--" {
-    PRINTDEBUG(yytext)
-    return MINUSMINUS;
-}
 ! {
     PRINTDEBUG(yytext)
     return NOT;
@@ -137,6 +129,13 @@ false {
     return DOT;
 }
 
+    /* Bad Tokens - tokens that are not allowed in MiniJava Grammar */
+"++" {
+    //Eat this token so that Yacc throws an Error
+}
+"--" {
+    //Eat this token so that Yacc throws an Error
+}
 
     /* Binary Operators */
 && {

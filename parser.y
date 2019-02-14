@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define YYDEBUG 5
+#define YYDEBUG 1
 
 int yylex();
 void yyerror(const char *str);
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 %token INT BOOL /* Primitive Types */
 %token TRUE FALSE /* booleans */
 
-%token EQUAL PLUSPLUS  MINUSMINUS NOT DOT /* Operators */
+%token EQUAL NOT DOT /* Operators */
 %token AND OR LESS GREATER GREATERTHANEQUAL LESSTHANEQUAL IS ISNOT PLUS MINUS TIMES SLASH /* Binary Operators - op */
 
 %token COMMA SEMICOLON OPARANTHESIS EPARANTHESIS OBRACK EBRACK OBRACE EBRACE QUOTE /* Separators */
@@ -72,6 +72,8 @@ ClassDeclList:
 
 VarDecl:
         Type ID SEMICOLON
+        |
+        ID EQUAL Exp SEMICOLON
         ;
 
 VarDeclList:
@@ -189,10 +191,6 @@ I_Exp:
         ;
 
 J_Exp:
-        PLUSPLUS K_Exp
-        |
-        MINUSMINUS K_Exp
-        |
         PLUS K_Exp
         |
         MINUS K_Exp
