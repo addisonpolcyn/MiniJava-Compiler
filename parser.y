@@ -104,11 +104,11 @@ FormalRestList:
         ;
 
 Type:
+        ID
+        |
         INT
         |
         BOOL
-        |
-        ID
         |
         Type OBRACK EBRACK
         ;
@@ -203,11 +203,19 @@ J_Exp:
         ;
 
 K_Exp:
+        K_Exp DOT LENGTH
+        |
+        K_Exp DOT ID OPARANTHESIS ExpList EPARANTHESIS
+        |
         Root_Exp
         ;
 
 Root_Exp:
         OPARANTHESIS Exp EPARANTHESIS
+        |
+        ID Index
+        |
+        ID Index DOT LENGTH
         |
         INTEGER_LITERAL
         |
@@ -216,14 +224,6 @@ Root_Exp:
         FALSE
         |
         Object
-        |
-        ID Index 
-        |
-        ID DOT LENGTH
-        |
-        ID Index DOT LENGTH
-        |
-        Object DOT ID OPARANTHESIS ExpList EPARANTHESIS
         ; 
 
 Object:
