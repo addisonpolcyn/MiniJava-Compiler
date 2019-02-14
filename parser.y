@@ -209,12 +209,6 @@ K_Exp:
 Root_Exp:
         OPARANTHESIS Exp EPARANTHESIS
         |
-        ID Index
-        |
-        ID DOT LENGTH
-        |
-        ID Index DOT LENGTH
-        |
         INTEGER_LITERAL
         |
         TRUE
@@ -222,6 +216,12 @@ Root_Exp:
         FALSE
         |
         Object
+        |
+        ID Index 
+        |
+        ID DOT LENGTH
+        |
+        ID Index DOT LENGTH
         |
         Object DOT ID OPARANTHESIS ExpList EPARANTHESIS
         ; 
