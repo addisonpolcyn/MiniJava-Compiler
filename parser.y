@@ -207,15 +207,19 @@ K_Exp:
         |
         K_Exp DOT ID OPARANTHESIS ExpList EPARANTHESIS
         |
-        Root_Exp
+        L_Exp
         ;
 
-Root_Exp:
+L_Exp:
+        ID Root_Exp DOT LENGTH
+        |
+        Root_Exp
+        ;
+        
+Root_Exp:  
         OPARANTHESIS Exp EPARANTHESIS
         |
         ID Index
-        |
-        ID Index DOT LENGTH
         |
         INTEGER_LITERAL
         |
@@ -224,7 +228,7 @@ Root_Exp:
         FALSE
         |
         Object
-        ; 
+        ;  
 
 Object:
         ID         
