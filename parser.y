@@ -14,8 +14,7 @@ FILE *yyin;
 void yyerror(const char *str)
 {
     fprintf(stderr, "Syntax error on line: %d\n", yylineno);
-    fprintf (stderr, "%s\n", str);
-
+    //fprintf (stderr, "%s\n", str);
 }
  
 int yywrap()
@@ -35,7 +34,7 @@ int main(int argc, char **argv) {
 
 %define parse.error verbose
 %token CLASS PUBLIC STATIC VOID MAIN EXTENDS RETURN /* Declarations */
-%token LENGTH PRINT /* Functions */
+%token LENGTH PRINTLN PRINT /* Functions */
 %token IF ELSE WHILE /* Loops and if-statements */
 
 %token THIS NEW STRING /* Objects */
@@ -105,12 +104,16 @@ FormalRestList:
         | /* Empty */
         ;
 
-Type:
-        ID
-        |
+PrimeType:
         INT
         |
         BOOL
+        |
+        ID
+        ;
+
+Type:
+        PrimeType
         |
         Type OBRACK EBRACK
         ;
@@ -122,6 +125,10 @@ Statement:
         |
         WHILE OPARANTHESIS Exp EPARANTHESIS Statement
         |
+        PRINTLN OPARANTHESIS Exp EPARANTHESIS SEMICOLON
+        |
+        PRINTLN OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
+        |
         PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON
         |
         PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
@@ -129,6 +136,8 @@ Statement:
         ID EQUAL Exp SEMICOLON
         |
         ID Index EQUAL Exp SEMICOLON
+        |
+        RETURN Exp SEMICOLON
         ;
 
 StatementList:
@@ -235,7 +244,7 @@ Object:
         |
         NEW ID OPARANTHESIS EPARANTHESIS
         |
-        NEW Type Index
+        NEW PrimeType Index
         ;
 
 ExpList:

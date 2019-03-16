@@ -59,6 +59,10 @@ length {
 }
 System.out.println {
     PRINTDEBUG(yytext)
+    return PRINTLN;
+}
+System.out.print {
+    PRINTDEBUG(yytext)
     return PRINT;
 }
    
