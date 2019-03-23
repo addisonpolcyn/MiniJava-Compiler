@@ -10,12 +10,14 @@ public:
     Identifier(std::string str) {
         id=str;
     }
+    void evaluate();
 };
 
 /*******************    EXP CLASS    ****************************/
 /* Exp Abstract-Class */
 class Exp {
-
+public:
+    virtual void evaluate() = 0;
 };
 
 /* Exp Sub-Classes */
@@ -28,6 +30,7 @@ public:
         lhs=left;
         rhs=right;
     }
+    void evaluate();
 };
 
 class LessThan : public Exp {
@@ -39,6 +42,7 @@ public:
         lhs=e1;
         rhs=e2;
     }
+    void evaluate();
 };
 
 class Plus : public Exp {
@@ -50,6 +54,7 @@ public:
         lhs = (e1);
         rhs = (e2); 
     }
+    void evaluate();
 };
 
 class Minus : public Exp {
@@ -61,6 +66,7 @@ public:
         lhs=e1;
         rhs=e2;
     }
+    void evaluate();
 };
 
 class Times : public Exp {
@@ -72,6 +78,7 @@ public:
         lhs=e1;
         rhs=e2;
     }
+    void evaluate();
 };
 
 class ArrayLookup : public Exp {
@@ -83,6 +90,7 @@ public:
         lhs=e1;
         rhs=e2;
     }
+    void evaluate();
 };
 
 class ArrayLength : public Exp {
@@ -92,6 +100,7 @@ public:
     ArrayLength(Exp *e) {
         e=e;
     }
+    void evaluate();
 };
 
 class Call : public Exp {
@@ -105,6 +114,7 @@ public:
         i=i;
         el=el;
     }
+    void evaluate();
 };
 
 class IntegerLiteral : public Exp {
@@ -114,16 +124,19 @@ public:
     IntegerLiteral(int i) {
         num=i;
     }
+    void evaluate();
 };
 
 class True : public Exp {
 public:
     True() {}
+    void evaluate();
 };
 
 class False : public Exp {
 public:
     False() {}
+    void evaluate();
 };
 
 class IdentifierExp : public Exp {
@@ -133,11 +146,13 @@ public:
     IdentifierExp(std::string str) {
         id=str;
     }
+    void evaluate();
 };
 
 class This : public Exp {
 public:
     This() {}
+    void evaluate();
 };
 
 class NewArray : public Exp {
@@ -147,6 +162,7 @@ public:
     NewArray(Exp *e) {
         e=e;
     }
+    void evaluate();
 };
 
 class NewObject : public Exp {
@@ -156,6 +172,7 @@ public:
     NewObject(Identifier *i) {
         i=i;
     }
+    void evaluate();
 };
 
 class Not : public Exp {
@@ -165,6 +182,7 @@ public:
     Not(Exp *e) {
         e=e;
     }
+    void evaluate();
 };
 
 class NegativeExp : public Exp {
@@ -174,6 +192,7 @@ public:
     NegativeExp(Exp *e) {
         e=e;
     }
+    void evaluate();
 };
 
 class PositiveExp : public Exp {
@@ -183,13 +202,15 @@ public:
     PositiveExp(Exp *e) { 
         e=e;
     }
+    void evaluate();
 };
 
 
 /*******************    STATEMENT CLASS    ****************************/
 //abstract Statement class
 class Statement {
-
+public:
+    virtual void evaluate() = 0;
 };
 
 class Block : public Statement {
@@ -199,6 +220,7 @@ public:
     Block(std::list<Statement *> *sl) {
         sl=sl;
     }
+    void evaluate();
 };
 
 class If : public Statement {
@@ -213,6 +235,7 @@ public:
         s1=s1;
         s2=s2;
     }
+    void evaluate();
 };
 
 class While : public Statement {
@@ -224,6 +247,7 @@ public:
         e=e;
         s=s;
     }
+    void evaluate();
 };
 
 class Print : public Statement {
@@ -233,6 +257,7 @@ public:
     Print(Exp *e) {
         e=e;
     }
+    void evaluate();
 };
 
 class Assign : public Statement {
@@ -244,6 +269,7 @@ public:
         i=i;
         e=e;
     }
+    void evaluate();
 };
 
 class ArrayAssign : public Statement {
@@ -257,26 +283,30 @@ public:
     e1=e1;
     e2=e2;
    }
+   void evaluate();
 };
 
 /*******************    TYPE CLASS    ****************************/
-//abstract class
 class Type {
-
+public:
+    virtual void evaluate() = 0;
 };
 class IntArrayType : public Type {
 public:
     IntArrayType() {}
+    void evaluate();
 };
 
 class BooleanType : public Type {
 public:    
     BooleanType() {}
+    void evaluate();
 };
 
 class IntegerType : public Type {
 public:
     IntegerType() {}
+    void evaluate();
 };
 
 class IdentifierType : public Type {  
@@ -286,6 +316,7 @@ public:
     IdentifierType(const std::string s) {
         str=s;
     }
+    void evaluate();
 };
 
 /*******************    VAR CLASS    ****************************/
@@ -298,6 +329,7 @@ public:
         t=t;
         i=i;
     }
+    void evaluate();
 };
 
 /*******************    FORMAL CLASS    ****************************/
@@ -310,6 +342,7 @@ public:
         t=t;
         i=i;
     }
+    void evaluate();
 };
 
 /*******************    METHOD CLASS    ****************************/
@@ -331,13 +364,15 @@ public:
         sl=sl;
         e=e;
     }
+    void evaluate();
 };
 
 
 /*******************    CLASS DECLARATION CLASS ****************************/
 //abstract class
 class ClassDecl {
-
+public:
+    virtual void evaluate() = 0;
 };
 
 class ClassDeclSimple : public ClassDecl {
@@ -352,6 +387,7 @@ public:
         vl=vl;
         ml=ml;
     }
+    void evaluate();
 };
 
 class ClassDeclExtends : public ClassDecl { 
@@ -368,6 +404,7 @@ public:
         vl=vl;
         ml=ml;
     }
+    void evaluate();
 };
 
 /*******************    MAIN CLASS    ****************************/
@@ -383,6 +420,7 @@ public:
         i2=i2;
         s=s;
     }
+    void evaluate();
 };
 
 /*******************    PROGRAM CLASS ****************************/
@@ -395,6 +433,7 @@ public:
         m=m;
         cl=cl;
     }
+    void evaluate();
 };
 
 extern Program *root;

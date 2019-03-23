@@ -30,8 +30,14 @@ extern "C" int yywrap()
 int main(int argc, char **argv) {
     /* Process file as command line args */
     yyin = fopen(argv[1], "r");
+    
+    /* Parse file and build AST */
     yyparse();
     fclose(yyin);
+
+    /* Traverse AST */
+    root->evaluate();
+
     return 0;
 }
 
@@ -90,13 +96,13 @@ int main(int argc, char **argv) {
 
 Program:
         MainClass ClassDeclList
-        { $$ = new Program($1, $2); root = $$; std::cout << "fired Program @@@@@@@@@@@@@@\n"; }
+        { $$ = new Program($1, $2); root = $$; std::cout << "fired Program $$$$$$$$$$$$$$$\n"; }
         ;
 
 MainClass:
         CLASS ID OBRACE PUBLIC STATIC VOID MAIN OPARANTHESIS STRING OBRACK EBRACK ID EPARANTHESIS
             OBRACE Statement EBRACE EBRACE
-        { $$ = new MainClass(new Identifier($2), new Identifier($12), $15); std::cout << "fired MAin #############\n"; }
+        { $$ = new MainClass(new Identifier($2), new Identifier($12), $15); std::cout << "fired Main #############\n"; }
         ;
 
 ClassDecl:
@@ -109,7 +115,7 @@ ClassDecl:
 
 ClassDeclList:
         ClassDeclList ClassDecl { std::cout << "class list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
-        | /* Empty */
+        | /* Empty */  { std::cout << "class list wanted DOWNSTREAM EMPTY\n"; }
         ;
 
 VarDecl:
