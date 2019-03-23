@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
 #include "node.h"
 
 #define YYDEBUG 1
@@ -39,6 +40,13 @@ int main(int argc, char **argv) {
     int num;
     char *id;
     Exp *expr;
+    Statement *stmt;
+    Type *type;
+    MethodDecl *method;
+    VarDecl *var;
+    ClassDecl *classDecl;
+    MainClass *main;
+    Program *pgm;
 }
 
 %define parse.error verbose
@@ -55,7 +63,14 @@ int main(int argc, char **argv) {
 
 %type <num> INTEGER_LITERAL
 %type <id> ID
-%type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp
+%type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object
+%type <stmt> Statement
+%type <type> Type PrimeType
+%type <method> MethodDecl
+%type <var> VarDecl
+%type <classDecl> ClassDecl
+%type <main> MainClass
+%type <pgm> Program
 
 %%
 
@@ -168,7 +183,7 @@ Exp:
         ;
 
 T_Exp:
-        T_Exp AND F_Exp
+        T_Exp AND F_Exp { $$ = new And($1, $3); std::cout << "fired And #############\n"; }
         |
         F_Exp
         ;
@@ -182,7 +197,7 @@ F_Exp:
         ;
 
 G_Exp:
-        G_Exp LESS H_Exp
+        G_Exp LESS H_Exp { $$ = new LessThan($1, $3); std::cout << "fired Less #############\n"; }
         |
         G_Exp LESSTHANEQUAL H_Exp
         |
@@ -194,15 +209,15 @@ G_Exp:
         ;
 
 H_Exp:
-        H_Exp PLUS I_Exp { $$ = new Plus($1, $3); }
+        H_Exp PLUS I_Exp { $$ = new Plus($1, $3); std::cout << "fired Plus #############\n"; }
         |
-        H_Exp MINUS I_Exp
+        H_Exp MINUS I_Exp { $$ = new Minus($1, $3); std::cout << "fired Minus #############\n"; }
         |
         I_Exp
         ;
 
 I_Exp:
-        I_Exp TIMES J_Exp
+        I_Exp TIMES J_Exp { $$ = new Times($1, $3); std::cout << "fired Times #############\n"; }
         |
         I_Exp SLASH J_Exp
         |
@@ -214,7 +229,7 @@ J_Exp:
         |
         MINUS K_Exp 
         |
-        NOT K_Exp
+        NOT K_Exp { $$ = new Not($2); std::cout << "fired Not #############\n"; }
         |
         K_Exp
         ;
@@ -234,23 +249,23 @@ L_Exp:
         ;
         
 Root_Exp:  
-        OPARANTHESIS Exp EPARANTHESIS
+        OPARANTHESIS Exp EPARANTHESIS { $$ = $2; std::cout << "fired (exp)"; }
         |
         ID Index
         |
         INTEGER_LITERAL
         |
-        TRUE
+        TRUE { $$ = new True(); std::cout << "fired True #############\n"; }
         |
-        FALSE
+        FALSE { $$ = new False(); std::cout << "fired False #############\n"; }
         |
         Object
         ;  
 
 Object:
-        ID         
+        ID { $$ = new IdentifierExp($1); std::cout << "fired IdentExp #############\n"; }
         |
-        THIS
+        THIS { $$ = new This(); std::cout << "fired This #############\n"; }
         |
         NEW ID OPARANTHESIS EPARANTHESIS
         |
