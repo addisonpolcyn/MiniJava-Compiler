@@ -21,6 +21,36 @@ int And::evaluate() {
     return left && right;
 }
 
+Or::Or(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
+int Or::evaluate() {
+    std::cout << "(Or)" << std::endl;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " || " << right << std::endl;
+    return left || right;
+}
+
+Is::Is(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
+int Is::evaluate() {
+    std::cout << "(Is)" << std::endl;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " == " << right << std::endl;
+    return left == right;
+}
+
+IsNot::IsNot(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
+int IsNot::evaluate() {
+    std::cout << "(IsNot)" << std::endl;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " != " << right << std::endl;
+    return left != right;
+}
+
 LessThan::LessThan(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
 int LessThan::evaluate() {
     std::cout << "(LessThan)" << std::endl;
@@ -29,6 +59,36 @@ int LessThan::evaluate() {
     
     std::cout << left << " < " << right << std::endl;
     return left < right;
+}
+
+LessThanEqual::LessThanEqual(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
+int LessThanEqual::evaluate() {
+    std::cout << "(LessThan=)" << std::endl;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " <= " << right << std::endl;
+    return left <= right;
+}
+
+GreaterThan::GreaterThan(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
+int GreaterThan::evaluate() {
+    std::cout << "(GrweaterThan)" << std::endl;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " > " << right << std::endl;
+    return left > right;
+}
+
+GreaterThanEqual::GreaterThanEqual(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
+int GreaterThanEqual::evaluate() {
+    std::cout << "(GreaterThan=)" << std::endl;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " >= " << right << std::endl;
+    return left >= right;
 }
 
 Plus::Plus(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
@@ -61,6 +121,16 @@ int Times::evaluate() {
     
     std::cout << left << " * " << right << std::endl;
     return left * right;
+}
+
+Div::Div(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
+int Div::evaluate() {
+    std::cout << "(Div)" << std::endl;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " / " << right << std::endl;
+    return left / right;
 }
 
 ArrayLookup::ArrayLookup(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}

@@ -28,12 +28,66 @@ public:
     int evaluate();
 };
 
+class Or : public Exp {
+protected:
+    Exp *lhs;
+    Exp *rhs;
+public:
+    Or(Exp *lhs, Exp *rhs);
+    int evaluate();
+};
+
+class Is : public Exp {
+protected:
+    Exp *lhs;
+    Exp *rhs;
+public:
+    Is(Exp *lhs, Exp *rhs);
+    int evaluate();
+};
+
+class IsNot : public Exp {
+protected:
+    Exp *lhs;
+    Exp *rhs;
+public:
+    IsNot(Exp *lhs, Exp *rhs);
+    int evaluate();
+};
+
 class LessThan : public Exp {
 protected:
     Exp * lhs;
     Exp * rhs;
 public:
     LessThan(Exp *lhs, Exp *rhs);
+    int evaluate();
+};
+
+class LessThanEqual : public Exp {
+protected:
+    Exp * lhs;
+    Exp * rhs;
+public:
+    LessThanEqual(Exp *lhs, Exp *rhs);
+    int evaluate();
+};
+
+class GreaterThan : public Exp {
+protected:
+    Exp * lhs;
+    Exp * rhs;
+public:
+    GreaterThan(Exp *lhs, Exp *rhs);
+    int evaluate();
+};
+
+class GreaterThanEqual : public Exp {
+protected:
+    Exp * lhs;
+    Exp * rhs;
+public:
+    GreaterThanEqual(Exp *lhs, Exp *rhs);
     int evaluate();
 };
 
@@ -61,6 +115,15 @@ protected:
     Exp * rhs;
 public:
     Times(Exp *lhs, Exp *rhs);
+    int evaluate();
+};
+
+class Div : public Exp {
+protected:
+    Exp * lhs;
+    Exp * rhs;
+public:
+    Div(Exp *lhs, Exp *rhs);
     int evaluate();
 };
 
