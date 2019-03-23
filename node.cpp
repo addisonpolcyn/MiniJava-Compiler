@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <list>
 #include <string>
 #include <iostream>
@@ -11,90 +12,108 @@ void Identifier::evaluate() {
 
 /*******************    EXP SUB-CLASSES    ****************************/
 And::And(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
-void And::evaluate() {
+int And::evaluate() {
     std::cout << "(And)" << std::endl;
+    return 0;
 }
 
 LessThan::LessThan(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
-void LessThan::evaluate() {
+int LessThan::evaluate() {
     std::cout << "(LessThan)" << std::endl;
+    return 0;
 }
 
 Plus::Plus(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
-void Plus::evaluate() {
+int Plus::evaluate() {
     std::cout << "(Plus)" << std::endl;
+    return 0;
 }
 
 Minus::Minus(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
-void Minus::evaluate() {
+int Minus::evaluate() {
     std::cout << "(Minus)" << std::endl;
+    return 0;
 }
 
 Times::Times(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
-void Times::evaluate() {
+int Times::evaluate() {
     std::cout << "(Times)" << std::endl;
+    return 0;
 }
 
 ArrayLookup::ArrayLookup(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
-void ArrayLookup::evaluate() {
+int ArrayLookup::evaluate() {
     std::cout << "(ArrayLookup)" << std::endl;
+    return 0;
 }
 
 ArrayLength::ArrayLength(Exp *e): e(e) {}
-void ArrayLength::evaluate() {
+int ArrayLength::evaluate() {
     std::cout << "(ArrLength)" << std::endl;
+    return 0;
 }
 
 Call::Call(Exp *e, Identifier *i, std::list<Exp *> *el): e(e), i(i), el(el) {}
-void Call::evaluate() {
+int Call::evaluate() {
     std::cout << "(Call)" << std::endl;
+    return 0;
 }
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
-void IntegerLiteral::evaluate() {
+int IntegerLiteral::evaluate() {
     std::cout << "(IntegerLiteral)" << std::endl;
+    return num;
 }
 
-void True::evaluate() {
+int True::evaluate() {
     std::cout << "(True)" << std::endl;
+    return 0;
 }
 
-void False::evaluate() {
+int False::evaluate() {
     std::cout << "(False)" << std::endl;
+    return 0;
 }
 
-void This::evaluate() {
+int This::evaluate() {
     std::cout << "(This)" << std::endl;
+    return 0;
 }
 
 IdentifierExp::IdentifierExp(std::string str): id(str) {}
-void IdentifierExp::evaluate() {
+int IdentifierExp::evaluate() {
     std::cout << "(IdentifierExp)" << std::endl;
+    return 0;
 }
 
 NewArray::NewArray(Exp *e): e(e) {}
-void NewArray::evaluate() {
+int NewArray::evaluate() {
     std::cout << "(NewArray)" << std::endl;
+    return 0;
 }
 
 NewObject::NewObject(Identifier *i): i(i) {}
-void NewObject::evaluate() {
+int NewObject::evaluate() {
     std::cout << "(NewObject)" << std::endl;
+    return 0;
 }
 
 Not::Not(Exp *e): e(e) {}
-void Not::evaluate() {
+int Not::evaluate() {
     std::cout << "(Not)" << std::endl;
+    return 0;
 }
 
 NegativeExp::NegativeExp(Exp *e): e(e) {}
-void NegativeExp::evaluate() {
+int NegativeExp::evaluate() {
     std::cout << "(NegativeExp)" << std::endl;
+    return 0;
 }
 
 PositiveExp::PositiveExp(Exp *e): e(e) {}
-void PositiveExp::evaluate() {
+int PositiveExp::evaluate() {
     std::cout << "(PositiveExp)" << std::endl;
+    return 0;
 }
 
 /*******************    STATEMENT CLASS    ****************************/
@@ -115,8 +134,29 @@ void While::evaluate() {
 
 Print::Print(Exp *e): e(e) {}
 void Print::evaluate() {
-    e->evaluate();
-    std::cout << "(Print)" << std::endl;
+    int num = e->evaluate();
+    std::cout << "(Print):";
+    std::cout << num;
+}
+
+Println::Println(Exp *e): e(e) {}
+void Println::evaluate() {
+    int num = e->evaluate();
+    std::cout << "(Println):\n";
+    std::cout << num << std::endl;
+}
+
+PrintString::PrintString(std::string str): str(str) {}
+void PrintString::evaluate() {
+    std::cout << "(PrintString):" << str <<std::endl;
+    std::string s(str);
+    std::cout << str;
+}
+
+PrintStringln::PrintStringln(const std::string str): str(str) {}
+void PrintStringln::evaluate() {
+    std::cout << "(PrintStringln):" << str << std::endl;
+    std::cout << str << std::endl;
 }
 
 Assign::Assign(Identifier *i, Exp *e): i(i), e(e) {}

@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
 %union {
     int num;
     char *id;
+    char *str;
 
     Exp *expr;
     Statement *stmt;
@@ -77,6 +78,7 @@ int main(int argc, char **argv) {
 
 /* Terminals */
 %type <num> INTEGER_LITERAL
+%type <str> STRING_LITERAL
 %type <id> ID
 
 /* Non-Terminals */
@@ -176,13 +178,13 @@ Statement:
         |
         WHILE OPARANTHESIS Exp EPARANTHESIS Statement { $$ = new While($3, $5); std::cout << "fired While #############\n"; }
         |
-        PRINTLN OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Print($3); std::cout << "fired Println ###FIX_THIS####\n"; }
+        PRINTLN OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Println($3); std::cout << "fired Println #############\n"; }
         |
-        PRINTLN OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { std::cout << "fired println Stringlit @@@@@@@@@@@@@@@@@@@"; }
+        PRINTLN OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { $$ = new PrintStringln($3); std::cout << "fired println Stringlit ############"; }
         |
         PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Print($3); std::cout << "fired Print #############\n"; }
         |
-        PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { std::cout << "fired print string lit @@@@@@@@@@@@@@@@@@@"; }
+        PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { $$ = new PrintString($3); std::cout << "fired print string lit ################"; }
         |
         ID EQUAL Exp SEMICOLON { $$ = new Assign(new Identifier($1), $3); std::cout << "fired Assign #############\n"; }
         |

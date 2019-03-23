@@ -15,7 +15,7 @@ public:
 /* Exp Abstract-Class */
 class Exp {
 public:
-    virtual void evaluate() = 0;
+    virtual int evaluate() = 0;
 };
 
 /* Exp Sub-Classes */
@@ -25,7 +25,7 @@ protected:
     Exp *rhs;
 public:
     And(Exp *lhs, Exp *rhs);
-    void evaluate();
+    int evaluate();
 };
 
 class LessThan : public Exp {
@@ -34,7 +34,7 @@ protected:
     Exp * rhs;
 public:
     LessThan(Exp *lhs, Exp *rhs);
-    void evaluate();
+    int evaluate();
 };
 
 class Plus : public Exp {
@@ -43,7 +43,7 @@ protected:
     Exp *rhs;
 public:
     Plus(Exp *lhs, Exp *rhs);
-    void evaluate();
+    int evaluate();
 };
 
 class Minus : public Exp {
@@ -52,7 +52,7 @@ protected:
     Exp * rhs;
 public:
     Minus(Exp *lhs, Exp *rhs);
-    void evaluate();
+    int evaluate();
 };
 
 class Times : public Exp {
@@ -61,7 +61,7 @@ protected:
     Exp * rhs;
 public:
     Times(Exp *lhs, Exp *rhs);
-    void evaluate();
+    int evaluate();
 };
 
 class ArrayLookup : public Exp {
@@ -70,7 +70,7 @@ protected:
     Exp * rhs;
 public:
     ArrayLookup(Exp *lhs, Exp *rhs);
-    void evaluate();
+    int evaluate();
 };
 
 class ArrayLength : public Exp {
@@ -78,7 +78,7 @@ protected:
     Exp * e;
 public:
     ArrayLength(Exp *e);
-    void evaluate();
+    int evaluate();
 };
 
 class Call : public Exp {
@@ -88,7 +88,7 @@ protected:
     std::list<Exp *> * el;
 public:
     Call(Exp *e, Identifier *i, std::list<Exp *> *el);
-    void evaluate();
+    int evaluate();
 };
 
 class IntegerLiteral : public Exp {
@@ -96,19 +96,19 @@ protected:
     int num;
 public:
     IntegerLiteral(int i);
-    void evaluate();
+    int evaluate();
 };
 
 class True : public Exp {
 public:
     True() {}
-    void evaluate();
+    int evaluate();
 };
 
 class False : public Exp {
 public:
     False() {}
-    void evaluate();
+    int evaluate();
 };
 
 class IdentifierExp : public Exp {
@@ -116,13 +116,13 @@ protected:
     std::string id;
 public:
     IdentifierExp(std::string str);
-    void evaluate();
+    int evaluate();
 };
 
 class This : public Exp {
 public:
     This() {}
-    void evaluate();
+    int evaluate();
 };
 
 class NewArray : public Exp {
@@ -130,7 +130,7 @@ protected:
     Exp * e;
 public:
     NewArray(Exp *e);
-    void evaluate();
+    int evaluate();
 };
 
 class NewObject : public Exp {
@@ -138,7 +138,7 @@ protected:
     Identifier * i;
 public:
     NewObject(Identifier *i);
-    void evaluate();
+    int evaluate();
 };
 
 class Not : public Exp {
@@ -146,7 +146,7 @@ protected:
     Exp * e;
 public:
     Not(Exp *e);
-    void evaluate();
+    int evaluate();
 };
 
 class NegativeExp : public Exp {
@@ -154,7 +154,7 @@ protected:
     Exp * e;
 public:
     NegativeExp(Exp *e);
-    void evaluate();
+    int evaluate();
 };
 
 class PositiveExp : public Exp {
@@ -162,7 +162,7 @@ protected:
     Exp * e;
 public:
     PositiveExp(Exp *e);
-    void evaluate();
+    int evaluate();
 };
 
 
@@ -206,6 +206,30 @@ protected:
     Exp *e;
 public:
     Print(Exp *e);
+    void evaluate();
+};
+
+class Println : public Statement {
+protected:    
+    Exp *e;
+public:
+    Println(Exp *e);
+    void evaluate();
+};
+
+class PrintString : public Statement {
+protected:    
+    const std::string str;
+public:
+    PrintString(const std::string str);
+    void evaluate();
+};
+
+class PrintStringln : public Statement {
+protected:    
+    const std::string str;
+public:
+    PrintStringln(const std::string str);
     void evaluate();
 };
 
