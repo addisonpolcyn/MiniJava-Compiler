@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include "node.h"
 
 #define YYDEBUG 1
 
@@ -8,8 +9,8 @@ int yylex();
 void yyerror(const char *str);
 int yyparse();
 
-extern int yylineno, yychar;
-FILE *yyin;
+extern "C" int yylineno;//, yychar;
+extern "C" FILE *yyin;
 
 void yyerror(const char *str)
 {
@@ -17,9 +18,9 @@ void yyerror(const char *str)
     //fprintf (stderr, "%s\n", str);
 }
  
-int yywrap()
+extern "C" int yywrap()
 {
-        return 1;
+    return 1;
 } 
   
 int main(int argc, char **argv) {

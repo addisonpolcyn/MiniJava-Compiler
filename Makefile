@@ -1,8 +1,24 @@
-parser:	y.tab.c lex.yy.c
-	gcc y.tab.c lex.yy.c -o parser
-y.tab.c: parser.y
-	yacc -d -g --verbose parser.y
-lex.yy.c: parser.l
-	lex parser.l
+CCC = g++
+CCFLAGS= -O2
+LEX = flex
+LFLAGS= -8     
+YACC= bison
+YFLAGS= -v -y -d -g -t --debug
+
+RM = /bin/rm -f
+
+parser: y.tab.o lex.yy.o node.o
+	${CCC} -o parser lex.yy.o y.tab.o node.o
+
+node.o: node.cpp node.h
+	${CCC} -c node.cpp
+y.tab.o: parser.y
+	${YACC} ${YFLAGS} parser.y
+	${CCC} ${CCFLAGS} y.tab.c -c 
+
+lex.yy.o: parser.l
+	${LEX} $(LFLAGS) parser.l
+	${CCC} ${CCFLAGS} lex.yy.c -c 
+
 clean:
-	rm -f lex.yy.c y.tab.c 
+	/bin/rm -f lex.yy.* y.tab.* *.o exp
