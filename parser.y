@@ -96,18 +96,18 @@ ClassDecl:
         ;
 
 ClassDeclList:
-        ClassDeclList ClassDecl
+        ClassDeclList ClassDecl { std::cout << "class list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
         | /* Empty */
         ;
 
 VarDecl:
         Type ID SEMICOLON { std::cout << "fired Var Decl @@@@@@@@@@@@@@\n"; }
         |
-        ID EQUAL Exp SEMICOLON
+        ID EQUAL Exp SEMICOLON { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> var dec id = exp\n"; }
         ;
 
 VarDeclList:
-        VarDeclList VarDecl
+        VarDeclList VarDecl { std::cout << "var list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
         | /* Empty */
         ;
 
@@ -118,12 +118,12 @@ MethodDecl:
         ;
 
 MethodDeclList:
-        MethodDeclList MethodDecl
+        MethodDeclList MethodDecl { std::cout << "method list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
         | /* Empty */
         ;
 
 FormalList:
-        Type ID FormalRestList
+        Type ID FormalRestList { std::cout << "formal list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
         | /* Empty */
         ;
 
@@ -132,7 +132,7 @@ FormalRest:
         ;
 
 FormalRestList:
-        FormalRestList FormalRest
+        FormalRestList FormalRest { std::cout << "formal rest list list wanted upstream ??????????????????????????\n"; }
         | /* Empty */
         ;
 
@@ -173,18 +173,18 @@ Statement:
         ;
 
 StatementList:
-        StatementList Statement
+        StatementList Statement { std::cout << "statment list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
         | /* Empty */
         ;
 
 Index:
-        OBRACK Exp EBRACK
+        OBRACK Exp EBRACK { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index (exp)\n"; }
         |
-        Index OBRACK Exp EBRACK 
-        ;
+        Index OBRACK Exp EBRACK { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index [exp]\n"; }
+       ;
 
 Exp: 
-        Exp OR T_Exp
+        Exp OR T_Exp { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp OR\n"; }
         |
         T_Exp
         ;
@@ -196,9 +196,9 @@ T_Exp:
         ;
 
 F_Exp:
-        F_Exp IS G_Exp
+        F_Exp IS G_Exp { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp == \n"; }
         |
-        F_Exp ISNOT G_Exp
+        F_Exp ISNOT G_Exp { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp != \n"; }
         |
         G_Exp
         ;
@@ -206,11 +206,11 @@ F_Exp:
 G_Exp:
         G_Exp LESS H_Exp { $$ = new LessThan($1, $3); std::cout << "fired Less #############\n"; }
         |
-        G_Exp LESSTHANEQUAL H_Exp
+        G_Exp LESSTHANEQUAL H_Exp { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp <=\n"; }
         |
-        G_Exp GREATER H_Exp
+        G_Exp GREATER H_Exp { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp >\n"; }
         |
-        G_Exp GREATERTHANEQUAL H_Exp
+        G_Exp GREATERTHANEQUAL H_Exp { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp >=\n"; }
         |
         H_Exp
         ;
@@ -226,15 +226,15 @@ H_Exp:
 I_Exp:
         I_Exp TIMES J_Exp { $$ = new Times($1, $3); std::cout << "fired Times #############\n"; }
         |
-        I_Exp SLASH J_Exp
+        I_Exp SLASH J_Exp { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp division\n"; }
         |
         J_Exp
         ;
 
 J_Exp:
-        PLUS K_Exp
+        PLUS K_Exp { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp (+)\n"; }
         |
-        MINUS K_Exp 
+        MINUS K_Exp  { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp (-)\n"; }
         |
         NOT K_Exp { $$ = new Not($2); std::cout << "fired Not #############\n"; }
         |
@@ -242,15 +242,15 @@ J_Exp:
         ;
 
 K_Exp:
-        K_Exp DOT LENGTH
+        K_Exp DOT LENGTH { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp dot length\n"; }
         |
-        K_Exp DOT ID OPARANTHESIS ExpList EPARANTHESIS
+        K_Exp DOT ID OPARANTHESIS ExpList EPARANTHESIS { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp dot id explist\n"; }
         |
         L_Exp
         ;
 
 L_Exp:
-        ID Root_Exp DOT LENGTH
+        ID Root_Exp DOT LENGTH { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp length\n"; }
         |
         Root_Exp
         ;
@@ -258,15 +258,15 @@ L_Exp:
 Root_Exp:  
         OPARANTHESIS Exp EPARANTHESIS { $$ = $2; std::cout << "fired (exp)"; }
         |
-        ID Index
+        ID Index { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp id index\n"; }
         |
-        INTEGER_LITERAL
+        INTEGER_LITERAL { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp integer\n"; }
         |
         TRUE { $$ = new True(); std::cout << "fired True #############\n"; }
         |
         FALSE { $$ = new False(); std::cout << "fired False #############\n"; }
         |
-        Object
+        Object { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp object\n"; }
         ;  
 
 Object:
@@ -274,22 +274,22 @@ Object:
         |
         THIS { $$ = new This(); std::cout << "fired This #############\n"; }
         |
-        NEW ID OPARANTHESIS EPARANTHESIS
+        NEW ID OPARANTHESIS EPARANTHESIS { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp new id()\n"; }
         |
-        NEW PrimeType Index
+        NEW PrimeType Index { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX exp new object prime\n"; }
         ;
 
 ExpList:
-        Exp ExpRestList
+        Exp ExpRestList { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp exprest list\n"; }
         | /* Empty */
         ;
 
 ExpRest:
-        COMMA Exp
+        COMMA Exp { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprest comma\n"; }
         ;
 
 ExpRestList:
-        ExpRestList ExpRest
+        ExpRestList ExpRest { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprestlist\n"; }
         | /* Empty */
         ;
 
