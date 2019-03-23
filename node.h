@@ -280,9 +280,7 @@ class IdentifierType : public Type {
 protected:
     std::string str;
 public:
-    IdentifierType(const std::string s) {
-        str=s;
-    }
+    IdentifierType(const std::string s);
     void evaluate();
 };
 
@@ -292,10 +290,7 @@ protected:
     Type *t;
     Identifier *i;
 public:
-    VarDecl(Type *t, Identifier *i) {
-        t=t;
-        i=i;
-    }
+    VarDecl(Type *t, Identifier *i);
     void evaluate();
 };
 
@@ -305,10 +300,7 @@ protected:
     Type *t;
     Identifier *i;
 public:
-    Formal(Type *t, Identifier *i) {
-        t=t;
-        i=i;
-    }
+    Formal(Type *t, Identifier *i);
     void evaluate();
 };
 
@@ -323,14 +315,7 @@ protected:
     Exp *e;
 
 public:
-    MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl, std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e) {
-        t=t;
-        i=i;
-        fl=fl;
-        vl=vl;
-        sl=sl;
-        e=e;
-    }
+    MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl, std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e);
     void evaluate();
 };
 

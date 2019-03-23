@@ -118,15 +118,15 @@ Program:
 MainClass:
         CLASS ID OBRACE PUBLIC STATIC VOID MAIN OPARANTHESIS STRING OBRACK EBRACK ID EPARANTHESIS
             OBRACE Statement EBRACE EBRACE
-        { Identifier *id = new Identifier($2); Identifier *id2 = new Identifier($12); $$ = new MainClass(new Identifier($2), new Identifier($12), $15); std::cout << "fired Main #############\n"; }
+        { $$ = new MainClass(new Identifier($2), new Identifier($12), $15); std::cout << "fired Main #############\n"; }
         ;
 
 ClassDecl:
         CLASS ID OBRACE VarDeclList MethodDeclList EBRACE 
-        { /*$$ = new ClassDeclSimple($2, $4, $5)*/; std::cout << "fired Class Decl Simple @@@@@@@@@@@@@@@@\n"; }
+        { $$ = new ClassDeclSimple(new Identifier($2), $4, $5); std::cout << "fired Class Decl Simple @@@@@@@@@@@@@@@@\n"; }
         |
         CLASS ID EXTENDS ID OBRACE VarDeclList MethodDeclList EBRACE
-        { /*$$ = new ClassDeclExtends($2, $4, $6, $7)*/; std::cout << "fired Class Decl Extends @@@@@@@@@@@@@\n"; }
+        { $$ = new ClassDeclExtends(new Identifier($2), new Identifier($4), $6, $7); std::cout << "fired Class Decl Extends @@@@@@@@@@@@@\n"; }
         ;
 
 ClassDeclList:
@@ -141,15 +141,15 @@ VarDecl:
         ;
 
 VarDeclList:
-        VarDeclList VarDecl { std::cout << "var list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
-        $$ = $1; $1->push_back($2); std::cout << "loaded up vardecl list push\n";
+        VarDeclList VarDecl { std::cout << "var list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n";
+        $$ = $1; $1->push_back($2); std::cout << "loaded up vardecl list push\n"; }
         | /* Empty */  { std::cout << "var list wanted DOWNSTREAM EMPTY\n"; $$ = new std::list<VarDecl *>(); std::cout << "alocated new list\n"; }
         ;
 
 MethodDecl:
         PUBLIC Type ID OPARANTHESIS FormalList EPARANTHESIS 
             OBRACE VarDeclList StatementList RETURN Exp SEMICOLON EBRACE
-        { /*$$ = new MethodDecl($2, $3, $5, $7, $8, $10); */std::cout << "fired method decl @@@@@@@@@@@@@@@\n"; }
+        { /*$$ = new MethodDecl($2, $3, $5, $7, $8, $10);*/ std::cout << "fired method decl EEEEEERRRRRRRRRr@@@@@@@@@@@@@@@\n"; }
         ;
 
 MethodDeclList:
@@ -164,7 +164,7 @@ FormalList:
         ;
 
 FormalRest:
-        COMMA Type ID { /*$$ = new Formal($2, $3)*/; std::cout << "fired formal @@@@@@@@@@@@@@@2\n"; }
+        COMMA Type ID { $$ = new Formal($2, new Identifier($3)); std::cout << "fired formal @@@@@@@@@@@@@@@2\n"; }
         ;
 
 FormalRestList:
@@ -319,12 +319,12 @@ Object:
         ;
 
 ExpList:
-        Exp ExpRestList { std::cout << "TESTTESTTESTTESTTEST> exp exprest list\n"; } 
-        | /* Empty */  { std::cout << "exp list wanted TESTESTESTDOWNSTREAM EMPTY\n"; $$ = new std::list<Exp *>(); std::cout << "alocated new list\n"; }
+        Exp ExpRestList { std::cout << "@@@@@@@@@@TESTTESTTESTTESTTEST> exp exprest list\n"; } 
+        | /* Empty */  { std::cout << "exp list wanted @@@@@@@@@2222TESTESTESTDOWNSTREAM EMPTY\n"; /*$$ = new std::list<Exp *>(); std::cout << "alocated new list\n";*/ }
         ;
 
 ExpRest:
-        COMMA Exp { std::cout << "TESTTESTESTESTESTES> exprest comma\n"; $$->push_back($2); std::cout << "loaded up classdecl list push\n"; }
+        COMMA Exp { std::cout << "@@@@@@@@@@@@@@@@TESTTESTESTESTESTES> exprest comma\n"; /*$$->push_back($2); std::cout << "loaded up classdecl list push\n";*/ }
         ;
 
 ExpRestList:

@@ -14,49 +14,71 @@ void Identifier::evaluate() {
 And::And(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
 int And::evaluate() {
     std::cout << "(And)" << std::endl;
-    return 0;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " && " << right << std::endl;
+    return left && right;
 }
 
 LessThan::LessThan(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
 int LessThan::evaluate() {
     std::cout << "(LessThan)" << std::endl;
-    return 0;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " < " << right << std::endl;
+    return left < right;
 }
 
 Plus::Plus(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
 int Plus::evaluate() {
     std::cout << "(Plus)" << std::endl;
-    return 0;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " + " << right << std::endl;
+    return left + right;
+
 }
 
 Minus::Minus(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
 int Minus::evaluate() {
     std::cout << "(Minus)" << std::endl;
-    return 0;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " - " << right << std::endl;
+    return left - right;
+
 }
 
 Times::Times(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
 int Times::evaluate() {
     std::cout << "(Times)" << std::endl;
-    return 0;
+    int left = lhs->evaluate();
+    int right = rhs->evaluate();
+    
+    std::cout << left << " * " << right << std::endl;
+    return left * right;
 }
 
 ArrayLookup::ArrayLookup(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
 int ArrayLookup::evaluate() {
-    std::cout << "(ArrayLookup)" << std::endl;
-    return 0;
+    std::cout << "(ArrayLookup) XXXXXXXXXXX" << std::endl;
+    return -1;
 }
 
 ArrayLength::ArrayLength(Exp *e): e(e) {}
 int ArrayLength::evaluate() {
-    std::cout << "(ArrLength)" << std::endl;
-    return 0;
+    std::cout << "(ArrLength) XXXXXXXXXXX" << std::endl;
+    return -1;
 }
 
 Call::Call(Exp *e, Identifier *i, std::list<Exp *> *el): e(e), i(i), el(el) {}
 int Call::evaluate() {
-    std::cout << "(Call)" << std::endl;
-    return 0;
+    std::cout << "(Call) XXXXXXXXXXXX" << std::endl;
+    return -1;
 }
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
@@ -67,7 +89,7 @@ int IntegerLiteral::evaluate() {
 
 int True::evaluate() {
     std::cout << "(True)" << std::endl;
-    return 0;
+    return 1;
 }
 
 int False::evaluate() {
@@ -76,44 +98,47 @@ int False::evaluate() {
 }
 
 int This::evaluate() {
-    std::cout << "(This)" << std::endl;
-    return 0;
+    std::cout << "(This) XXXXXXXXXXXx" << std::endl;
+    return -1;
 }
 
 IdentifierExp::IdentifierExp(std::string str): id(str) {}
 int IdentifierExp::evaluate() {
-    std::cout << "(IdentifierExp)" << std::endl;
-    return 0;
+    std::cout << "XXXXXXXXX(IdentifierExp):" << id << std::endl;
+    return -1;
 }
 
 NewArray::NewArray(Exp *e): e(e) {}
 int NewArray::evaluate() {
-    std::cout << "(NewArray)" << std::endl;
-    return 0;
+    std::cout << "(NewArray)XXXXXXXx" << std::endl;
+    return -1;
 }
 
 NewObject::NewObject(Identifier *i): i(i) {}
 int NewObject::evaluate() {
-    std::cout << "(NewObject)" << std::endl;
-    return 0;
+    std::cout << "(NewObject)  XXXXXXXXx" << std::endl;
+    return -1;
 }
 
 Not::Not(Exp *e): e(e) {}
 int Not::evaluate() {
     std::cout << "(Not)" << std::endl;
-    return 0;
+    int result = e->evaluate();
+    return !result;
 }
 
 NegativeExp::NegativeExp(Exp *e): e(e) {}
 int NegativeExp::evaluate() {
     std::cout << "(NegativeExp)" << std::endl;
-    return 0;
+    int result = e->evaluate();
+    return -result;
 }
 
 PositiveExp::PositiveExp(Exp *e): e(e) {}
 int PositiveExp::evaluate() {
     std::cout << "(PositiveExp)" << std::endl;
-    return 0;
+    int result = e->evaluate();
+    return +result;
 }
 
 /*******************    STATEMENT CLASS    ****************************/
@@ -131,11 +156,25 @@ void Block::evaluate() {
 If::If(Exp *e, Statement *s1, Statement *s2): e(e), s1(s1), s2(s2) {}
 void If::evaluate() {
     std::cout << "(If)" << std::endl;
+    int result = e->evaluate();
+
+    if(result) {
+        s1->evaluate();
+    } else {
+        s2->evaluate();
+    }
+    std::cout << "(If)" << std::endl;
 }
 
 While::While(Exp *e, Statement *s): e(e), s(s) {} 
 void While::evaluate() {
-    std::cout << "(While)" << std::endl;
+    int result = e->evaluate();
+
+    while(result) {
+        s->evaluate();
+    }
+
+    std::cout << "(While) TESTTESTTEST"  << std::endl;
 }
 
 Print::Print(Exp *e): e(e) {}
@@ -167,11 +206,12 @@ void PrintStringln::evaluate() {
 
 Assign::Assign(Identifier *i, Exp *e): i(i), e(e) {}
 void Assign::evaluate() {
-    std::cout << "(Assign)" << std::endl;
+    int value = e->evaluate();
+    std::cout << "(Assign) XXXXXXXXX" << std::endl;
 }
 ArrayAssign::ArrayAssign(Identifier *i, Exp *e1, Exp *e2): i(i), e1(e1), e2(e2) {}
 void ArrayAssign::evaluate() {
-    std::cout << "(ArrayAssign)" << std::endl;
+    std::cout << "(ArrayAssign) XXXXXXXXX" << std::endl;
 }
 
 /*******************    TYPE CLASS    ****************************/
@@ -187,7 +227,7 @@ void IntegerType::evaluate() {
     std::cout << "(IntegerType)" << std::endl;
 }
 
-Identifier::Identifier(const std::string s): str(s) {}
+IdentifierType::IdentifierType(const std::string s): str(s) {}
 void IdentifierType::evaluate() {
     std::cout << "(IdentifierType)" << std::endl;
 }
@@ -205,10 +245,9 @@ void Formal::evaluate() {
 }
 
 /*******************    METHOD CLASS    ****************************/
-MethodDecl::MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl,
- std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e): t(t), i(i), fl(fl), vl(vl), sl(sl), e(e) {}
-   
-MethodDecl::void evaluate() {
+MethodDecl::MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl,std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e): 
+t(t), i(i), fl(fl), vl(vl), sl(sl), e(e) {}
+void MethodDecl::evaluate() {
     std::cout << "(MethodDecl)" << std::endl;
 }
 
