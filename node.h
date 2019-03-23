@@ -388,18 +388,13 @@ class MainClass {
 protected:
     Identifier *i1;
     Identifier *i2;
-public:
-    
-    /*Statement s;
+    Statement *s;
 
-    MainClass(Identifier i1, Identifier i2, Statement s) :
-        i1(i1),
-        i2(i2),
-        s(s) {std::cout << "ouch";}
-    */  
-    MainClass(Identifier *i1, Identifier *i2) {
+public:
+    MainClass(Identifier *i1, Identifier *i2, Statement *s) {
         i1=i1;
         i2=i2;
+        s=s;
     }
 };
 

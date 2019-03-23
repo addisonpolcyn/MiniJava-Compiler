@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
     Exp *expr;
     Statement *stmt;
     Type *type;
+    Formal *formal;
     MethodDecl *method;
     VarDecl *var;
     ClassDecl *classDecl;
@@ -66,6 +67,7 @@ int main(int argc, char **argv) {
 %type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object
 %type <stmt> Statement
 %type <type> Type PrimeType
+%type <formal> FormalRest
 %type <method> MethodDecl
 %type <var> VarDecl
 %type <classDecl> ClassDecl
@@ -76,17 +78,21 @@ int main(int argc, char **argv) {
 
 Program:
         MainClass ClassDeclList
+        { /*$$ = new Program($1, $2)*/; std::cout << "fired Program @@@@@@@@@@@@@@\n"; }
         ;
 
 MainClass:
         CLASS ID OBRACE PUBLIC STATIC VOID MAIN OPARANTHESIS STRING OBRACK EBRACK ID EPARANTHESIS
             OBRACE Statement EBRACE EBRACE
+        { $$ = new MainClass(new Identifier($2), new Identifier($12), $15); std::cout << "fired MAin #############\n"; }
         ;
 
 ClassDecl:
-        CLASS ID OBRACE VarDeclList MethodDeclList EBRACE
+        CLASS ID OBRACE VarDeclList MethodDeclList EBRACE 
+        { /*$$ = new ClassDeclSimple($2, $4, $5)*/; std::cout << "fired Class Decl Simple @@@@@@@@@@@@@@@@\n"; }
         |
         CLASS ID EXTENDS ID OBRACE VarDeclList MethodDeclList EBRACE
+        { /*$$ = new ClassDeclExtends($2, $4, $6, $7)*/; std::cout << "fired Class Decl Extends @@@@@@@@@@@@@\n"; }
         ;
 
 ClassDeclList:
@@ -95,7 +101,7 @@ ClassDeclList:
         ;
 
 VarDecl:
-        Type ID SEMICOLON
+        Type ID SEMICOLON { std::cout << "fired Var Decl @@@@@@@@@@@@@@\n"; }
         |
         ID EQUAL Exp SEMICOLON
         ;
@@ -108,6 +114,7 @@ VarDeclList:
 MethodDecl:
         PUBLIC Type ID OPARANTHESIS FormalList EPARANTHESIS 
             OBRACE VarDeclList StatementList RETURN Exp SEMICOLON EBRACE
+        { /*$$ = new MethodDecl($2, $3, $5, $7, $8, $10); */std::cout << "fired method decl @@@@@@@@@@@@@@@\n"; }
         ;
 
 MethodDeclList:
@@ -121,7 +128,7 @@ FormalList:
         ;
 
 FormalRest:
-        COMMA Type ID
+        COMMA Type ID { /*$$ = new Formal($2, $3)*/; std::cout << "fired formal @@@@@@@@@@@@@@@2\n"; }
         ;
 
 FormalRestList:
@@ -130,37 +137,37 @@ FormalRestList:
         ;
 
 PrimeType:
-        INT
+        INT { $$ = new IntegerType(); std::cout << "fired int type #############\n"; }
         |
-        BOOL
+        BOOL { $$ = new BooleanType(); std::cout << "fired bool type #############\n"; }
         |
-        ID
+        ID { $$ = new IdentifierType($1); std::cout << "fired id type #############\n"; }
         ;
 
 Type:
-        PrimeType
+        PrimeType 
         |
-        Type OBRACK EBRACK
+        Type OBRACK EBRACK { $$ = new IntArrayType(); std::cout << "fired int array type #############\n"; }
         ;
 
 Statement:
         OBRACE StatementList EBRACE
         |
-        IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement
+        IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement { $$ = new If($3, $5, $7); std::cout << "fired If #############\n"; }
         |
-        WHILE OPARANTHESIS Exp EPARANTHESIS Statement
+        WHILE OPARANTHESIS Exp EPARANTHESIS Statement { $$ = new While($3, $5); std::cout << "fired While #############\n"; }
         |
-        PRINTLN OPARANTHESIS Exp EPARANTHESIS SEMICOLON
+        PRINTLN OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Print($3); std::cout << "fired Println ###FIX_THIS####\n"; }
         |
         PRINTLN OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
         |
-        PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON
+        PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Print($3); std::cout << "fired Print #############\n"; }
         |
         PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
         |
-        ID EQUAL Exp SEMICOLON
+        ID EQUAL Exp SEMICOLON { $$ = new Assign(new Identifier($1), $3); std::cout << "fired Assign #############\n"; }
         |
-        ID Index EQUAL Exp SEMICOLON
+        ID Index EQUAL Exp SEMICOLON { std::cout << "fired ArrayAssign @@@@@@@@@@@\n"; }
         |
         RETURN Exp SEMICOLON
         ;
