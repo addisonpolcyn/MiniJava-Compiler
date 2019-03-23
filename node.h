@@ -7,9 +7,6 @@ class Identifier {
 protected:
     std::string id;
 public:
-   // Identifier(const std::string str):id(str) {
-      //  std::cout << "newid-construct:"<< str << std::endl;
-    //}
     Identifier(const std::string str);
     void evaluate();
 };
@@ -27,10 +24,7 @@ protected:
     Exp *lhs;
     Exp *rhs;
 public:
-    And(Exp *left, Exp *right) {
-        lhs=left;
-        rhs=right;
-    }
+    And(Exp *lhs, Exp *rhs);
     void evaluate();
 };
 
@@ -39,10 +33,7 @@ protected:
     Exp * lhs;
     Exp * rhs;
 public:
-    LessThan(Exp *e1, Exp *e2) {
-        lhs=e1;
-        rhs=e2;
-    }
+    LessThan(Exp *lhs, Exp *rhs);
     void evaluate();
 };
 
@@ -51,10 +42,7 @@ protected:
     Exp *lhs;
     Exp *rhs;
 public:
-    Plus(Exp *e1, Exp *e2) {
-        lhs = (e1);
-        rhs = (e2); 
-    }
+    Plus(Exp *lhs, Exp *rhs);
     void evaluate();
 };
 
@@ -63,10 +51,7 @@ protected:
     Exp * lhs;
     Exp * rhs;
 public:
-    Minus(Exp *e1, Exp *e2){
-        lhs=e1;
-        rhs=e2;
-    }
+    Minus(Exp *lhs, Exp *rhs);
     void evaluate();
 };
 
@@ -75,10 +60,7 @@ protected:
     Exp * lhs;
     Exp * rhs;
 public:
-    Times(Exp *e1, Exp *e2) {
-        lhs=e1;
-        rhs=e2;
-    }
+    Times(Exp *lhs, Exp *rhs);
     void evaluate();
 };
 
@@ -87,10 +69,7 @@ protected:
     Exp * lhs;
     Exp * rhs;
 public:
-    ArrayLookup(Exp *e1, Exp *e2) {
-        lhs=e1;
-        rhs=e2;
-    }
+    ArrayLookup(Exp *lhs, Exp *rhs);
     void evaluate();
 };
 
@@ -98,9 +77,7 @@ class ArrayLength : public Exp {
 protected:
     Exp * e;
 public:
-    ArrayLength(Exp *e) {
-        e=e;
-    }
+    ArrayLength(Exp *e);
     void evaluate();
 };
 
@@ -110,11 +87,7 @@ protected:
     Identifier * i;
     std::list<Exp *> * el;
 public:
-    Call(Exp *e, Identifier *i, std::list<Exp *> *el) {
-        e=e;
-        i=i;
-        el=el;
-    }
+    Call(Exp *e, Identifier *i, std::list<Exp *> *el);
     void evaluate();
 };
 
@@ -122,9 +95,6 @@ class IntegerLiteral : public Exp {
 protected:
     int num;
 public:
-    /*IntegerLiteral(int i) {
-        num=i;
-    }*/
     IntegerLiteral(int i);
     void evaluate();
 };
@@ -145,9 +115,7 @@ class IdentifierExp : public Exp {
 protected:
     std::string id;
 public:
-    IdentifierExp(std::string str) {
-        id=str;
-    }
+    IdentifierExp(std::string str);
     void evaluate();
 };
 
@@ -161,9 +129,7 @@ class NewArray : public Exp {
 protected:
     Exp * e;
 public:
-    NewArray(Exp *e) {
-        e=e;
-    }
+    NewArray(Exp *e);
     void evaluate();
 };
 
@@ -171,9 +137,7 @@ class NewObject : public Exp {
 protected:
     Identifier * i;
 public:
-    NewObject(Identifier *i) {
-        i=i;
-    }
+    NewObject(Identifier *i);
     void evaluate();
 };
 
@@ -181,9 +145,7 @@ class Not : public Exp {
 protected:
     Exp * e;
 public:
-    Not(Exp *e) {
-        e=e;
-    }
+    Not(Exp *e);
     void evaluate();
 };
 
@@ -191,9 +153,7 @@ class NegativeExp : public Exp {
 protected:
     Exp * e;
 public:
-    NegativeExp(Exp *e) {
-        e=e;
-    }
+    NegativeExp(Exp *e);
     void evaluate();
 };
 
@@ -201,9 +161,7 @@ class PositiveExp : public Exp {
 protected:
     Exp * e;
 public:
-    PositiveExp(Exp *e) { 
-        e=e;
-    }
+    PositiveExp(Exp *e);
     void evaluate();
 };
 
@@ -219,9 +177,7 @@ class Block : public Statement {
 protected:
     std::list<Statement *> *sl;
 public:
-    Block(std::list<Statement *> *sl) {
-        sl=sl;
-    }
+    Block(std::list<Statement *> *sl);
     void evaluate();
 };
 
@@ -232,11 +188,7 @@ protected:
     Statement *s2;
 
 public:
-    If(Exp *e, Statement *s1, Statement *s2) {
-        e=e;
-        s1=s1;
-        s2=s2;
-    }
+    If(Exp *e, Statement *s1, Statement *s2);
     void evaluate();
 };
 
@@ -245,10 +197,7 @@ protected:
     Exp *e;
     Statement *s;
 public:
-    While(Exp *e, Statement *s) {
-        e=e;
-        s=s;
-    }
+    While(Exp *e, Statement *s);
     void evaluate();
 };
 
@@ -256,10 +205,6 @@ class Print : public Statement {
 protected:    
     Exp *e;
 public:
-    /*(Print(Exp *e) {
-        e=e;
-    }*/
-    
     Print(Exp *e);
     void evaluate();
 };
@@ -268,11 +213,9 @@ class Assign : public Statement {
 protected:
     Identifier *i;
     Exp *e;
+
 public:
-    Assign(Identifier *i, Exp *e) {
-        i=i;
-        e=e;
-    }
+    Assign(Identifier *i, Exp *e);
     void evaluate();
 };
 
@@ -282,11 +225,7 @@ protected:
     Exp * e1;
     Exp * e2;
 public:
-   ArrayAssign(Identifier *i, Exp *e1, Exp *e2) {
-    i=i;
-    e1=e1;
-    e2=e2;
-   }
+   ArrayAssign(Identifier *i, Exp *e1, Exp *e2);
    void evaluate();
 };
 
