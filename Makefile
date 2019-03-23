@@ -21,4 +21,4 @@ lex.yy.o: parser.l
 	${CCC} ${CCFLAGS} lex.yy.c -c 
 
 clean:
-	/bin/rm -f lex.yy.* y.tab.* *.o exp
+	/bin/rm -f lex.yy.* y.tab.* *.o exp y.dot y.output node.h.gch parser

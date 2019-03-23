@@ -21,7 +21,9 @@ class Identifier {
 protected:
     std::string id;
 public:
-    Identifier(std::string str);
+    Identifier(std::string str) {
+        id=str;
+    }
 };
 
 /*******************    EXP CLASS    ****************************/
@@ -36,7 +38,10 @@ protected:
     Exp *lhs;
     Exp *rhs;
 public:
-    And(Exp *left, Exp *right);
+    And(Exp *left, Exp *right) {
+        lhs=left;
+        rhs=right;
+    }
 };
 
 class LessThan : public Exp {
@@ -44,7 +49,10 @@ protected:
     Exp * lhs;
     Exp * rhs;
 public:
-    LessThan(Exp *e1, Exp *e2);
+    LessThan(Exp *e1, Exp *e2) {
+        lhs=e1;
+        rhs=e2;
+    }
 };
 
 class Plus : public Exp {
@@ -52,7 +60,10 @@ protected:
     Exp *lhs;
     Exp *rhs;
 public:
-    Plus(Exp *e1, Exp *e2);
+    Plus(Exp *e1, Exp *e2) {
+        lhs = (e1);
+        rhs = (e2); 
+    }
 };
 
 class Minus : public Exp {
@@ -60,7 +71,10 @@ protected:
     Exp * lhs;
     Exp * rhs;
 public:
-    Minus(Exp *e1, Exp *e2);
+    Minus(Exp *e1, Exp *e2){
+        lhs=e1;
+        rhs=e2;
+    }
 };
 
 class Times : public Exp {
@@ -68,7 +82,10 @@ protected:
     Exp * lhs;
     Exp * rhs;
 public:
-    Times(Exp *e1, Exp *e2);
+    Times(Exp *e1, Exp *e2) {
+        lhs=e1;
+        rhs=e2;
+    }
 };
 
 class ArrayLookup : public Exp {
@@ -76,14 +93,19 @@ protected:
     Exp * lhs;
     Exp * rhs;
 public:
-    ArrayLookup(Exp *e1, Exp *e2);
+    ArrayLookup(Exp *e1, Exp *e2) {
+        lhs=e1;
+        rhs=e2;
+    }
 };
 
 class ArrayLength : public Exp {
 protected:
     Exp * e;
 public:
-    ArrayLength(Exp *e);
+    ArrayLength(Exp *e) {
+        e=e;
+    }
 };
 
 class Call : public Exp {
@@ -92,14 +114,20 @@ protected:
     Identifier * i;
     ExpList * el;
 public:
-    Call(Exp *e, Identifier *i, ExpList *el);
+    Call(Exp *e, Identifier *i, ExpList *el) {
+        e=e;
+        i=i;
+        el=el;
+    }
 };
 
 class IntegerLiteral : public Exp {
 protected:
     int num;
 public:
-    IntegerLiteral(int i);
+    IntegerLiteral(int i) {
+        num=i;
+    }
 };
 
 class True : public Exp {
@@ -116,7 +144,9 @@ class IdentifierExp : public Exp {
 protected:
     std::string id;
 public:
-    IdentifierExp(std::string str);
+    IdentifierExp(std::string str) {
+        id=str;
+    }
 };
 
 class This : public Exp {
@@ -128,35 +158,45 @@ class NewArray : public Exp {
 protected:
     Exp * e;
 public:
-    NewArray(Exp *e);
+    NewArray(Exp *e) {
+        e=e;
+    }
 };
 
 class NewObject : public Exp {
 protected:
     Identifier * i;
 public:
-    NewObject(Identifier *i);
+    NewObject(Identifier *i) {
+        i=i;
+    }
 };
 
 class Not : public Exp {
 protected:
     Exp * e;
 public:
-    Not(Exp *e);
+    Not(Exp *e) {
+        e=e;
+    }
 };
 
 class NegativeExp : public Exp {
 protected:
     Exp * e;
 public:
-    NegativeExp(Exp *e);
+    NegativeExp(Exp *e) {
+        e=e;
+    }
 };
 
 class PositiveExp : public Exp {
 protected:
     Exp * e;
 public:
-    PositiveExp(Exp *e);
+    PositiveExp(Exp *e) { 
+        e=e;
+    }
 };
 
 
@@ -170,7 +210,9 @@ class Block : public Statement {
 protected:
     StatementList sl;
 public:
-    Block(StatementList sl);
+    Block(StatementList sl) {
+        sl=sl;
+    }
 };
 
 class If : public Statement {
@@ -180,7 +222,11 @@ protected:
     Statement *s2;
 
 public:
-    If(Exp *e, Statement *s1, Statement *s2);
+    If(Exp *e, Statement *s1, Statement *s2) {
+        e=e;
+        s1=s1;
+        s2=s2;
+    }
 };
 
 class While : public Statement {
@@ -188,14 +234,19 @@ protected:
     Exp *e;
     Statement *s;
 public:
-    While(Exp *e, Statement *s);
+    While(Exp *e, Statement *s) {
+        e=e;
+        s=s;
+    }
 };
 
 class Print : public Statement {
 protected:    
     Exp *e;
 public:
-    Print(Exp *e);
+    Print(Exp *e) {
+        e=e;
+    }
 };
 
 class Assign : public Statement {
@@ -203,7 +254,10 @@ protected:
     Identifier *i;
     Exp *e;
 public:
-    Assign(Identifier *i, Exp *e);
+    Assign(Identifier *i, Exp *e) {
+        i=i;
+        e=e;
+    }
 };
 
 class ArrayAssign : public Statement {
@@ -212,7 +266,11 @@ protected:
     Exp * e1;
     Exp * e2;
 public:
-   ArrayAssign(Identifier *i, Exp *e1, Exp *e2);
+   ArrayAssign(Identifier *i, Exp *e1, Exp *e2) {
+    i=i;
+    e1=e1;
+    e2=e2;
+   }
 };
 
 /*******************    TYPE CLASS    ****************************/
@@ -239,7 +297,9 @@ class IdentifierType : public Type {
 protected:
     std::string str;
 public:
-    IdentifierType(const std::string s);
+    IdentifierType(const std::string s) {
+        str=s;
+    }
 };
 
 /*******************    VAR CLASS    ****************************/
@@ -248,7 +308,10 @@ protected:
     Type *t;
     Identifier *i;
 public:
-    VarDecl(Type *t, Identifier *i);
+    VarDecl(Type *t, Identifier *i) {
+        t=t;
+        i=i;
+    }
 };
 
 /*******************    METHOD CLASS    ****************************/
@@ -262,7 +325,14 @@ protected:
     Exp *e;
 
 public:
-    MethodDecl(Type *t, Identifier *i, FormalList *fl, VarDeclList *vl, StatementList *sl, Exp *e);
+    MethodDecl(Type *t, Identifier *i, FormalList *fl, VarDeclList *vl, StatementList *sl, Exp *e) {
+        t=t;
+        i=i;
+        fl=fl;
+        vl=vl;
+        sl=sl;
+        e=e;
+    }
 };
 
 /*******************    FORMAL CLASS    ****************************/
@@ -271,7 +341,10 @@ protected:
     Type *t;
     Identifier *i;
 public:
-    Formal(Type *t, Identifier *i);
+    Formal(Type *t, Identifier *i) {
+        t=t;
+        i=i;
+    }
 };
 
 /*******************    CLASS DECLARATION CLASS ****************************/
@@ -287,7 +360,11 @@ protected:
     MethodDeclList *ml;
 
 public:
-    ClassDeclSimple(Identifier *i, VarDeclList *vl, MethodDeclList *ml);
+    ClassDeclSimple(Identifier *i, VarDeclList *vl, MethodDeclList *ml) {
+        i=i;
+        vl=vl;
+        ml=ml;
+    }
 };
 
 class ClassDeclExtends : public ClassDecl { 
@@ -298,7 +375,12 @@ protected:
     MethodDeclList *ml;
 
 public:
-    ClassDeclExtends(Identifier *i, Identifier *j, VarDeclList *vl, MethodDeclList *ml);
+    ClassDeclExtends(Identifier *i, Identifier *j, VarDeclList *vl, MethodDeclList *ml) {
+        i=i;
+        j=j;
+        vl=vl;
+        ml=ml;
+    }
 };
 
 /*******************    MAIN CLASS    ****************************/
@@ -315,7 +397,10 @@ public:
         i2(i2),
         s(s) {std::cout << "ouch";}
     */  
-    MainClass(Identifier *i1, Identifier *i2); 
+    MainClass(Identifier *i1, Identifier *i2) {
+        i1=i1;
+        i2=i2;
+    }
 };
 
 /*******************    PROGRAM CLASS ****************************/
@@ -324,7 +409,10 @@ protected:
     MainClass *m;
     ClassDeclList *cl;
 public:
-    Program(MainClass *m, ClassDeclList *cl);
+    Program(MainClass *m, ClassDeclList *cl) {
+        m=m;
+        cl=cl;
+    }
 };
 
 extern Program *root;
