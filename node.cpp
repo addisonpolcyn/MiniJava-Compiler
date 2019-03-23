@@ -4,11 +4,13 @@
 #include "node.h"
 
 /*******************    IDENTIFIER CLASS    *********************/
+Identifier::Identifier(const std::string str): id(str) {}
 void Identifier::evaluate() {
     std::cout << "Identifier:" << id << std::endl;
 }
 
 /*******************    EXP SUB-CLASSES    ****************************/
+
 void And::evaluate() {
     std::cout << "(And)" << std::endl;
 }
@@ -40,6 +42,8 @@ void ArrayLength::evaluate() {
 void Call::evaluate() {
     std::cout << "(Call)" << std::endl;
 }
+
+IntegerLiteral::IntegerLiteral(int i): num(i) {}
 
 void IntegerLiteral::evaluate() {
     std::cout << "(IntegerLiteral)" << std::endl;
@@ -94,7 +98,9 @@ void While::evaluate() {
     std::cout << "(While)" << std::endl;
 }
 
+Print::Print(Exp *e): e(e) {}
 void Print::evaluate() {
+    e->evaluate();
     std::cout << "(Print)" << std::endl;
 }
 
@@ -176,45 +182,43 @@ public:
 
 */
 /*******************    CLASS DECLARATION CLASS ****************************/
-/*
-class ClassDeclSimple : public ClassDecl {
-protected:
-    Identifier *i;
-    std::list<VarDecl *> *vl;
-    std::list<MethodDecl *> *ml;
+void ClassDeclSimple::evaluate() {
+    std::cout << "(ClassDeclSimple)" << std::endl;
+}
 
-public:
-    ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml) {
-        i=i;
-        vl=vl;
-        ml=ml;
-    }
-    void evaluate();
-};
+void ClassDeclExtends::evaluate() {
+    std::cout << "(ClassDeclExtends)" << std::endl;
+}
 
-class ClassDeclExtends : public ClassDecl { 
-protected:
-    Identifier *i;
-    Identifier *j;
-    std::list<VarDecl *> *vl;
-    std::list<MethodDecl *> *ml;
-
-public:
-    ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml) {
-        i=i;
-        j=j;
-        vl=vl;
-        ml=ml;
-    }
-    void evaluate();
-};
-*/
 /*******************    MAIN CLASS    ****************************/
+MainClass::MainClass(Identifier *i1, Identifier *i2, Statement *s): i1(i1), i2(i2), s(s) {}
 void MainClass::evaluate() {
+    //evaluate Identifiers
+    i1->evaluate();
+    i2->evaluate();
+
+    //evaluate Statement
+    s->evaluate();
+    
     std::cout << "(MainClass)" << std::endl;
 };
 
 /*******************    PROGRAM CLASS ****************************/
+Program::Program(MainClass *m, std::list<ClassDecl *> *cl): m(m), cl(cl) { std::cout << "built program\n";}
 void Program::evaluate() {
-    std::cout << "(Program)" << std::endl;
+    std::cout << "^ (Program Start)" << std::endl;
+    
+    //evaluate ClassDeclarations
+    //std::list<ClassDecl *>::iterator classDeclIter;
+    //std::cout << "^btfn (Program Start)" << std::endl;
+    //for(classDeclIter = cl->begin(); classDeclIter != cl->end(); classDeclIter++){
+      //  std::cout << "^agg (Program Start)" << std::endl;
+        //(*classDeclIter)->evaluate();
+    //std::cout << "^csces (Program Start)" << std::endl;
+    //}
+
+    //evaluate MainClass    
+    m->evaluate();
+    
+    std::cout << "(Program End) $" << std::endl;
 };

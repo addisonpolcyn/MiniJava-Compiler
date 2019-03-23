@@ -7,9 +7,10 @@ class Identifier {
 protected:
     std::string id;
 public:
-    Identifier(std::string str) {
-        id=str;
-    }
+   // Identifier(const std::string str):id(str) {
+      //  std::cout << "newid-construct:"<< str << std::endl;
+    //}
+    Identifier(const std::string str);
     void evaluate();
 };
 
@@ -121,9 +122,10 @@ class IntegerLiteral : public Exp {
 protected:
     int num;
 public:
-    IntegerLiteral(int i) {
+    /*IntegerLiteral(int i) {
         num=i;
-    }
+    }*/
+    IntegerLiteral(int i);
     void evaluate();
 };
 
@@ -254,9 +256,11 @@ class Print : public Statement {
 protected:    
     Exp *e;
 public:
-    Print(Exp *e) {
+    /*(Print(Exp *e) {
         e=e;
-    }
+    }*/
+    
+    Print(Exp *e);
     void evaluate();
 };
 
@@ -415,11 +419,11 @@ protected:
     Statement *s;
 
 public:
-    MainClass(Identifier *i1, Identifier *i2, Statement *s) {
-        i1=i1;
-        i2=i2;
-        s=s;
-    }
+    //MainClass(Identifier *i1, Identifier *i2, Statement *s):i1(i1), i2(i2), s(s) {
+    
+    //}
+    MainClass(Identifier *i1, Identifier *i2, Statement *s);
+    //:i1(i1), i2(i2), s(s) {
     void evaluate();
 };
 
@@ -429,10 +433,10 @@ protected:
     MainClass *m;
     std::list<ClassDecl *> *cl;
 public:
-    Program(MainClass *m, std::list<ClassDecl *> *cl) {
-        m=m;
-        cl=cl;
-    }
+    /*Program(MainClass *m, std::list<ClassDecl *> *cl):m(m), cl(cl) {
+        std::cout << "newprog-construct:"<< std::endl;
+    }*/
+    Program(MainClass *m, std::list<ClassDecl *> *cl);
     void evaluate();
 };
 

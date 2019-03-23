@@ -102,7 +102,7 @@ Program:
 MainClass:
         CLASS ID OBRACE PUBLIC STATIC VOID MAIN OPARANTHESIS STRING OBRACK EBRACK ID EPARANTHESIS
             OBRACE Statement EBRACE EBRACE
-        { $$ = new MainClass(new Identifier($2), new Identifier($12), $15); std::cout << "fired Main #############\n"; }
+        { Identifier *id = new Identifier($2); Identifier *id2 = new Identifier($12); $$ = new MainClass(id, id2, $15); std::cout << "fired Main #############\n"; }
         ;
 
 ClassDecl:
