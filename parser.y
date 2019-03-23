@@ -151,7 +151,7 @@ Type:
         ;
 
 Statement:
-        OBRACE StatementList EBRACE
+        OBRACE StatementList EBRACE { std::cout << "fired statementList @@@@@@@@@@@@@@@@@@@"; }
         |
         IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement { $$ = new If($3, $5, $7); std::cout << "fired If #############\n"; }
         |
@@ -159,17 +159,17 @@ Statement:
         |
         PRINTLN OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Print($3); std::cout << "fired Println ###FIX_THIS####\n"; }
         |
-        PRINTLN OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
+        PRINTLN OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { std::cout << "fired println Stringlit @@@@@@@@@@@@@@@@@@@"; }
         |
         PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Print($3); std::cout << "fired Print #############\n"; }
         |
-        PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON
+        PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { std::cout << "fired print string lit @@@@@@@@@@@@@@@@@@@"; }
         |
         ID EQUAL Exp SEMICOLON { $$ = new Assign(new Identifier($1), $3); std::cout << "fired Assign #############\n"; }
         |
         ID Index EQUAL Exp SEMICOLON { std::cout << "fired ArrayAssign @@@@@@@@@@@\n"; }
         |
-        RETURN Exp SEMICOLON
+        RETURN Exp SEMICOLON { std::cout << "fired return @@@@@@@@@@@@@@@@@@@"; }
         ;
 
 StatementList:
