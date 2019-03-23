@@ -47,10 +47,12 @@ int main(int argc, char **argv) {
 %start Program
 
 %union {
+    /* Terminals */
     int num;
     char *id;
     char *str;
 
+    /* Non-Terminals */
     Exp *expr;
     Statement *stmt;
     Type *type;
@@ -61,8 +63,13 @@ int main(int argc, char **argv) {
     MainClass *main;
     Program *pgm;
 
+    /* Lists */
     std::list<ClassDecl *> *classDeclList;
+    std::list<Exp *> *expList;
+    std::list<Formal *> *formalList;
+    std::list<MethodDecl *> *methodDeclList;
     std::list<Statement *> *stmtList;
+    std::list<VarDecl *> *varDeclList;
 }
 
 %define parse.error verbose
@@ -95,7 +102,11 @@ int main(int argc, char **argv) {
 
 /* Lists */
 %type <classDeclList> ClassDeclList
+%type <expList> ExpList
+%type <formalList> FormalList
+%type <methodDeclList> MethodDeclList
 %type <stmtList> StatementList
+%type <varDeclList> VarDeclList
 
 %%
 
@@ -131,7 +142,8 @@ VarDecl:
 
 VarDeclList:
         VarDeclList VarDecl { std::cout << "var list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
-        | /* Empty */
+        $$ = $1; $1->push_back($2); std::cout << "loaded up vardecl list push\n";
+        | /* Empty */  { std::cout << "var list wanted DOWNSTREAM EMPTY\n"; $$ = new std::list<VarDecl *>(); std::cout << "alocated new list\n"; }
         ;
 
 MethodDecl:
@@ -141,8 +153,9 @@ MethodDecl:
         ;
 
 MethodDeclList:
-        MethodDeclList MethodDecl { std::cout << "method list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
-        | /* Empty */
+        MethodDeclList MethodDecl { std::cout << "method list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n";
+        $$ = $1; $1->push_back($2); std::cout << "loaded up methoddecl list push\n"; }
+        | /* Empty */  { std::cout << "method list wanted DOWNSTREAM EMPTY\n"; $$ = new std::list<MethodDecl *>(); std::cout << "alocated new list\n"; }
         ;
 
 FormalList:
@@ -306,16 +319,16 @@ Object:
         ;
 
 ExpList:
-        Exp ExpRestList { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp exprest list\n"; }
-        | /* Empty */
+        Exp ExpRestList { std::cout << "TESTTESTTESTTESTTEST> exp exprest list\n"; } 
+        | /* Empty */  { std::cout << "exp list wanted TESTESTESTDOWNSTREAM EMPTY\n"; $$ = new std::list<Exp *>(); std::cout << "alocated new list\n"; }
         ;
 
 ExpRest:
-        COMMA Exp { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprest comma\n"; }
+        COMMA Exp { std::cout << "TESTTESTESTESTESTES> exprest comma\n"; $$->push_back($2); std::cout << "loaded up classdecl list push\n"; }
         ;
 
 ExpRestList:
-        ExpRestList ExpRest { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprestlist\n"; }
+        ExpRestList ExpRest { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprestlist\n"; } 
         | /* Empty */
         ;
 

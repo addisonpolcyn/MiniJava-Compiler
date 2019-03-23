@@ -187,62 +187,31 @@ void IntegerType::evaluate() {
     std::cout << "(IntegerType)" << std::endl;
 }
 
+Identifier::Identifier(const std::string s): str(s) {}
 void IdentifierType::evaluate() {
     std::cout << "(IdentifierType)" << std::endl;
 }
 
 /*******************    VAR CLASS    ****************************/
-/*
-class VarDecl {
-protected:
-    Type *t;
-    Identifier *i;
-public:
-    VarDecl(Type *t, Identifier *i) {
-        t=t;
-        i=i;
-    }
-    void evaluate();
-};
-*/
+VarDecl::VarDecl(Type *t, Identifier *i): t(t), i(i) {}
+void VarDecl::evaluate() {
+    std::cout << "(VarDecl)" << std::endl;
+}
+
 /*******************    FORMAL CLASS    ****************************/
-/*
-class Formal {
-protected:
-    Type *t;
-    Identifier *i;
-public:
-    Formal(Type *t, Identifier *i) {
-        t=t;
-        i=i;
-    }
-    void evaluate();
-};
-*/
+Formal::Formal(Type *t, Identifier *i): t(t), i(i) {}
+void Formal::evaluate() {
+    std::cout << "(Formal)" << std::endl;
+}
+
 /*******************    METHOD CLASS    ****************************/
-/*
-class MethodDecl {
-protected:
-    Type *t;
-    Identifier *i;
-    std::list<Formal *> *fl;
-    std::list<VarDecl *> *vl;
-    std::list<Statement *> *sl;
-    Exp *e;
+MethodDecl::MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl,
+ std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e): t(t), i(i), fl(fl), vl(vl), sl(sl), e(e) {}
+   
+MethodDecl::void evaluate() {
+    std::cout << "(MethodDecl)" << std::endl;
+}
 
-public:
-    MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl, std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e) {
-        t=t;
-        i=i;
-        fl=fl;
-        vl=vl;
-        sl=sl;
-        e=e;
-    }
-    void evaluate();
-};
-
-*/
 /******************    CLASS DECLARATION SUB-CLASS    ************/
 ClassDeclSimple::ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml): i(i), vl(vl), ml(ml) {}
 void ClassDeclSimple::evaluate() {
