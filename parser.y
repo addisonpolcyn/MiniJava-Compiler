@@ -33,20 +33,29 @@ int main(int argc, char **argv) {
 
 %}
 
+%start Program
+
+%union {
+    int num;
+    char *id;
+    Exp *expr;
+}
+
 %define parse.error verbose
 %token CLASS PUBLIC STATIC VOID MAIN EXTENDS RETURN /* Declarations */
 %token LENGTH PRINTLN PRINT /* Functions */
 %token IF ELSE WHILE /* Loops and if-statements */
-
 %token THIS NEW STRING /* Objects */
 %token ID INTEGER_LITERAL STRING_LITERAL /* Variables */
 %token INT BOOL /* Primitive Types */
 %token TRUE FALSE /* booleans */
-
 %token EQUAL NOT DOT /* Operators */
 %token AND OR LESS GREATER GREATERTHANEQUAL LESSTHANEQUAL IS ISNOT PLUS MINUS TIMES SLASH /* Binary Operators - op */
-
 %token COMMA SEMICOLON OPARANTHESIS EPARANTHESIS OBRACK EBRACK OBRACE EBRACE QUOTE /* Separators */
+
+%type <num> INTEGER_LITERAL
+%type <id> ID
+%type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp
 
 %%
 
@@ -185,7 +194,7 @@ G_Exp:
         ;
 
 H_Exp:
-        H_Exp PLUS I_Exp
+        H_Exp PLUS I_Exp { $$ = new Plus($1, $3); }
         |
         H_Exp MINUS I_Exp
         |
@@ -203,7 +212,7 @@ I_Exp:
 J_Exp:
         PLUS K_Exp
         |
-        MINUS K_Exp
+        MINUS K_Exp 
         |
         NOT K_Exp
         |

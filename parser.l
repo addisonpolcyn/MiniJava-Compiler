@@ -236,11 +236,12 @@ false {
     /* Variables */
 [a-zA-Z][a-zA-Z0-9_]* {
     PRINTDEBUG(yytext)
+    yylval.id = strdup(yytext);
     return ID;
 }
 [0-9]+ {
     PRINTDEBUG(yytext)
-    yylval=atoi(yytext);
+    yylval.num = atoi(yytext);
     return INTEGER_LITERAL;
 }
 \"[^\n^\r]*\" {
