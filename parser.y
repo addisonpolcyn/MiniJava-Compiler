@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
     /* Traverse AST */
     root->evaluate();
 
+    /* Finish */
     return 0;
 }
 
@@ -102,7 +103,7 @@ Program:
 MainClass:
         CLASS ID OBRACE PUBLIC STATIC VOID MAIN OPARANTHESIS STRING OBRACK EBRACK ID EPARANTHESIS
             OBRACE Statement EBRACE EBRACE
-        { Identifier *id = new Identifier($2); Identifier *id2 = new Identifier($12); $$ = new MainClass(id, id2, $15); std::cout << "fired Main #############\n"; }
+        { Identifier *id = new Identifier($2); Identifier *id2 = new Identifier($12); $$ = new MainClass(new Identifier($2), new Identifier($12), $15); std::cout << "fired Main #############\n"; }
         ;
 
 ClassDecl:
@@ -114,8 +115,8 @@ ClassDecl:
         ;
 
 ClassDeclList:
-        ClassDeclList ClassDecl { std::cout << "class list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
-        | /* Empty */  { std::cout << "class list wanted DOWNSTREAM EMPTY\n"; }
+        ClassDeclList ClassDecl { std::cout << "class list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; $$ = $1; $1->push_back($2); std::cout << "loaded up classdecl list push\n"; }
+        | /* Empty */  { std::cout << "class list wanted DOWNSTREAM EMPTY\n"; $$ = new std::list<ClassDecl *>(); std::cout << "alocated new list\n"; }
         ;
 
 VarDecl:

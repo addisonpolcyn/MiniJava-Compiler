@@ -197,7 +197,7 @@ public:
 };
 
 */
-/*******************    CLASS DECLARATION CLASS ****************************/
+/******************    CLASS DECLARATION SUB-CLASS    ************/
 ClassDeclSimple::ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml): i(i), vl(vl), ml(ml) {}
 void ClassDeclSimple::evaluate() {
     std::cout << "(ClassDeclSimple)" << std::endl;
@@ -222,21 +222,21 @@ void MainClass::evaluate() {
 };
 
 /*******************    PROGRAM CLASS ****************************/
-Program::Program(MainClass *m, std::list<ClassDecl *> *cl): m(m), cl(cl) { std::cout << "built program\n";}
+Program::Program(MainClass *m, std::list<ClassDecl *> *cl): m(m), cl(cl) {}
 void Program::evaluate() {
-    std::cout << "^ (Program Start)" << std::endl;
+    std::cout << "\n^ (Program Start)...\n" << std::endl;
     
     //evaluate ClassDeclarations
-    //std::list<ClassDecl *>::iterator classDeclIter;
-    //std::cout << "^btfn (Program Start)" << std::endl;
-    //for(classDeclIter = cl->begin(); classDeclIter != cl->end(); classDeclIter++){
-      //  std::cout << "^agg (Program Start)" << std::endl;
-        //(*classDeclIter)->evaluate();
-    //std::cout << "^csces (Program Start)" << std::endl;
-    //}
+    std::list<ClassDecl *>::iterator classDeclIter;
+    std::cout << "^btfn (Program Start)" << std::endl;
+    for(classDeclIter = cl->begin(); classDeclIter != cl->end(); classDeclIter++){
+        std::cout << "^agg (Program Start)" << std::endl;
+        (*classDeclIter)->evaluate();
+    std::cout << "^csces (Program Start)" << std::endl;
+    }
 
     //evaluate MainClass    
     m->evaluate();
     
-    std::cout << "(Program End) $" << std::endl;
+    std::cout << "\n...(Program End) $" << std::endl;
 };
