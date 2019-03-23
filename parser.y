@@ -2,21 +2,24 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <list>
 #include "node.h"
 
 #define YYDEBUG 1
+
+//root of AST
+Program *root;
 
 int yylex();
 void yyerror(const char *str);
 int yyparse();
 
-extern "C" int yylineno;//, yychar;
+extern "C" int yylineno;
 extern "C" FILE *yyin;
 
 void yyerror(const char *str)
 {
     fprintf(stderr, "Syntax error on line: %d\n", yylineno);
-    //fprintf (stderr, "%s\n", str);
 }
  
 extern "C" int yywrap()
@@ -39,6 +42,7 @@ int main(int argc, char **argv) {
 %union {
     int num;
     char *id;
+
     Exp *expr;
     Statement *stmt;
     Type *type;
@@ -48,6 +52,8 @@ int main(int argc, char **argv) {
     ClassDecl *classDecl;
     MainClass *main;
     Program *pgm;
+
+    std::list<ClassDecl *> *classDeclList;
 }
 
 %define parse.error verbose
@@ -62,8 +68,11 @@ int main(int argc, char **argv) {
 %token AND OR LESS GREATER GREATERTHANEQUAL LESSTHANEQUAL IS ISNOT PLUS MINUS TIMES SLASH /* Binary Operators - op */
 %token COMMA SEMICOLON OPARANTHESIS EPARANTHESIS OBRACK EBRACK OBRACE EBRACE QUOTE /* Separators */
 
+/* Terminals */
 %type <num> INTEGER_LITERAL
 %type <id> ID
+
+/* Non-Terminals */
 %type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object
 %type <stmt> Statement
 %type <type> Type PrimeType
@@ -74,11 +83,14 @@ int main(int argc, char **argv) {
 %type <main> MainClass
 %type <pgm> Program
 
+/* Lists */
+%type <classDeclList> ClassDeclList
+
 %%
 
 Program:
         MainClass ClassDeclList
-        { /*$$ = new Program($1, $2)*/; std::cout << "fired Program @@@@@@@@@@@@@@\n"; }
+        { $$ = new Program($1, $2); root = $$; std::cout << "fired Program @@@@@@@@@@@@@@\n"; }
         ;
 
 MainClass:
@@ -256,11 +268,11 @@ L_Exp:
         ;
         
 Root_Exp:  
-        OPARANTHESIS Exp EPARANTHESIS { $$ = $2; std::cout << "fired (exp)"; }
+        OPARANTHESIS Exp EPARANTHESIS { $$ = $2; std::cout << "fired (exp) ###########"; }
         |
         ID Index { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp id index\n"; }
         |
-        INTEGER_LITERAL { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp integer\n"; }
+        INTEGER_LITERAL { $$ = new IntegerLiteral($1); std::cout << "fired integer literal ###########\n"; }
         |
         TRUE { $$ = new True(); std::cout << "fired True #############\n"; }
         |

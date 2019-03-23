@@ -1,22 +1,8 @@
-#include <vector>
+#include <list>
 #include <string>
 #include <iostream>
 
-class ClassDecl;
-class Exp;
-class Formal;
-class MethodDecl;
-class Statement;
-class VarDecl;
-
-typedef std::vector<ClassDecl *> ClassDeclList;
-typedef std::vector<Exp *> ExpList;
-typedef std::vector<Formal *> FormalList;
-typedef std::vector<MethodDecl *> MethodDeclList;
-typedef std::vector<Statement *> StatementList;
-typedef std::vector<VarDecl *> VarDeclList;
-
-/*******************    IDENTIFIER CLASS    ****************************/
+/*******************    IDENTIFIER CLASS    *********************/
 class Identifier {
 protected:
     std::string id;
@@ -112,9 +98,9 @@ class Call : public Exp {
 protected:
     Exp * e;
     Identifier * i;
-    ExpList * el;
+    std::list<Exp *> * el;
 public:
-    Call(Exp *e, Identifier *i, ExpList *el) {
+    Call(Exp *e, Identifier *i, std::list<Exp *> *el) {
         e=e;
         i=i;
         el=el;
@@ -208,9 +194,9 @@ class Statement {
 
 class Block : public Statement {
 protected:
-    StatementList sl;
+    std::list<Statement *> *sl;
 public:
-    Block(StatementList sl) {
+    Block(std::list<Statement *> *sl) {
         sl=sl;
     }
 };
@@ -314,27 +300,6 @@ public:
     }
 };
 
-/*******************    METHOD CLASS    ****************************/
-class MethodDecl {
-protected:
-    Type *t;
-    Identifier *i;
-    FormalList *fl;
-    VarDeclList *vl;
-    StatementList *sl;
-    Exp *e;
-
-public:
-    MethodDecl(Type *t, Identifier *i, FormalList *fl, VarDeclList *vl, StatementList *sl, Exp *e) {
-        t=t;
-        i=i;
-        fl=fl;
-        vl=vl;
-        sl=sl;
-        e=e;
-    }
-};
-
 /*******************    FORMAL CLASS    ****************************/
 class Formal {
 protected:
@@ -347,6 +312,28 @@ public:
     }
 };
 
+/*******************    METHOD CLASS    ****************************/
+class MethodDecl {
+protected:
+    Type *t;
+    Identifier *i;
+    std::list<Formal *> *fl;
+    std::list<VarDecl *> *vl;
+    std::list<Statement *> *sl;
+    Exp *e;
+
+public:
+    MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl, std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e) {
+        t=t;
+        i=i;
+        fl=fl;
+        vl=vl;
+        sl=sl;
+        e=e;
+    }
+};
+
+
 /*******************    CLASS DECLARATION CLASS ****************************/
 //abstract class
 class ClassDecl {
@@ -356,11 +343,11 @@ class ClassDecl {
 class ClassDeclSimple : public ClassDecl {
 protected:
     Identifier *i;
-    VarDeclList *vl;
-    MethodDeclList *ml;
+    std::list<VarDecl *> *vl;
+    std::list<MethodDecl *> *ml;
 
 public:
-    ClassDeclSimple(Identifier *i, VarDeclList *vl, MethodDeclList *ml) {
+    ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml) {
         i=i;
         vl=vl;
         ml=ml;
@@ -371,11 +358,11 @@ class ClassDeclExtends : public ClassDecl {
 protected:
     Identifier *i;
     Identifier *j;
-    VarDeclList *vl;
-    MethodDeclList *ml;
+    std::list<VarDecl *> *vl;
+    std::list<MethodDecl *> *ml;
 
 public:
-    ClassDeclExtends(Identifier *i, Identifier *j, VarDeclList *vl, MethodDeclList *ml) {
+    ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml) {
         i=i;
         j=j;
         vl=vl;
@@ -402,9 +389,9 @@ public:
 class Program {
 protected:
     MainClass *m;
-    ClassDeclList *cl;
+    std::list<ClassDecl *> *cl;
 public:
-    Program(MainClass *m, ClassDeclList *cl) {
+    Program(MainClass *m, std::list<ClassDecl *> *cl) {
         m=m;
         cl=cl;
     }
