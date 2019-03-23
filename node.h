@@ -325,11 +325,7 @@ protected:
     std::list<MethodDecl *> *ml;
 
 public:
-    ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml) {
-        i=i;
-        vl=vl;
-        ml=ml;
-    }
+    ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml);
     void evaluate();
 };
 
@@ -341,12 +337,7 @@ protected:
     std::list<MethodDecl *> *ml;
 
 public:
-    ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml) {
-        i=i;
-        j=j;
-        vl=vl;
-        ml=ml;
-    }
+    ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml);
     void evaluate();
 };
 
@@ -358,11 +349,7 @@ protected:
     Statement *s;
 
 public:
-    //MainClass(Identifier *i1, Identifier *i2, Statement *s):i1(i1), i2(i2), s(s) {
-    
-    //}
     MainClass(Identifier *i1, Identifier *i2, Statement *s);
-    //:i1(i1), i2(i2), s(s) {
     void evaluate();
 };
 
@@ -372,9 +359,6 @@ protected:
     MainClass *m;
     std::list<ClassDecl *> *cl;
 public:
-    /*Program(MainClass *m, std::list<ClassDecl *> *cl):m(m), cl(cl) {
-        std::cout << "newprog-construct:"<< std::endl;
-    }*/
     Program(MainClass *m, std::list<ClassDecl *> *cl);
     void evaluate();
 };

@@ -198,10 +198,12 @@ public:
 
 */
 /*******************    CLASS DECLARATION CLASS ****************************/
+ClassDeclSimple::ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml): i(i), vl(vl), ml(ml) {}
 void ClassDeclSimple::evaluate() {
     std::cout << "(ClassDeclSimple)" << std::endl;
 }
 
+ClassDeclExtends::ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml): i(i), j(j), vl(vl), ml(ml) {}
 void ClassDeclExtends::evaluate() {
     std::cout << "(ClassDeclExtends)" << std::endl;
 }
