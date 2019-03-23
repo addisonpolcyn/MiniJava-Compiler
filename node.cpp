@@ -119,7 +119,13 @@ int PositiveExp::evaluate() {
 /*******************    STATEMENT CLASS    ****************************/
 Block::Block(std::list<Statement *> *sl): sl(sl) {}
 void Block::evaluate() {
-    std::cout << "(evaluate)" << std::endl;
+    //evaluate Block
+    std::list<Statement *>::iterator stmtIter;
+    for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
+        (*stmtIter)->evaluate();
+        std::cout << "(Statement)" << std::endl;
+    }
+    std::cout << "(Block bithces)" << std::endl;
 }
 
 If::If(Exp *e, Statement *s1, Statement *s2): e(e), s1(s1), s2(s2) {}

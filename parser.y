@@ -62,6 +62,7 @@ int main(int argc, char **argv) {
     Program *pgm;
 
     std::list<ClassDecl *> *classDeclList;
+    std::list<Statement *> *stmtList;
 }
 
 %define parse.error verbose
@@ -94,6 +95,7 @@ int main(int argc, char **argv) {
 
 /* Lists */
 %type <classDeclList> ClassDeclList
+%type <stmtList> StatementList
 
 %%
 
@@ -172,7 +174,7 @@ Type:
         ;
 
 Statement:
-        OBRACE StatementList EBRACE { std::cout << "fired statementList @@@@@@@@@@@@@@@@@@@"; }
+        OBRACE StatementList EBRACE { std::cout << "fired statementList ################"; $$ = new Block($2); }
         |
         IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement { $$ = new If($3, $5, $7); std::cout << "fired If #############\n"; }
         |
@@ -194,8 +196,11 @@ Statement:
         ;
 
 StatementList:
-        StatementList Statement { std::cout << "statment list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
-        | /* Empty */
+        StatementList Statement { std::cout << "statment list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n";
+        $$ = $1, $1->push_back($2); 
+        std::cout << "loaded stmt list\n"; }
+        | /* Empty */ { std::cout << "empty stmt list\n"; 
+        $$ = new std::list<Statement *>(); std::cout <<"built stmt list\n";}
         ;
 
 Index:
