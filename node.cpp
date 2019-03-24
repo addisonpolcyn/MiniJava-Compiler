@@ -6,8 +6,9 @@
 
 /*******************    IDENTIFIER CLASS    *********************/
 Identifier::Identifier(const std::string str): id(str) {}
-void Identifier::evaluate() {
+std::string Identifier::evaluate() {
     std::cout << "Identifier:" << id << std::endl;
+    return id;
 }
 
 /*******************    EXP SUB-CLASSES    ****************************/
@@ -136,18 +137,21 @@ int Div::evaluate() {
 ArrayLookup::ArrayLookup(Exp *lhs, Exp *rhs): lhs(lhs), rhs(rhs) {}
 int ArrayLookup::evaluate() {
     std::cout << "(ArrayLookup) XXXXXXXXXXX" << std::endl;
+    exit(1);
     return -1;
 }
 
 ArrayLength::ArrayLength(Exp *e): e(e) {}
 int ArrayLength::evaluate() {
     std::cout << "(ArrLength) XXXXXXXXXXX" << std::endl;
+    exit(1);
     return -1;
 }
 
 Call::Call(Exp *e, Identifier *i, std::list<Exp *> *el): e(e), i(i), el(el) {}
 int Call::evaluate() {
-    std::cout << "(Call) XXXXXXXXXXXX" << std::endl;
+    std::cout << "(Call):" << e->evaluate() << i->evaluate() << std::endl;
+    exit(1);
     return -1;
 }
 
@@ -169,24 +173,27 @@ int False::evaluate() {
 
 int This::evaluate() {
     std::cout << "(This) XXXXXXXXXXXx" << std::endl;
+    exit(1);
     return -1;
 }
 
 IdentifierExp::IdentifierExp(std::string str): id(str) {}
 int IdentifierExp::evaluate() {
-    std::cout << "XXXXXXXXX(IdentifierExp):" << id << std::endl;
-    return -1;
+    std::cout << "(IdentifierExp):" << id << varTable[id] << std::endl;
+    return varTable[id];
 }
 
 NewArray::NewArray(Exp *e): e(e) {}
 int NewArray::evaluate() {
     std::cout << "(NewArray)XXXXXXXx" << std::endl;
+    exit(1);
     return -1;
 }
 
 NewObject::NewObject(Identifier *i): i(i) {}
 int NewObject::evaluate() {
-    std::cout << "(NewObject)  XXXXXXXXx" << std::endl;
+    std::cout << "(NewObject): " << i->evaluate() << std::endl;
+    exit(1);
     return -1;
 }
 
@@ -277,7 +284,10 @@ void PrintStringln::evaluate() {
 Assign::Assign(Identifier *i, Exp *e): i(i), e(e) {}
 void Assign::evaluate() {
     int value = e->evaluate();
-    std::cout << "(Assign) XXXXXXXXX" << std::endl;
+    std::string id = i->evaluate();
+    std::cout << "(Assign):" << id << "=" << value << std::endl;
+
+    varTable[id] = value;
 }
 ArrayAssign::ArrayAssign(Identifier *i, Exp *e1, Exp *e2): i(i), e1(e1), e2(e2) {}
 void ArrayAssign::evaluate() {
@@ -306,6 +316,7 @@ void IdentifierType::evaluate() {
 VarDecl::VarDecl(Type *t, Identifier *i): t(t), i(i) {}
 void VarDecl::evaluate() {
     std::cout << "(VarDecl)" << std::endl;
+    varTable[i->evaluate()];
 }
 
 /*******************    FORMAL CLASS    ****************************/
@@ -318,13 +329,63 @@ void Formal::evaluate() {
 MethodDecl::MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl,std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e): 
 t(t), i(i), fl(fl), vl(vl), sl(sl), e(e) {}
 void MethodDecl::evaluate() {
-    std::cout << "(MethodDecl)" << std::endl;
+    std::cout << "(MethodDecl)----->" << i->evaluate() << std::endl;
+    
+    //evaluate Formal Declarations
+    std::list<Formal *>::iterator formalIter;
+    std::cout << "^btfn (formal Start)" << std::endl;
+    for(formalIter = fl->begin(); formalIter != fl->end(); formalIter++){
+        std::cout << "^agg (formal Start)" << std::endl;
+        (*formalIter)->evaluate();
+    std::cout << "^csces (formal Start)" << std::endl;
+    }
+
+    //evaluate Variable Declarations
+    std::list<VarDecl *>::iterator varIter;
+    std::cout << "^btfn (var Start)" << std::endl;
+    for(varIter = vl->begin(); varIter != vl->end(); varIter++){
+        std::cout << "^agg (var Start)" << std::endl;
+        (*varIter)->evaluate();
+    std::cout << "^csces (var Start)" << std::endl;
+    }
+
+    //evaluate Statement Declarations
+    std::list<Statement *>::iterator stmtIter;
+    std::cout << "^btfn (stmt Start)" << std::endl;
+    for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
+        std::cout << "^agg (stmt Start)" << std::endl;
+        (*stmtIter)->evaluate();
+    std::cout << "^csces (stmt Start)" << std::endl;
+    }
+
+    //evaluate Expression
+    std::cout << "firing last expr statement\n";
+    int result = e->evaluate();
 }
 
 /******************    CLASS DECLARATION SUB-CLASS    ************/
 ClassDeclSimple::ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml): i(i), vl(vl), ml(ml) {}
 void ClassDeclSimple::evaluate() {
-    std::cout << "(ClassDeclSimple)" << std::endl;
+    std::cout << "(ClassDeclSimple)----->" << i->evaluate() << std::endl;    
+    
+    //evaluate Variable Declarations
+    std::list<VarDecl *>::iterator varDeclIter;
+    std::cout << "^btfn (Var Start)" << std::endl;
+    for(varDeclIter = vl->begin(); varDeclIter != vl->end(); varDeclIter++){
+        std::cout << "^agg (Var Start)" << std::endl;
+        (*varDeclIter)->evaluate();
+    std::cout << "^csces (Var Start)" << std::endl;
+    }
+
+    //evaluate Method Declarations
+    std::list<MethodDecl *>::iterator methodDeclIter;
+    std::cout << "^btfn (method Start)" << std::endl;
+    for(methodDeclIter = ml->begin(); methodDeclIter != ml->end(); methodDeclIter++){
+        std::cout << "^agg (meth Start)" << std::endl;
+        (*methodDeclIter)->evaluate();
+    std::cout << "^csces (method Start)" << std::endl;
+    }
+
 }
 
 ClassDeclExtends::ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml): i(i), j(j), vl(vl), ml(ml) {}
@@ -364,3 +425,5 @@ void Program::evaluate() {
     
     std::cout << "\n...(Program End) $" << std::endl;
 };
+
+std::map<std::string, int> varTable;

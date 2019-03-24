@@ -91,8 +91,8 @@ int main(int argc, char **argv) {
 
 /* Non-Terminals */
 %type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object
-%type <stmt> Statement
-%type <type> Type PrimeType
+%type <stmt> Statement 
+%type <type> Type PrimeType 
 %type <formal> FormalRest
 %type <method> MethodDecl
 %type <var> VarDecl
@@ -123,10 +123,10 @@ MainClass:
 
 ClassDecl:
         CLASS ID OBRACE VarDeclList MethodDeclList EBRACE 
-        { $$ = new ClassDeclSimple(new Identifier($2), $4, $5); std::cout << "fired Class Decl Simple @@@@@@@@@@@@@@@@\n"; }
+        { $$ = new ClassDeclSimple(new Identifier($2), $4, $5); std::cout << "fired Class Decl Simple ############\n"; }
         |
         CLASS ID EXTENDS ID OBRACE VarDeclList MethodDeclList EBRACE
-        { $$ = new ClassDeclExtends(new Identifier($2), new Identifier($4), $6, $7); std::cout << "fired Class Decl Extends @@@@@@@@@@@@@\n"; }
+        { $$ = new ClassDeclExtends(new Identifier($2), new Identifier($4), $6, $7); std::cout << "fired Class Decl Extends ###########\n"; }
         ;
 
 ClassDeclList:
@@ -135,21 +135,18 @@ ClassDeclList:
         ;
 
 VarDecl:
-        Type ID SEMICOLON { std::cout << "fired Var Decl @@@@@@@@@@@@@@\n"; }
-        |
-        ID EQUAL Exp SEMICOLON { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> var dec id = exp\n"; }
+        PrimeType ID SEMICOLON { $$ = new VarDecl($1, new Identifier($2)); std::cout << "fired Var Decl ###############\n"; }
         ;
 
 VarDeclList:
-        VarDeclList VarDecl { std::cout << "var list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n";
-        $$ = $1; $1->push_back($2); std::cout << "loaded up vardecl list push\n"; }
-        | /* Empty */  { std::cout << "var list wanted DOWNSTREAM EMPTY\n"; $$ = new std::list<VarDecl *>(); std::cout << "alocated new list\n"; }
+        VarDeclList VarDecl { $$ = $1; $1->push_back($2); std::cout << "loaded up vardecl list push\n"; }
+        | /* Empty */  { std::cout << "var list EMPTY\n"; $$ = new std::list<VarDecl *>(); std::cout << "alocated new list\n"; }
         ;
 
 MethodDecl:
         PUBLIC Type ID OPARANTHESIS FormalList EPARANTHESIS 
             OBRACE VarDeclList StatementList RETURN Exp SEMICOLON EBRACE
-        { /*$$ = new MethodDecl($2, $3, $5, $7, $8, $10);*/ std::cout << "fired method decl EEEEEERRRRRRRRRr@@@@@@@@@@@@@@@\n"; }
+        { $$ = new MethodDecl($2, new Identifier($3), $5, $8, $9, $11); std::cout << "fired method decl ######################\n"; }
         ;
 
 MethodDeclList:
@@ -159,12 +156,16 @@ MethodDeclList:
         ;
 
 FormalList:
-        Type ID FormalRestList { std::cout << "formal list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
-        | /* Empty */
+        Formal FormalRestList { std::cout << "formal list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
+        | /* Empty */ { $$ = new std::list<Formal *>(); std::cout << "formlist empty, creating new list"; }
+        ;
+
+Formal:
+        Type ID
         ;
 
 FormalRest:
-        COMMA Type ID { $$ = new Formal($2, new Identifier($3)); std::cout << "fired formal @@@@@@@@@@@@@@@2\n"; }
+        COMMA Formal { $$ = new Formal($2, new Identifier($3)); std::cout << "fired formal @@@@@@@@@@@@@@@2\n"; }
         ;
 
 FormalRestList:
@@ -175,15 +176,15 @@ FormalRestList:
 PrimeType:
         INT { $$ = new IntegerType(); std::cout << "fired int type #############\n"; }
         |
-        BOOL { $$ = new BooleanType(); std::cout << "fired bool type #############\n"; }
-        |
-        ID { $$ = new IdentifierType($1); std::cout << "fired id type #############\n"; }
+        BOOL { $$ = new BooleanType(); std::cout << "fired bool type #############\n"; } 
         ;
 
 Type:
-        PrimeType 
+        ID { $$ = new IdentifierType($1); std::cout << "fired id type #############\n"; }
         |
         Type OBRACK EBRACK { $$ = new IntArrayType(); std::cout << "fired int array type #############\n"; }
+        |
+        PrimeType 
         ;
 
 Statement:
@@ -283,7 +284,8 @@ J_Exp:
 K_Exp:
         K_Exp DOT LENGTH { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp dot length\n"; }
         |
-        K_Exp DOT ID OPARANTHESIS ExpList EPARANTHESIS { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp dot id explist\n"; }
+        K_Exp DOT ID OPARANTHESIS ExpList EPARANTHESIS { $$ = new Call($1, new Identifier($3), $5); 
+        std::cout << "call exp #########################3\n"; }
         |
         L_Exp
         ;
@@ -305,7 +307,7 @@ Root_Exp:
         |
         FALSE { $$ = new False(); std::cout << "fired False #############\n"; }
         |
-        Object { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp object\n"; }
+        Object
         ;  
 
 Object:
@@ -313,14 +315,14 @@ Object:
         |
         THIS { $$ = new This(); std::cout << "fired This #############\n"; }
         |
-        NEW ID OPARANTHESIS EPARANTHESIS { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp new id()\n"; }
+        NEW ID OPARANTHESIS EPARANTHESIS { $$ = new NewObject(new Identifier($2)); std::cout << "fired exp new id() ###############\n"; }
         |
         NEW PrimeType Index { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX exp new object prime\n"; }
         ;
 
 ExpList:
-        Exp ExpRestList { std::cout << "@@@@@@@@@@TESTTESTTESTTESTTEST> exp exprest list\n"; } 
-        | /* Empty */  { std::cout << "exp list wanted @@@@@@@@@2222TESTESTESTDOWNSTREAM EMPTY\n"; /*$$ = new std::list<Exp *>(); std::cout << "alocated new list\n";*/ }
+        Exp ExpRestList { std::cout << "@@@@@@@@@@gubub&*^%#TESTTESTTESTTESTTEST> exp exprest list\n"; } 
+        | /* Empty */ { $$ = new std::list<Exp *>(); std::cout << "explist empty, creating new list"; }
         ;
 
 ExpRest:

@@ -1,5 +1,6 @@
 #include <list>
 #include <string>
+#include <map>
 #include <iostream>
 
 /*******************    IDENTIFIER CLASS    *********************/
@@ -8,7 +9,7 @@ protected:
     std::string id;
 public:
     Identifier(const std::string str);
-    void evaluate();
+    std::string evaluate();
 };
 
 /*******************    EXP CLASS    ****************************/
@@ -435,4 +436,5 @@ public:
     void evaluate();
 };
 
+extern std::map<std::string, int> varTable;
 extern Program *root;
