@@ -4,7 +4,7 @@
 #include "node.h"
 #include "y.tab.h"
 
-#define PRINTDEBUG(x) fprintf(stderr, "\n%s\n", (x)); // comment out print statement to remove the printing
+#define PRINTDEBUG(x) //fprintf(stderr, "\n%s\n", (x)); // comment out print statement to remove the printing
 %}
 
 %option yylineno

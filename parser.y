@@ -6,6 +6,7 @@
 #include "node.h"
 
 #define YYDEBUG 1
+#define PRINTDEBUG(x) std::cout << x; // comment out print statement to remove the printing
 
 //root of AST
 Program *root;
@@ -103,7 +104,7 @@ int main(int argc, char **argv) {
 /* Lists */
 %type <classDeclList> ClassDeclList
 %type <expList> ExpList
-%type <formalList> FormalList
+%type <formalList> FormalList FormalRestList
 %type <methodDeclList> MethodDeclList
 %type <stmtList> StatementList
 %type <varDeclList> VarDeclList
@@ -112,225 +113,224 @@ int main(int argc, char **argv) {
 
 Program:
         MainClass ClassDeclList
-        { $$ = new Program($1, $2); root = $$; std::cout << "fired Program $$$$$$$$$$$$$$$\n"; }
+        { $$ = new Program($1, $2); root = $$; PRINTDEBUG("fired Program $$$$$$$$$$$$$$$\n") }
         ;
 
 MainClass:
         CLASS ID OBRACE PUBLIC STATIC VOID MAIN OPARANTHESIS STRING OBRACK EBRACK ID EPARANTHESIS
             OBRACE Statement EBRACE EBRACE
-        { $$ = new MainClass(new Identifier($2), new Identifier($12), $15); std::cout << "fired Main #############\n"; }
+        { $$ = new MainClass(new Identifier($2), new Identifier($12), $15); PRINTDEBUG("fired Main #############\n") }
         ;
 
 ClassDecl:
         CLASS ID OBRACE VarDeclList MethodDeclList EBRACE 
-        { $$ = new ClassDeclSimple(new Identifier($2), $4, $5); std::cout << "fired Class Decl Simple ############\n"; }
+        { $$ = new ClassDeclSimple(new Identifier($2), $4, $5); PRINTDEBUG("fired Class Decl Simple ############\n") }
         |
         CLASS ID EXTENDS ID OBRACE VarDeclList MethodDeclList EBRACE
-        { $$ = new ClassDeclExtends(new Identifier($2), new Identifier($4), $6, $7); std::cout << "fired Class Decl Extends ###########\n"; }
+        { $$ = new ClassDeclExtends(new Identifier($2), new Identifier($4), $6, $7); PRINTDEBUG("fired Class Decl Extends ###########\n") }
         ;
 
 ClassDeclList:
-        ClassDeclList ClassDecl { std::cout << "class list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; $$ = $1; $1->push_back($2); std::cout << "loaded up classdecl list push\n"; }
-        | /* Empty */  { std::cout << "class list wanted DOWNSTREAM EMPTY\n"; $$ = new std::list<ClassDecl *>(); std::cout << "alocated new list\n"; }
+        ClassDeclList ClassDecl { PRINTDEBUG("class list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"); $$ = $1; $1->push_back($2); PRINTDEBUG("loaded up classdecl list push\n") }
+        | /* Empty */  { PRINTDEBUG("class list wanted DOWNSTREAM EMPTY\n"); $$ = new std::list<ClassDecl *>(); PRINTDEBUG("alocated new list\n") }
         ;
 
 VarDecl:
-        PrimeType ID SEMICOLON { $$ = new VarDecl($1, new Identifier($2)); std::cout << "fired Var Decl ###############\n"; }
+        PrimeType ID SEMICOLON { $$ = new VarDecl($1, new Identifier($2)); PRINTDEBUG("fired Var Decl ###############\n") }
         ;
 
 VarDeclList:
-        VarDeclList VarDecl { $$ = $1; $1->push_back($2); std::cout << "loaded up vardecl list push\n"; }
-        | /* Empty */  { std::cout << "var list EMPTY\n"; $$ = new std::list<VarDecl *>(); std::cout << "alocated new list\n"; }
+        VarDeclList VarDecl { $$ = $1; $1->push_back($2); PRINTDEBUG("loaded up vardecl list push\n") }
+        | /* Empty */  { PRINTDEBUG("var list EMPTY\n") $$ = new std::list<VarDecl *>(); PRINTDEBUG("alocated new list\n") }
         ;
 
 MethodDecl:
         PUBLIC Type ID OPARANTHESIS FormalList EPARANTHESIS 
             OBRACE VarDeclList StatementList RETURN Exp SEMICOLON EBRACE
-        { $$ = new MethodDecl($2, new Identifier($3), $5, $8, $9, $11); std::cout << "fired method decl ######################\n"; }
+        { $$ = new MethodDecl($2, new Identifier($3), $5, $8, $9, $11); PRINTDEBUG("fired method decl ######################\n") }
         ;
 
 MethodDeclList:
-        MethodDeclList MethodDecl { std::cout << "method list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n";
-        $$ = $1; $1->push_back($2); std::cout << "loaded up methoddecl list push\n"; }
-        | /* Empty */  { std::cout << "method list wanted DOWNSTREAM EMPTY\n"; $$ = new std::list<MethodDecl *>(); std::cout << "alocated new list\n"; }
+        MethodDeclList MethodDecl { PRINTDEBUG("method list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n");
+        $$ = $1; $1->push_back($2); PRINTDEBUG("loaded up methoddecl list push\n") }
+        | /* Empty */  {  PRINTDEBUG("method list wanted DOWNSTREAM EMPTY\n"); $$ = new std::list<MethodDecl *>(); PRINTDEBUG("alocated new list\n") }
         ;
 
 FormalList:
-        Formal FormalRestList { std::cout << "formal list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"; }
-        | /* Empty */ { $$ = new std::list<Formal *>(); std::cout << "formlist empty, creating new list"; }
-        ;
-
-Formal:
-        Type ID
+        Type ID FormalRestList { $$ = new std::list<Formal *>(); $$->push_back(new Formal($1, new Identifier($2)));
+        PRINTDEBUG("formal list wanted upstream&&&&&&&&&&&&&&&&& ^^^^^^^^^^^^^^^^^^^^^\n") }
+        | /* Empty */ { $$ = new std::list<Formal *>(); PRINTDEBUG("formlist empty, creating new list") }
         ;
 
 FormalRest:
-        COMMA Formal { $$ = new Formal($2, new Identifier($3)); std::cout << "fired formal @@@@@@@@@@@@@@@2\n"; }
+        COMMA Type ID { }
         ;
 
 FormalRestList:
-        FormalRestList FormalRest { std::cout << "formal rest list list wanted upstream ??????????????????????????\n"; }
+        FormalRestList FormalRest { $$=$1; $1->push_back($2); PRINTDEBUG("fired formal @@@@@@@@@@@@@@@2\n"); 
+        PRINTDEBUG("formal rest list list wanted upstream ??????????????????????????\n") }
         | /* Empty */
         ;
 
 PrimeType:
-        INT { $$ = new IntegerType(); std::cout << "fired int type #############\n"; }
+        INT { $$ = new IntegerType(); PRINTDEBUG("fired int type #############\n") }
         |
-        BOOL { $$ = new BooleanType(); std::cout << "fired bool type #############\n"; } 
+        BOOL { $$ = new BooleanType(); PRINTDEBUG("fired bool type #############\n") } 
         ;
 
 Type:
-        ID { $$ = new IdentifierType($1); std::cout << "fired id type #############\n"; }
+        ID { $$ = new IdentifierType($1); PRINTDEBUG("fired id type #############\n") }
         |
-        Type OBRACK EBRACK { $$ = new IntArrayType(); std::cout << "fired int array type #############\n"; }
+        Type OBRACK EBRACK { $$ = new IntArrayType(); PRINTDEBUG("fired int array type #############\n") }
         |
         PrimeType 
         ;
 
 Statement:
-        OBRACE StatementList EBRACE { std::cout << "fired statementList ################"; $$ = new Block($2); }
+        OBRACE StatementList EBRACE { PRINTDEBUG("fired statementList ################") $$ = new Block($2); }
         |
-        IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement { $$ = new If($3, $5, $7); std::cout << "fired If #############\n"; }
+        IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement { $$ = new If($3, $5, $7); PRINTDEBUG("fired If #############\n") }
         |
-        WHILE OPARANTHESIS Exp EPARANTHESIS Statement { $$ = new While($3, $5); std::cout << "fired While #############\n"; }
+        WHILE OPARANTHESIS Exp EPARANTHESIS Statement { $$ = new While($3, $5); PRINTDEBUG("fired While #############\n") }
         |
-        PRINTLN OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Println($3); std::cout << "fired Println #############\n"; }
+        PRINTLN OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Println($3); PRINTDEBUG("fired Println #############\n") }
         |
-        PRINTLN OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { $$ = new PrintStringln($3); std::cout << "fired println Stringlit ############"; }
+        PRINTLN OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { $$ = new PrintStringln($3); PRINTDEBUG("fired println Stringlit ############") }
         |
-        PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Print($3); std::cout << "fired Print #############\n"; }
+        PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Print($3); PRINTDEBUG("fired Print #############\n") }
         |
-        PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { $$ = new PrintString($3); std::cout << "fired print string lit ################"; }
+        PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { $$ = new PrintString($3); PRINTDEBUG("fired print string lit ################") }
         |
-        ID EQUAL Exp SEMICOLON { $$ = new Assign(new Identifier($1), $3); std::cout << "fired Assign #############\n"; }
+        ID EQUAL Exp SEMICOLON { $$ = new Assign(new Identifier($1), $3); PRINTDEBUG("fired Assign #############\n") }
         |
-        ID Index EQUAL Exp SEMICOLON { std::cout << "fired ArrayAssign @@@@@@@@@@@\n"; }
+        ID Index EQUAL Exp SEMICOLON { PRINTDEBUG("fired ArrayAssign @@@@@@@@@@@\n") }
         |
-        RETURN Exp SEMICOLON { std::cout << "fired return @@@@@@@@@@@@@@@@@@@"; }
+        RETURN Exp SEMICOLON { PRINTDEBUG("fired return @@@@@@@@@@@@@@@@@@@") }
         ;
 
 StatementList:
-        StatementList Statement { std::cout << "statment list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n";
+        StatementList Statement { PRINTDEBUG("statment list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n")
         $$ = $1, $1->push_back($2); 
-        std::cout << "loaded stmt list\n"; }
-        | /* Empty */ { std::cout << "empty stmt list\n"; 
-        $$ = new std::list<Statement *>(); std::cout <<"built stmt list\n";}
+        PRINTDEBUG("loaded stmt list\n") }
+        | /* Empty */ { PRINTDEBUG("empty stmt list\n") 
+        $$ = new std::list<Statement *>(); PRINTDEBUG("built stmt list\n") }
         ;
 
 Index:
-        OBRACK Exp EBRACK { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index (exp)\n"; }
+        OBRACK Exp EBRACK { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index (exp)\n") }
         |
-        Index OBRACK Exp EBRACK { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index [exp]\n"; }
+        Index OBRACK Exp EBRACK { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index [exp]\n") }
        ;
 
 Exp: 
-        Exp OR T_Exp { $$ = new Or($1, $3); std::cout << "fired exp OR #################\n"; }
+        Exp OR T_Exp { $$ = new Or($1, $3); PRINTDEBUG("fired exp OR #################\n") }
         |
         T_Exp
         ;
 
 T_Exp:
-        T_Exp AND F_Exp { $$ = new And($1, $3); std::cout << "fired And #############\n"; }
+        T_Exp AND F_Exp { $$ = new And($1, $3); PRINTDEBUG("fired And #############\n") }
         |
         F_Exp
         ;
 
 F_Exp:
-        F_Exp IS G_Exp { $$ = new Is($1, $3); std::cout << "fired exp == #################\n"; }
+        F_Exp IS G_Exp { $$ = new Is($1, $3); PRINTDEBUG("fired exp == #################\n") }
         |
-        F_Exp ISNOT G_Exp { $$ = new IsNot($1, $3); std::cout << "fired exp != #################\n"; }
+        F_Exp ISNOT G_Exp { $$ = new IsNot($1, $3); PRINTDEBUG("fired exp != #################\n") }
         |
         G_Exp
         ;
 
 G_Exp:
-        G_Exp LESS H_Exp { $$ = new LessThan($1, $3); std::cout << "fired Less #############\n"; }
+        G_Exp LESS H_Exp { $$ = new LessThan($1, $3); PRINTDEBUG("fired Less #############\n") }
         |
-        G_Exp LESSTHANEQUAL H_Exp { $$ = new LessThanEqual($1, $3); std::cout << "fired lessthanequl #############\n"; }
+        G_Exp LESSTHANEQUAL H_Exp { $$ = new LessThanEqual($1, $3); PRINTDEBUG("fired lessthanequl #############\n") }
         |
-        G_Exp GREATER H_Exp { $$ = new GreaterThan($1, $3); std::cout << "fired greater ###############\n"; }
+        G_Exp GREATER H_Exp { $$ = new GreaterThan($1, $3); PRINTDEBUG("fired greater ###############\n") }
         |
-        G_Exp GREATERTHANEQUAL H_Exp { $$ = new GreaterThanEqual($1, $3); std::cout << "fired greaterthanequal ###############\n"; }
+        G_Exp GREATERTHANEQUAL H_Exp { $$ = new GreaterThanEqual($1, $3); PRINTDEBUG("fired greaterthanequal ###############\n") }
         |
         H_Exp
         ;
 
 H_Exp:
-        H_Exp PLUS I_Exp { $$ = new Plus($1, $3); std::cout << "fired Plus #############\n"; }
+        H_Exp PLUS I_Exp { $$ = new Plus($1, $3); PRINTDEBUG("fired Plus #############\n") }
         |
-        H_Exp MINUS I_Exp { $$ = new Minus($1, $3); std::cout << "fired Minus #############\n"; }
+        H_Exp MINUS I_Exp { $$ = new Minus($1, $3); PRINTDEBUG("fired Minus #############\n") }
         |
         I_Exp
         ;
 
 I_Exp:
-        I_Exp TIMES J_Exp { $$ = new Times($1, $3); std::cout << "fired Times #############\n"; }
+        I_Exp TIMES J_Exp { $$ = new Times($1, $3); PRINTDEBUG("fired Times #############\n") }
         |
-        I_Exp SLASH J_Exp { $$ = new Div($1, $3); std::cout << "fired exp division ##############\n"; }
+        I_Exp SLASH J_Exp { $$ = new Div($1, $3); PRINTDEBUG("fired exp division ##############\n") }
         |
         J_Exp
         ;
 
 J_Exp:
-        PLUS K_Exp { $$ = new PositiveExp($2); std::cout << "fired exp (+) #############\n"; }
+        PLUS K_Exp { $$ = new PositiveExp($2); PRINTDEBUG("fired exp (+) #############\n") }
         |
-        MINUS K_Exp  { $$ = new NegativeExp($2); std::cout << "fired exp (-) ##############\n"; }
+        MINUS K_Exp  { $$ = new NegativeExp($2); PRINTDEBUG("fired exp (-) ##############\n") }
         |
-        NOT K_Exp { $$ = new Not($2); std::cout << "fired Not #############\n"; }
+        NOT K_Exp { $$ = new Not($2); PRINTDEBUG("fired Not #############\n") }
         |
         K_Exp
         ;
 
 K_Exp:
-        K_Exp DOT LENGTH { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp dot length\n"; }
+        K_Exp DOT LENGTH { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp dot length\n") }
         |
         K_Exp DOT ID OPARANTHESIS ExpList EPARANTHESIS { $$ = new Call($1, new Identifier($3), $5); 
-        std::cout << "call exp #########################3\n"; }
+        PRINTDEBUG("call exp #########################3\n") }
         |
         L_Exp
         ;
 
 L_Exp:
-        ID Root_Exp DOT LENGTH { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp length\n"; }
+        ID Root_Exp DOT LENGTH { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp length\n") }
         |
         Root_Exp
         ;
         
 Root_Exp:  
-        OPARANTHESIS Exp EPARANTHESIS { $$ = $2; std::cout << "fired (exp) ###########"; }
+        OPARANTHESIS Exp EPARANTHESIS { $$ = $2; PRINTDEBUG("fired (exp) ###########") }
         |
-        ID Index { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp id index\n"; }
+        ID Index { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp id index\n") }
         |
-        INTEGER_LITERAL { $$ = new IntegerLiteral($1); std::cout << "fired integer literal ###########\n"; }
+        INTEGER_LITERAL { $$ = new IntegerLiteral($1); PRINTDEBUG("fired integer literal ###########\n") }
         |
-        TRUE { $$ = new True(); std::cout << "fired True #############\n"; }
+        TRUE { $$ = new True(); PRINTDEBUG("fired True #############\n") }
         |
-        FALSE { $$ = new False(); std::cout << "fired False #############\n"; }
+        FALSE { $$ = new False(); PRINTDEBUG("fired False #############\n") }
         |
         Object
         ;  
 
 Object:
-        ID { $$ = new IdentifierExp($1); std::cout << "fired IdentExp #############\n"; }
+        ID { $$ = new IdentifierExp($1); PRINTDEBUG("fired IdentExp #############\n") }
         |
-        THIS { $$ = new This(); std::cout << "fired This #############\n"; }
+        THIS { $$ = new This(); PRINTDEBUG("fired This #############\n") }
         |
-        NEW ID OPARANTHESIS EPARANTHESIS { $$ = new NewObject(new Identifier($2)); std::cout << "fired exp new id() ###############\n"; }
+        NEW ID OPARANTHESIS EPARANTHESIS { $$ = new NewObject(new Identifier($2)); PRINTDEBUG("fired exp new id() ###############\n") }
         |
-        NEW PrimeType Index { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX exp new object prime\n"; }
+        NEW PrimeType Index { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX exp new object prime\n") }
         ;
 
 ExpList:
-        Exp ExpRestList { std::cout << "@@@@@@@@@@gubub&*^%#TESTTESTTESTTESTTEST> exp exprest list\n"; } 
-        | /* Empty */ { $$ = new std::list<Exp *>(); std::cout << "explist empty, creating new list"; }
+        Exp ExpRestList { PRINTDEBUG("@@@@@@@@@@gubub&*^%#TESTTESTTESTTESTTEST> exp exprest list\n") } 
+        | /* Empty */ { $$ = new std::list<Exp *>(); PRINTDEBUG("explist empty, creating new list") }
         ;
 
 ExpRest:
-        COMMA Exp { std::cout << "@@@@@@@@@@@@@@@@TESTTESTESTESTESTES> exprest comma\n"; /*$$->push_back($2); std::cout << "loaded up classdecl list push\n";*/ }
+        COMMA Exp { PRINTDEBUG("@@@@@@@@@@@@@@@@TESTTESTESTESTESTES> exprest comma\n")
+        /*$$->push_back($2); std::cout << "loaded up classdecl list push\n";*/ }
         ;
 
 ExpRestList:
-        ExpRestList ExpRest { std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprestlist\n"; } 
+        ExpRestList ExpRest { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprestlist") } 
         | /* Empty */
         ;
 

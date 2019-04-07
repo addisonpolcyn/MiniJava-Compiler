@@ -437,4 +437,5 @@ public:
 };
 
 extern std::map<std::string, int> varTable;
+extern std::map<std::string, ClassDeclSimple *> classTable;
 extern Program *root;
