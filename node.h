@@ -11,7 +11,7 @@ protected:
     std::string id;
 public:
     Identifier(const std::string str);
-    std::string visit();
+    std::string toString();
 };
 
 /*******************    EXP CLASS    ****************************/
@@ -326,9 +326,10 @@ class Assign : public Statement {
 protected:
     Identifier *i;
     Exp *e;
+    int lineno;
 
 public:
-    Assign(Identifier *i, Exp *e);
+    Assign(Identifier *i, Exp *e, int lineno);
     void visit();
 };
 
@@ -347,6 +348,7 @@ class Type {
 public:
     virtual Types getType() = 0;
 };
+
 class IntArrayType : public Type {
 public:
     IntArrayType() {}
@@ -375,20 +377,18 @@ public:
 
 /*******************    VAR CLASS    ****************************/
 class VarDecl {
-protected:
+public:
     Type *t;
     Identifier *i;
-public:
     VarDecl(Type *t, Identifier *i);
     void visit();
 };
 
 /*******************    FORMAL CLASS    ****************************/
 class Formal {
-protected:
+public:
     Type *t;
     Identifier *i;
-public:
     Formal(Type *t, Identifier *i);
     void visit();
 };
@@ -397,14 +397,18 @@ public:
 class MethodDecl {
 protected:
     Type *t;
-    Identifier *i;
     std::list<Formal *> *fl;
     std::list<VarDecl *> *vl;
     std::list<Statement *> *sl;
     Exp *e;
+    int lineno;
+
+    std::map<std::string, VarDecl *> localVariables;
+    std::map<std::string, Formal *> parameters;
 
 public:
-    MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl, std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e);
+    Identifier *i;
+    MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl, std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e, int lineno);
     void visit();
 };
 
@@ -414,6 +418,9 @@ public:
 class ClassDecl {
 public:
     virtual void visit() = 0;
+    virtual std::string getName() = 0;
+    std::map<std::string, VarDecl *> fieldVariables;
+    std::map<std::string, MethodDecl *> methods;
 };
 
 class ClassDeclSimple : public ClassDecl {
@@ -421,10 +428,12 @@ protected:
     Identifier *i;
     std::list<VarDecl *> *vl;
     std::list<MethodDecl *> *ml;
+    int lineno;
 
 public:
-    ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml);
+    ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml, int lineno);
     void visit();
+    std::string getName();
 };
 
 class ClassDeclExtends : public ClassDecl { 
@@ -433,20 +442,22 @@ protected:
     Identifier *j;
     std::list<VarDecl *> *vl;
     std::list<MethodDecl *> *ml;
+    int lineno;
 
 public:
-    ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml);
+    ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml, int lineno);
     void visit();
+    std::string getName();
 };
 
 /*******************    MAIN CLASS    ****************************/
 class MainClass {
 protected:
-    Identifier *i1;
     Identifier *i2;
     Statement *s;
 
 public:
+    Identifier *i1;
     MainClass(Identifier *i1, Identifier *i2, Statement *s);
     void visit();
 };
@@ -456,11 +467,13 @@ class Program {
 protected:
     MainClass *m;
     std::list<ClassDecl *> *cl;
+    int lineno;
+
 public:
-    Program(MainClass *m, std::list<ClassDecl *> *cl);
+    Program(MainClass *m, std::list<ClassDecl *> *cl, int lineno);
     void visit();
 };
 
 extern std::map<std::string, int> varTable;
-extern std::map<std::string, ClassDeclSimple *> classTable;
+extern std::map<std::string, ClassDecl *> classTable;
 extern Program *root;

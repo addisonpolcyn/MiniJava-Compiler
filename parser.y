@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
 
 Program:
         MainClass ClassDeclList
-        { $$ = new Program($1, $2); root = $$; PRINTDEBUG("fired Program $$$$$$$$$$$$$$$\n") }
+        { $$ = new Program($1, $2, yylineno); root = $$; PRINTDEBUG("fired Program $$$$$$$$$$$$$$$\n") }
         ;
 
 MainClass:
@@ -124,10 +124,10 @@ MainClass:
 
 ClassDecl:
         CLASS ID OBRACE VarDeclList MethodDeclList EBRACE 
-        { $$ = new ClassDeclSimple(new Identifier($2), $4, $5); PRINTDEBUG("fired Class Decl Simple ############\n") }
+        { $$ = new ClassDeclSimple(new Identifier($2), $4, $5, yylineno); PRINTDEBUG("fired Class Decl Simple ############\n") }
         |
         CLASS ID EXTENDS ID OBRACE VarDeclList MethodDeclList EBRACE
-        { $$ = new ClassDeclExtends(new Identifier($2), new Identifier($4), $6, $7); PRINTDEBUG("fired Class Decl Extends ###########\n") }
+        { $$ = new ClassDeclExtends(new Identifier($2), new Identifier($4), $6, $7, yylineno); PRINTDEBUG("fired Class Decl Extends ###########\n") }
         ;
 
 ClassDeclList:
@@ -147,7 +147,7 @@ VarDeclList:
 MethodDecl:
         PUBLIC Type ID OPARANTHESIS FormalList EPARANTHESIS 
             OBRACE VarDeclList StatementList RETURN Exp SEMICOLON EBRACE
-        { $$ = new MethodDecl($2, new Identifier($3), $5, $8, $9, $11); PRINTDEBUG("fired method decl ######################\n") }
+        { $$ = new MethodDecl($2, new Identifier($3), $5, $8, $9, $11, yylineno); PRINTDEBUG("fired method decl ######################\n") }
         ;
 
 MethodDeclList:
@@ -201,7 +201,7 @@ Statement:
         |
         PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { $$ = new PrintString($3); PRINTDEBUG("fired print string lit ################") }
         |
-        ID EQUAL Exp SEMICOLON { $$ = new Assign(new Identifier($1), $3); PRINTDEBUG("fired Assign #############\n") }
+        ID EQUAL Exp SEMICOLON { $$ = new Assign(new Identifier($1), $3, yylineno); PRINTDEBUG("fired Assign #############\n") }
         |
         ID Index EQUAL Exp SEMICOLON { PRINTDEBUG("fired ArrayAssign @@@@@@@@@@@\n") }
         |

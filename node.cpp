@@ -3,13 +3,18 @@
 #include <string>
 #include <iostream>
 #include "node.h"
-#define PRINTDEBUG(x) //std::cout << x; // comment out print statement to remove the printing
+#define PRINTDEBUG(x) std::cout << x << std::endl; // comment out print statement to remove the printing
 
-bool type_error = false;
+bool type_error = false;    //boolean value true denotes type_error present in Tree, false Tree syntax is type valid
+std::string mainClassName;  //string name of the main class 
+
+std::map<std::string, ClassDecl *> classTable;      //map of classes in program
+std::map<std::string, VarDecl *> type_class_scope;  //map of fields in current class scope
+std::map<std::string, VarDecl *> type_local_scope;  //map of variables in current scope inlcuding current class variables and method variables
 
 /*******************    IDENTIFIER CLASS    *********************/
 Identifier::Identifier(const std::string str): id(str) {}
-std::string Identifier::visit() {
+std::string Identifier::toString() {
     //std::cout << "Identifier:" << id << std::endl;
     return id;
 }
@@ -192,9 +197,8 @@ Types ArrayLength::visit() {
 Call::Call(Exp *e, Identifier *i, std::list<Exp *> *el): e(e), i(i), el(el) {}
 Types Call::visit() {
     PRINTDEBUG("(Call)")
-    ClassDeclSimple *cl = classTable["Factorial"];
-    cl->visit();
-    //std::cout << "(Call): exit" << e->visit() << i->visit() << std::endl;
+    //ClassDeclSimple *cl = classTable["Factorial"];
+    //cl->visit();
     std::cout << "(Call)MODIFY THIS TO RETURN DYNAMIC RETURN TYPES" << std::endl;
     
     return Integer;
@@ -202,7 +206,7 @@ Types Call::visit() {
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
 Types IntegerLiteral::visit() {
-    PRINTDEBUG("IntegerLiteral)")
+    PRINTDEBUG("(IntegerLiteral)")
     return Integer;
 }
 
@@ -226,8 +230,7 @@ Types This::visit() {
 IdentifierExp::IdentifierExp(std::string str): id(str) {}
 Types IdentifierExp::visit() {
     PRINTDEBUG("(IdentifierExp)")
-    std::cout << "(IdentifierExp):MODIFY THIS TO RETURN DYNAMIC TYPE OF VAR IN VAR TABLE" << id << varTable[id] << std::endl;
-    return Integer;
+    return type_local_scope[id]->t->getType();
 }
 
 NewArray::NewArray(Exp *e): e(e) {}
@@ -241,7 +244,6 @@ Types NewArray::visit() {
 NewObject::NewObject(Identifier *i): i(i) {}
 Types NewObject::visit() {
     PRINTDEBUG("(NewObject)")
-    std::cout << "(NewObject): exiting " << i->visit() << std::endl;
     //exit(1);
     return Object;
 }
@@ -338,15 +340,17 @@ void PrintStringln::visit() {
     PRINTDEBUG("(PrintStringln)")
 }
 
-Assign::Assign(Identifier *i, Exp *e): i(i), e(e) {}
+Assign::Assign(Identifier *i, Exp *e, int lineno): i(i), e(e), lineno(lineno) {}
 void Assign::visit() {
-    int value = e->visit();
-    std::string id = i->visit();
-    PRINTDEBUG("(Assign) NEEDS TO CHECK FOR TYPES!!!!!!")
-    std::cout << id << "=" << value << std::endl;
-
-    varTable[id] = value;
+    PRINTDEBUG("(Assign)")
+    
+    VarDecl *var = type_local_scope[i->toString()];
+    if(var->t->getType() != e->visit()) {
+        std::cerr << "Type Violation in Line " << lineno << " : invalid assignment type" << std::endl;
+        type_error = true;
+    }
 }
+
 ArrayAssign::ArrayAssign(Identifier *i, Exp *e1, Exp *e2): i(i), e1(e1), e2(e2) {}
 void ArrayAssign::visit() {
     PRINTDEBUG("(ArrayAssign)")
@@ -380,7 +384,6 @@ VarDecl::VarDecl(Type *t, Identifier *i): t(t), i(i) {}
 void VarDecl::visit() {
     PRINTDEBUG("(VarDecl)")
     t->getType();
-    varTable[i->visit()];
 }
 
 /*******************    FORMAL CLASS    ****************************/
@@ -390,77 +393,128 @@ void Formal::visit() {
 }
 
 /*******************    METHOD CLASS    ****************************/
-MethodDecl::MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl,std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e): 
-t(t), i(i), fl(fl), vl(vl), sl(sl), e(e) {}
+MethodDecl::MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl,std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e, int lineno): 
+t(t), i(i), fl(fl), vl(vl), sl(sl), e(e), lineno(lineno) {}
 void MethodDecl::visit() {
     PRINTDEBUG("(MethodDecl)")
-    std::cout << "(MethodDecl)----->" << i->visit() << std::endl;
+    
+    //init method scope
+    type_local_scope.clear();
+
+    //iterate class scope into method scope
+    std::map<std::string, VarDecl *>::iterator it;
+    for (it = type_class_scope.begin(); it != type_class_scope.end(); it++) {
+        type_local_scope[it->first] = it->second;
+    }
     
     //evaluate Formal Declarations
     std::list<Formal *>::iterator formalIter;
-    std::cout << "^btfn (formal Start)" << std::endl;
     for(formalIter = fl->begin(); formalIter != fl->end(); formalIter++){
-        std::cout << "^agg (formal Start)" << std::endl;
-        (*formalIter)->visit();
-    std::cout << "^csces (formal Start)" << std::endl;
+        std::string paramName = (*formalIter)->i->toString();
+        
+        //type check parameter 
+        if(parameters.count(paramName)){
+            std::cerr << "Type Violation in Line " << lineno << " : error: duplicate parameter: " << paramName << std::endl;
+            type_error = true;
+        } else {
+            parameters[paramName] = *formalIter;
+            type_local_scope[paramName] = new VarDecl((*formalIter)->t, (*formalIter)->i);
+            (*formalIter)->visit();
+
+        }
     }
 
     //evaluate Variable Declarations
     std::list<VarDecl *>::iterator varIter;
-    std::cout << "^btfn (var Start)" << std::endl;
     for(varIter = vl->begin(); varIter != vl->end(); varIter++){
-        std::cout << "^agg (var Start)" << std::endl;
-        (*varIter)->visit();
-    std::cout << "^csces (var Start)" << std::endl;
-    }
+        std::string varName = (*varIter)->i->toString();
 
+        //type check locals
+        if(localVariables.count(varName)){
+            std::cerr << "Type Violation in Line " << lineno << " : error: duplicate local variable: " << varName << std::endl;
+            type_error = true;
+        } else {
+            localVariables[varName] = *varIter;
+            type_local_scope[varName] = *varIter;
+            (*varIter)->visit();
+        }
+    }
+    
     //evaluate Statement Declarations
     std::list<Statement *>::iterator stmtIter;
-    std::cout << "^btfn (stmt Start)" << std::endl;
     for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
-        std::cout << "^agg (stmt Start)" << std::endl;
         (*stmtIter)->visit();
-    std::cout << "^csces (stmt Start)" << std::endl;
     }
 
-    //evaluate Expression
-    std::cout << "firing last expr statement\n";
-    int result = e->visit();
+    //evaluate return Expression
+    if(t->getType() != e->visit()) {
+        std::cerr << "Type Violation in Line " << lineno << " : error: incompatible return types" << std::endl;
+        type_error = true;
+    }
 }
 
 /******************    CLASS DECLARATION SUB-CLASS    ************/
-ClassDeclSimple::ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml): i(i), vl(vl), ml(ml) {}
+ClassDeclSimple::ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml, int lineno): i(i), vl(vl), ml(ml), lineno(lineno) {}
 void ClassDeclSimple::visit() {
     PRINTDEBUG("(ClassDeclSimple)")
-    std::cout << "(ClassDeclSimple)----->" << i->visit() << std::endl;    
-    classTable[i->visit()] = this;
+
+    //init class scope
+    type_class_scope.clear();
 
     //evaluate Variable Declarations
     std::list<VarDecl *>::iterator varDeclIter;
     for(varDeclIter = vl->begin(); varDeclIter != vl->end(); varDeclIter++){
-        (*varDeclIter)->visit();
+        std::string fieldName = (*varDeclIter)->i->toString();
+        
+        //type check variable
+        if(fieldVariables.count(fieldName)){
+            std::cerr << "Type Violation in Line " << lineno << " : error: duplicate field: " << fieldName << std::endl;
+            type_error = true;
+        } else {
+            fieldVariables[fieldName] = *varDeclIter;
+            type_class_scope[fieldName] = *varDeclIter;
+            (*varDeclIter)->visit();
+        }
+
     }
 
     //evaluate Method Declarations
     std::list<MethodDecl *>::iterator methodDeclIter;
     for(methodDeclIter = ml->begin(); methodDeclIter != ml->end(); methodDeclIter++){
-        (*methodDeclIter)->visit();
+        std::string methodName = (*methodDeclIter)->i->toString();
+
+        //type check method
+        if(methods.count(methodName)){
+            std::cerr << "Type Violation in Line " << lineno << " : error: duplicate method: " << methodName << std::endl;
+            type_error = true;
+        } else {
+            methods[methodName] = *methodDeclIter;
+            (*methodDeclIter)->visit();
+        }
+
     }
 
 }
+std::string ClassDeclSimple::getName() {
+    return i->toString();
+}
 
-ClassDeclExtends::ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml): i(i), j(j), vl(vl), ml(ml) {}
+ClassDeclExtends::ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml, int lineno): i(i), j(j), vl(vl), ml(ml), lineno(lineno) {}
 void ClassDeclExtends::visit() {
     PRINTDEBUG("(ClassDeclExtends)")
     std::cout << "(ClassDeclExtends)" << std::endl;
 }
+std::string ClassDeclExtends::getName() {
+    return i->toString();
+}
+
 
 /*******************    MAIN CLASS    ****************************/
 MainClass::MainClass(Identifier *i1, Identifier *i2, Statement *s): i1(i1), i2(i2), s(s) {}
 void MainClass::visit() {
     //evaluate Identifiers
-    i1->visit();
-    i2->visit();
+    i1->toString();
+    i2->toString();
 
     //evaluate Statement
     s->visit();
@@ -469,14 +523,26 @@ void MainClass::visit() {
 };
 
 /*******************    PROGRAM CLASS ****************************/
-Program::Program(MainClass *m, std::list<ClassDecl *> *cl): m(m), cl(cl) {}
+Program::Program(MainClass *m, std::list<ClassDecl *> *cl, int lineno): m(m), cl(cl), lineno(lineno) {}
 void Program::visit() {
     PRINTDEBUG("\n^ (Program Start)...\n")
     
+    //load main class name into global variable
+    mainClassName = m->i1->toString();
+
     //evaluate ClassDeclarations
     std::list<ClassDecl *>::iterator classDeclIter;
     for(classDeclIter = cl->begin(); classDeclIter != cl->end(); classDeclIter++){
-        (*classDeclIter)->visit();
+        std::string className = (*classDeclIter)->getName();
+
+        //type check class
+        if(classTable.count(className) || className.compare(mainClassName) == 0){
+            std::cerr << "Type Violation in Line " << lineno << " : error: duplicate class: " << className << std::endl;
+            type_error = true;
+        } else {
+            classTable[className] = (*classDeclIter);
+            (*classDeclIter)->visit();
+        }
     }
 
     //evaluate MainClass    
@@ -489,5 +555,3 @@ void Program::visit() {
     PRINTDEBUG("\n...(Program End Type Check Completed Gracefully) $")
 };
 
-std::map<std::string, int> varTable;
-std::map<std::string, ClassDeclSimple *> classTable;
