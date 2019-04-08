@@ -165,8 +165,10 @@ protected:
     Exp * e;
     Identifier * i;
     std::list<Exp *> * el;
+    int lineno;
+
 public:
-    Call(Exp *e, Identifier *i, std::list<Exp *> *el);
+    Call(Exp *e, Identifier *i, std::list<Exp *> *el, int lineno);
     std::string visit();
 };
 
@@ -396,18 +398,19 @@ public:
 /*******************    METHOD CLASS    ****************************/
 class MethodDecl {
 protected:
-    Type *t;
-    std::list<Formal *> *fl;
+    Exp *e; //return expr
     std::list<VarDecl *> *vl;
     std::list<Statement *> *sl;
-    Exp *e;
     int lineno;
 
     std::map<std::string, VarDecl *> localVariables;
     std::map<std::string, Formal *> parameters;
 
 public:
-    Identifier *i;
+    Type *t; //return type
+    Identifier *i; //method id
+    std::list<Formal *> *fl;
+    
     MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl, std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e, int lineno);
     void visit();
 };

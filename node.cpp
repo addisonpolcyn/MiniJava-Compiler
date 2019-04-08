@@ -190,14 +190,65 @@ std::string ArrayLength::visit() {
     return "int";
 }
 
-Call::Call(Exp *e, Identifier *i, std::list<Exp *> *el): e(e), i(i), el(el) {}
+Call::Call(Exp *e, Identifier *i, std::list<Exp *> *el, int lineno): e(e), i(i), el(el), lineno(lineno) {}
 std::string Call::visit() {
     PRINTDEBUG("(Call)")
-    //ClassDeclSimple *cl = classTable["Factorial"];
-    //cl->visit();
-    std::cout << "(Call)MODIFY THIS TO RETURN DYNAMIC RETURN TYPES" << std::endl;
+    std::string objectType = e->visit();
     
-    return "int";
+    //check if class object type exists
+    if(!classTable.count(objectType)){
+        std::cerr << "Type Violation in Line " << lineno << " : error cannot find class:" << objectType << std::endl;
+        type_error = true;
+        return "";
+    }
+    ClassDecl *cl = classTable[objectType];
+    std::string methodName = i->toString();
+    std::map<std::string, MethodDecl *> methods = cl->methods;
+    
+    //check if method exists
+    if(!methods.count(methodName)){
+        std::cerr << "Type Violation in Line " << lineno << " : error method:" << methodName << " does not belong to class:" << objectType << std::endl;
+        type_error = true;
+        return "";
+    }
+    MethodDecl *method = methods[methodName];
+    std::list<Formal *> *fl = method->fl;
+
+    //check if arguments size matches parameters size
+    int defSize = fl->size();
+    int argSize = el->size();
+    std::cout << "recieved:" << defSize << argSize;
+    if(defSize != argSize) {
+        std::cerr << "Type Violation in Line " << lineno << " : error expected:" << defSize << " argument(s) but recieved:" << argSize << std::endl;
+        type_error = true;
+        return "";
+    }
+    
+    std::cerr << "danGER :DANGER: IN CALL IN NODE.CPP NO PARAMETERS EXPLIST FOR METHOD CALL CHECKING" << std::endl;
+    //check if parameters are valid
+    /*
+    
+    std::list<Formal *> *fl = methods->fl;
+
+
+    std::list<Formal *>::iterator formalIter;
+    for(formalIter = fl->begin(); formalIter != fl->end(); formalIter++){
+        std::string paramName = (*formalIter)->i->toString();
+        
+        //type check parameter 
+        if(parameters.count(paramName)){
+            std::cerr << "Type Violation in Line " << lineno << " : error: duplicate parameter: " << paramName << std::endl;
+            type_error = true;
+        } else {
+            parameters[paramName] = *formalIter;
+            type_local_scope[paramName] = new VarDecl((*formalIter)->t, (*formalIter)->i);
+            (*formalIter)->visit();
+
+        }
+    }
+    */
+    std::string returnType = method->t->getType();
+    return returnType;
 }
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
@@ -524,7 +575,7 @@ void Program::visit() {
         std::string className = (*classDeclIter)->getName();
 
         //type check class
-        if(classTable.count(className) || className.compare(mainClassName) == 0){
+        if(classTable.count(className) || className == mainClassName){
             std::cerr << "Type Violation in Line " << lineno << " : error: duplicate class: " << className << std::endl;
             type_error = true;
         } else {

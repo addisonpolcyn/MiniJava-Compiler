@@ -6,7 +6,7 @@
 #include "node.h"
 
 #define YYDEBUG 1
-#define PRINTDEBUG(x)  //std::cout << x; // comment out print statement to remove the printing
+#define PRINTDEBUG(x) std::cout << x; // comment out print statement to remove the printing
 
 //root of AST
 Program *root;
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 
 /* Lists */
 %type <classDeclList> ClassDeclList
-%type <expList> ExpList
+%type <expList> ExpList ExpRestList
 %type <formalList> FormalList FormalRestList
 %type <methodDeclList> MethodDeclList
 %type <stmtList> StatementList
@@ -283,7 +283,7 @@ J_Exp:
 K_Exp:
         K_Exp DOT LENGTH { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp dot length\n") }
         |
-        K_Exp DOT ID OPARANTHESIS ExpList EPARANTHESIS { $$ = new Call($1, new Identifier($3), $5); 
+        K_Exp DOT ID OPARANTHESIS ExpList EPARANTHESIS { $$ = new Call($1, new Identifier($3), $5, yylineno); 
         PRINTDEBUG("call exp #########################3\n") }
         |
         L_Exp
@@ -320,17 +320,17 @@ Object:
         ;
 
 ExpList:
-        Exp ExpRestList { PRINTDEBUG("@@@@@@@@@@gubub&*^%#TESTTESTTESTTESTTEST> exp exprest list\n") } 
+        Exp ExpRestList { PRINTDEBUG("@@@@@@@@@@gubub&*^%#TESTTESTTESTTESTTEST> exp exprest list\n") $2->push_back($1); } 
         | /* Empty */ { $$ = new std::list<Exp *>(); PRINTDEBUG("explist empty, creating new list") }
         ;
 
 ExpRest:
         COMMA Exp { PRINTDEBUG("@@@@@@@@@@@@@@@@TESTTESTESTESTESTES> exprest comma\n")
-        /*$$->push_back($2); std::cout << "loaded up classdecl list push\n";*/ }
+        std::cout << "loaded up exp list push\n"; }
         ;
 
 ExpRestList:
-        ExpRestList ExpRest { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprestlist") } 
+        ExpRestList ExpRest { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprestlist") }  
         | /* Empty */
         ;
 
