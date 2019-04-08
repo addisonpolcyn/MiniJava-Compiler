@@ -131,8 +131,8 @@ ClassDecl:
         ;
 
 ClassDeclList:
-        ClassDeclList ClassDecl { PRINTDEBUG("class list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n"); $$ = $1; $1->push_back($2); PRINTDEBUG("loaded up classdecl list push\n") }
-        | /* Empty */  { PRINTDEBUG("class list wanted DOWNSTREAM EMPTY\n"); $$ = new std::list<ClassDecl *>(); PRINTDEBUG("alocated new list\n") }
+        ClassDeclList ClassDecl { PRINTDEBUG("class list wanted upstream"); $$ = $1; $1->push_back($2); PRINTDEBUG("loaded up classdecl list push\n") }
+        | /* Empty */  { PRINTDEBUG("class list wanted DOWNSTREAM EMPTY"); $$ = new std::list<ClassDecl *>(); PRINTDEBUG("alocated new list") }
         ;
 
 VarDecl:
@@ -157,8 +157,7 @@ MethodDeclList:
         ;
 
 FormalList:
-        Type ID FormalRestList { $$ = $3; $$->push_back(new Formal($1, new Identifier($2)));
-        PRINTDEBUG("Wrapping up formal list\n") }
+        Type ID FormalRestList { $$ = $3; $$->push_back(new Formal($1, new Identifier($2))); PRINTDEBUG("Wrapping up formal list\n") }
         | { $$ = new std::list<Formal *>(); PRINTDEBUG("formlist empty creating dummy list ##############") }
         ;
 
@@ -167,9 +166,8 @@ FormalRest:
         ;
 
 FormalRestList:
-        FormalRestList FormalRest { $$ = $1; $$->push_back($2); /*$$=$1; $1->push_back($2); PRINTDEBUG("fired formal @@@@@@@@@@@@@@@2\n") */ ; 
-        PRINTDEBUG("formal rest list list wanted upstream ??????????????????????????\n") }
-        | { $$ = new std::list<Formal *>(); PRINTDEBUG("formal list finished_____________") }
+        FormalRestList FormalRest { $$ = $1; $$->push_back($2); PRINTDEBUG("fired formal") }
+        | { $$ = new std::list<Formal *>(); PRINTDEBUG("formal list finished") }
         ;
 
 PrimeType:
