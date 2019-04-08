@@ -13,7 +13,7 @@ std::map<std::string, VarDecl *> type_class_scope;  //map of fields in current c
 std::map<std::string, VarDecl *> type_local_scope;  //map of variables in current scope inlcuding current class variables and method variables
 
 std::map<std::string, std::string> scope_type;
-std::map<std::string, void *> scope;
+std::map<std::string, int> scope;
 
 /*******************    IDENTIFIER CLASS    *********************/
 Identifier::Identifier(const std::string str): id(str) {}
@@ -35,9 +35,11 @@ std::string And::visit() {
     return "boolean";
 }
 void * And::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = 0;
+    if(*(int *)lhs->evaluate() && *(int *)rhs->evaluate()){
+        result = 1;
+    }
+    void *ptr = &result;
     return ptr;
 }
 
@@ -54,9 +56,11 @@ std::string Or::visit() {
     return "boolean";
 }
 void * Or::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = 0;
+    if(*(int *)lhs->evaluate() || *(int *)rhs->evaluate()){
+        result = 1;
+    }
+    void *ptr = &result;
     return ptr;
 }
 
@@ -73,9 +77,11 @@ std::string Is::visit() {
     return "boolean";
 }
 void * Is::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = 0;
+    if(*(int *)lhs->evaluate() == *(int *)rhs->evaluate()){
+        result = 1;
+    }
+    void *ptr = &result;
     return ptr;
 }
 
@@ -92,9 +98,11 @@ std::string IsNot::visit() {
     return "boolean";
 }
 void * IsNot::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = 0;
+    if(*(int *)lhs->evaluate() != *(int *)rhs->evaluate()){
+        result = 1;
+    }
+    void *ptr = &result;
     return ptr;
 }
 
@@ -111,9 +119,11 @@ std::string LessThan::visit() {
     return "boolean";
 }
 void * LessThan::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = 0;
+    if(*(int *)lhs->evaluate() < *(int *)rhs->evaluate()){
+        result = 1;
+    }
+    void *ptr = &result;
     return ptr;
 }
 
@@ -130,9 +140,11 @@ std::string LessThanEqual::visit() {
     return "boolean";
 }
 void * LessThanEqual::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = 0;
+    if(*(int *)lhs->evaluate() <= *(int *)rhs->evaluate()){
+        result = 1;
+    }
+    void *ptr = &result;
     return ptr;
 }
 
@@ -149,9 +161,11 @@ std::string GreaterThan::visit() {
     return "boolean";
 }
 void * GreaterThan::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = 0;
+    if(*(int *)lhs->evaluate() > *(int *)rhs->evaluate()){
+        result = 1;
+    }
+    void *ptr = &result;
     return ptr;
 }
 
@@ -168,9 +182,11 @@ std::string GreaterThanEqual::visit() {
     return "boolean";
 }
 void * GreaterThanEqual::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = 0;
+    if(*(int *)lhs->evaluate() >= *(int *)rhs->evaluate()){
+        result = 1;
+    }
+    void *ptr = &result;
     return ptr;
 }
 
@@ -188,9 +204,8 @@ std::string Plus::visit() {
 
 }
 void * Plus::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = *(int *)lhs->evaluate() + *(int *)rhs->evaluate();
+    void *ptr = &result;
     return ptr;
 }
 
@@ -208,9 +223,8 @@ std::string Minus::visit() {
 
 }
 void * Minus::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = *(int *)lhs->evaluate() || *(int *)rhs->evaluate();
+    void *ptr = &result;
     return ptr;
 }
 
@@ -227,9 +241,8 @@ std::string Times::visit() {
     return "int";
 }
 void * Times::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = *(int *)lhs->evaluate() * *(int *)rhs->evaluate();
+    void *ptr = &result;
     return ptr;
 }
 
@@ -246,9 +259,8 @@ std::string Div::visit() {
     return "int";
 }
 void * Div::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    int result = *(int *)lhs->evaluate() / *(int *)rhs->evaluate();
+    void *ptr = &result;
     return ptr;
 }
 
@@ -359,7 +371,7 @@ void * Call::evaluate() {
         std::string expr_Type = (*expIter)->visit();
         void * expr_value = (*expIter)->evaluate();
         
-        scope[key] = expr_value;
+        scope[key] = *(int *)expr_value;
         scope_type[key] = expr_Type;
         expIter++;
     }
@@ -415,7 +427,10 @@ std::string IdentifierExp::visit() {
     return type_local_scope[id]->t->getType();
 }
 void * IdentifierExp::evaluate() {
-    return scope[id];
+    PRINTDEBUG("(IdentifierExp)")
+    int val = scope[id];
+    void * ptr = &val;
+    return ptr;
 }
 
 NewArray::NewArray(Exp *e): e(e) {}
@@ -451,8 +466,10 @@ std::string Not::visit() {
     return "boolean";
 }
 void * Not::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
+    int val = 0;
+    if(*(int *)e->evaluate() == 0) {
+        val = 1;
+    }
     void *ptr = &val;
     return ptr;
 }
@@ -467,8 +484,7 @@ std::string NegativeExp::visit() {
     return "int";
 }
 void * NegativeExp::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
+    int val = -(*(int *)e->evaluate());
     void *ptr = &val;
     return ptr;
 }
@@ -483,8 +499,7 @@ std::string PositiveExp::visit() {
     return "int";
 }
 void * PositiveExp::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
+    int val = -(*(int *)e->evaluate());
     void *ptr = &val;
     return ptr;
 }
@@ -600,8 +615,15 @@ void Assign::visit() {
     }
 }
 void Assign::evaluate() {
-
-    PRINTDEBUG("(Statment Evaluation Broken)")
+//    std::cout << "value of asssign exp:" << *(int *)e->evaluate() << " for:" << i->toString();
+  //  std::cout << "value of asssign exp:" << e->evaluate() << " for:" << i->toString();
+    //void * ptr = e->evaluate();
+    int val = *(int *)e->evaluate();
+    //std::cout << "OICINEOCN    >" << val << "< OCINECEINC>";
+    scope[i->toString()] = val;
+    
+    //std::cout << "value of asssign  AFTER exp:" << *(int *)ptr << " for:" << i->toString();
+    //std::cout << "value of asssign  AFTER exp:" << scope[i->toString()] << " for:" << i->toString();
 }
 
 ArrayAssign::ArrayAssign(Identifier *i, Exp *e1, Exp *e2): i(i), e1(e1), e2(e2) {}
