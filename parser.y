@@ -6,7 +6,7 @@
 #include "node.h"
 
 #define YYDEBUG 1
-#define PRINTDEBUG(x) std::cout << x; // comment out print statement to remove the printing
+#define PRINTDEBUG(x)  //std::cout << x; // comment out print statement to remove the printing
 
 //root of AST
 Program *root;
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
     fclose(yyin);
 
     /* Traverse AST */
-    root->evaluate();
+    root->visit();
 
     /* Finish */
     return 0;
@@ -189,15 +189,15 @@ Type:
 Statement:
         OBRACE StatementList EBRACE { PRINTDEBUG("fired statementList ################") $$ = new Block($2); }
         |
-        IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement { $$ = new If($3, $5, $7); PRINTDEBUG("fired If #############\n") }
+        IF OPARANTHESIS Exp EPARANTHESIS Statement ELSE Statement { $$ = new If($3, $5, $7, yylineno); PRINTDEBUG("fired If #############\n") }
         |
-        WHILE OPARANTHESIS Exp EPARANTHESIS Statement { $$ = new While($3, $5); PRINTDEBUG("fired While #############\n") }
+        WHILE OPARANTHESIS Exp EPARANTHESIS Statement { $$ = new While($3, $5, yylineno); PRINTDEBUG("fired While #############\n") }
         |
-        PRINTLN OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Println($3); PRINTDEBUG("fired Println #############\n") }
+        PRINTLN OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Println($3, yylineno); PRINTDEBUG("fired Println #############\n") }
         |
         PRINTLN OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { $$ = new PrintStringln($3); PRINTDEBUG("fired println Stringlit ############") }
         |
-        PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Print($3); PRINTDEBUG("fired Print #############\n") }
+        PRINT OPARANTHESIS Exp EPARANTHESIS SEMICOLON { $$ = new Print($3, yylineno); PRINTDEBUG("fired Print #############\n") }
         |
         PRINT OPARANTHESIS STRING_LITERAL EPARANTHESIS SEMICOLON { $$ = new PrintString($3); PRINTDEBUG("fired print string lit ################") }
         |
@@ -223,59 +223,59 @@ Index:
        ;
 
 Exp: 
-        Exp OR T_Exp { $$ = new Or($1, $3); PRINTDEBUG("fired exp OR #################\n") }
+        Exp OR T_Exp { $$ = new Or($1, $3, yylineno); PRINTDEBUG("fired exp OR #################\n") }
         |
         T_Exp
         ;
 
 T_Exp:
-        T_Exp AND F_Exp { $$ = new And($1, $3); PRINTDEBUG("fired And #############\n") }
+        T_Exp AND F_Exp { $$ = new And($1, $3, yylineno); PRINTDEBUG("fired And #############\n") }
         |
         F_Exp
         ;
 
 F_Exp:
-        F_Exp IS G_Exp { $$ = new Is($1, $3); PRINTDEBUG("fired exp == #################\n") }
+        F_Exp IS G_Exp { $$ = new Is($1, $3, yylineno); PRINTDEBUG("fired exp == #################\n") }
         |
-        F_Exp ISNOT G_Exp { $$ = new IsNot($1, $3); PRINTDEBUG("fired exp != #################\n") }
+        F_Exp ISNOT G_Exp { $$ = new IsNot($1, $3, yylineno); PRINTDEBUG("fired exp != #################\n") }
         |
         G_Exp
         ;
 
 G_Exp:
-        G_Exp LESS H_Exp { $$ = new LessThan($1, $3); PRINTDEBUG("fired Less #############\n") }
+        G_Exp LESS H_Exp { $$ = new LessThan($1, $3, yylineno); PRINTDEBUG("fired Less #############\n") }
         |
-        G_Exp LESSTHANEQUAL H_Exp { $$ = new LessThanEqual($1, $3); PRINTDEBUG("fired lessthanequl #############\n") }
+        G_Exp LESSTHANEQUAL H_Exp { $$ = new LessThanEqual($1, $3, yylineno); PRINTDEBUG("fired lessthanequl #############\n") }
         |
-        G_Exp GREATER H_Exp { $$ = new GreaterThan($1, $3); PRINTDEBUG("fired greater ###############\n") }
+        G_Exp GREATER H_Exp { $$ = new GreaterThan($1, $3, yylineno); PRINTDEBUG("fired greater ###############\n") }
         |
-        G_Exp GREATERTHANEQUAL H_Exp { $$ = new GreaterThanEqual($1, $3); PRINTDEBUG("fired greaterthanequal ###############\n") }
+        G_Exp GREATERTHANEQUAL H_Exp { $$ = new GreaterThanEqual($1, $3, yylineno); PRINTDEBUG("fired greaterthanequal ###############\n") }
         |
         H_Exp
         ;
 
 H_Exp:
-        H_Exp PLUS I_Exp { $$ = new Plus($1, $3); PRINTDEBUG("fired Plus #############\n") }
+        H_Exp PLUS I_Exp { $$ = new Plus($1, $3, yylineno); PRINTDEBUG("fired Plus #############\n") }
         |
-        H_Exp MINUS I_Exp { $$ = new Minus($1, $3); PRINTDEBUG("fired Minus #############\n") }
+        H_Exp MINUS I_Exp { $$ = new Minus($1, $3, yylineno); PRINTDEBUG("fired Minus #############\n") }
         |
         I_Exp
         ;
 
 I_Exp:
-        I_Exp TIMES J_Exp { $$ = new Times($1, $3); PRINTDEBUG("fired Times #############\n") }
+        I_Exp TIMES J_Exp { $$ = new Times($1, $3, yylineno); PRINTDEBUG("fired Times #############\n") }
         |
-        I_Exp SLASH J_Exp { $$ = new Div($1, $3); PRINTDEBUG("fired exp division ##############\n") }
+        I_Exp SLASH J_Exp { $$ = new Div($1, $3, yylineno); PRINTDEBUG("fired exp division ##############\n") }
         |
         J_Exp
         ;
 
 J_Exp:
-        PLUS K_Exp { $$ = new PositiveExp($2); PRINTDEBUG("fired exp (+) #############\n") }
+        PLUS K_Exp { $$ = new PositiveExp($2, yylineno); PRINTDEBUG("fired exp (+) #############\n") }
         |
-        MINUS K_Exp  { $$ = new NegativeExp($2); PRINTDEBUG("fired exp (-) ##############\n") }
+        MINUS K_Exp  { $$ = new NegativeExp($2, yylineno); PRINTDEBUG("fired exp (-) ##############\n") }
         |
-        NOT K_Exp { $$ = new Not($2); PRINTDEBUG("fired Not #############\n") }
+        NOT K_Exp { $$ = new Not($2, yylineno); PRINTDEBUG("fired Not #############\n") }
         |
         K_Exp
         ;

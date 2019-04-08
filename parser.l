@@ -246,7 +246,8 @@ false {
 }
 \"[^\n^\r]*\" {
     PRINTDEBUG(yytext)
-    yylval.str = strdup(yytext);
+    yytext[strlen(yytext)-1] = 0;
+    yylval.str = strdup(yytext+1);
     return STRING_LITERAL;
 }
 
