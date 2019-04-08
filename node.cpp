@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 #include "node.h"
-#define PRINTDEBUG(x) std::cout << x << std::endl; // comment out print statement to remove the printing
+#define PRINTDEBUG(x) //std::cout << x << std::endl; // comment out print statement to remove the printing
 
 bool type_error = false;    //boolean value true denotes type_error present in Tree, false Tree syntax is type valid
 std::string mainClassName;  //string name of the main class 
@@ -370,8 +370,8 @@ void * Call::evaluate() {
         std::string key = (*formalIter)->i->toString();
         std::string expr_Type = (*expIter)->visit();
         void * expr_value = (*expIter)->evaluate();
-        
-        scope[key] = *(int *)expr_value;
+        int val = *(int *)(*expIter)->evaluate();
+        scope[key] = val;
         scope_type[key] = expr_Type;
         expIter++;
     }
