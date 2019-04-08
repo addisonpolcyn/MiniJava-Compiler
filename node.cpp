@@ -12,270 +12,261 @@ std::map<std::string, ClassDecl *> classTable;      //map of classes in program
 std::map<std::string, VarDecl *> type_class_scope;  //map of fields in current class scope
 std::map<std::string, VarDecl *> type_local_scope;  //map of variables in current scope inlcuding current class variables and method variables
 
+
 /*******************    IDENTIFIER CLASS    *********************/
 Identifier::Identifier(const std::string str): id(str) {}
 std::string Identifier::toString() {
-    //std::cout << "Identifier:" << id << std::endl;
     return id;
 }
 
 /*******************    EXP SUB-CLASSES    ****************************/
 And::And(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno)  {}
-Types And::visit() {
+std::string And::visit() {
     PRINTDEBUG("(And)");
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
     
-    if(left != Boolean || right != Boolean) {
+    if(left != "boolean" || right != "boolean") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '&&'" << std::endl;
         type_error = true;
     }
-    return Boolean;
+    return "boolean";
 }
 
 Or::Or(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types Or::visit() {
+std::string Or::visit() {
     PRINTDEBUG("(Or)");
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
     
-    if(left != Boolean || right != Boolean) {
+    if(left != "boolean" || right != "boolean") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '||'" << std::endl;
         type_error = true;
     }
-    return Boolean;
+    return "boolean";
 }
 
 Is::Is(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types Is::visit() {
+std::string Is::visit() {
     PRINTDEBUG("(Is)");
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
     
     if(left != right) {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types for binary operator '=='" << std::endl;
         type_error = true;
     }
-    return Boolean;
+    return "boolean";
 }
 
 IsNot::IsNot(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types IsNot::visit() {
+std::string IsNot::visit() {
     PRINTDEBUG("(IsNot)")
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
     
     if(left != right) {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types for binary operator '!='" << std::endl;
         type_error = true;
     }
-    return Boolean;
+    return "boolean";
 }
 
 LessThan::LessThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types LessThan::visit() {
+std::string LessThan::visit() {
     PRINTDEBUG("(LessThan)")
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
     
-    if(left != Integer || right != Integer) {
+    if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '<'" << std::endl;
         type_error = true;
     }
-    return Boolean;
+    return "boolean";
 }
 
 LessThanEqual::LessThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types LessThanEqual::visit() {
+std::string LessThanEqual::visit() {
     PRINTDEBUG("LessThanEqual)")
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
 
-    if(left != Integer || right != Integer) {
+    if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '<='" << std::endl;
         type_error = true;
     }
-    return Boolean;
+    return "boolean";
 }
 
 GreaterThan::GreaterThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types GreaterThan::visit() {
+std::string GreaterThan::visit() {
     PRINTDEBUG("(GreaterThan)")
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
 
-    if(left != Integer || right != Integer) {
+    if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '>'" << std::endl;
         type_error = true;
     }
-    return Boolean;
+    return "boolean";
 }
 
 GreaterThanEqual::GreaterThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types GreaterThanEqual::visit() {
+std::string GreaterThanEqual::visit() {
     PRINTDEBUG("(GreaterThanEqual)")
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
 
-    if(left != Integer || right != Integer) {
+    if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '>='" << std::endl;
         type_error = true;
     }
-    return Boolean;
+    return "boolean";
 }
 
 Plus::Plus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types Plus::visit() {
+std::string Plus::visit() {
     PRINTDEBUG("(Plus)")
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
     
-    if(left != Integer || right != Integer) {
+    if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '+'" << std::endl;
         type_error = true;
     }
-    return Integer;
+    return "int";
 
 }
 
 Minus::Minus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types Minus::visit() {
+std::string Minus::visit() {
     PRINTDEBUG("(Minus)")
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
     
-    if(left != Integer || right != Integer) {
+    if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '-'" << std::endl;
         type_error = true;
     }
-    return Integer;
+    return "int";
 
 }
 
 Times::Times(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types Times::visit() {
+std::string Times::visit() {
     PRINTDEBUG("(Times)")
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
     
-    if(left != Integer || right != Integer) {
+    if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '*'" << std::endl;
         type_error = true;
     }
-    return Integer;
+    return "int";
 }
 
 Div::Div(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types Div::visit() {
+std::string Div::visit() {
     PRINTDEBUG("(Div)")
-    Types left = lhs->visit();
-    Types right = rhs->visit();
+    std::string left = lhs->visit();
+    std::string right = rhs->visit();
     
-    if(left != Integer || right != Integer) {
+    if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '/'" << std::endl;
         type_error = true;
     }
-    return Integer;
+    return "int";
 }
 
 ArrayLookup::ArrayLookup(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
-Types ArrayLookup::visit() {
-    PRINTDEBUG("(ArrayLookup) NEEDS TO BE IMPLEMENTED")
-    //std::cout << "(ArrayLookup) exit XXXXXXXXXXX" << std::endl;
-    //exit(1);
-    return Integer;
+std::string ArrayLookup::visit() {
+    PRINTDEBUG("(ArrayLookup)")
+    return "int";
 }
 
 ArrayLength::ArrayLength(Exp *e): e(e) {}
-Types ArrayLength::visit() {
+std::string ArrayLength::visit() {
     PRINTDEBUG("(ArrayLength)")
-    //std::cout << "(ArrLength) exit XXXXXXXXXXX" << std::endl;
-    //exit(1);
-    return Integer;
+    return "int";
 }
 
 Call::Call(Exp *e, Identifier *i, std::list<Exp *> *el): e(e), i(i), el(el) {}
-Types Call::visit() {
+std::string Call::visit() {
     PRINTDEBUG("(Call)")
     //ClassDeclSimple *cl = classTable["Factorial"];
     //cl->visit();
     std::cout << "(Call)MODIFY THIS TO RETURN DYNAMIC RETURN TYPES" << std::endl;
     
-    return Integer;
+    return "int";
 }
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
-Types IntegerLiteral::visit() {
+std::string IntegerLiteral::visit() {
     PRINTDEBUG("(IntegerLiteral)")
-    return Integer;
+    return "int";
 }
 
-Types True::visit() {
+std::string True::visit() {
     PRINTDEBUG("(True)")
-    return Boolean;
+    return "boolean";
 }
 
-Types False::visit() {
+std::string False::visit() {
     PRINTDEBUG("(False)")
-    return Boolean;
+    return "boolean";
 }
 
-Types This::visit() {
-    PRINTDEBUG("(This)")
-    //std::cout << "(This) exiting XXXXXXXXXXXx" << std::endl;
-    //exit(1);
-    return Object;
+std::string This::visit() {
+    PRINTDEBUG("(This) XXXXX")
+    return "THIS";
 }
 
 IdentifierExp::IdentifierExp(std::string str): id(str) {}
-Types IdentifierExp::visit() {
+std::string IdentifierExp::visit() {
     PRINTDEBUG("(IdentifierExp)")
     return type_local_scope[id]->t->getType();
 }
 
 NewArray::NewArray(Exp *e): e(e) {}
-Types NewArray::visit() {
+std::string NewArray::visit() {
     PRINTDEBUG("(NewArray)")
-    //std::cout << "(NewArray)XXXXXXXx" << std::endl;
-    //exit(1);
-    return Array;
+    return "int []";
 }
 
 NewObject::NewObject(Identifier *i): i(i) {}
-Types NewObject::visit() {
+std::string NewObject::visit() {
     PRINTDEBUG("(NewObject)")
-    //exit(1);
-    return Object;
+    return i->toString();
 }
 
 Not::Not(Exp *e, int lineno): e(e), lineno(lineno) {}
-Types Not::visit() {
+std::string Not::visit() {
     PRINTDEBUG("(Not)")
-    if(e->visit() != Boolean) {
+    if(e->visit() != "boolean") {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types for binary operator '!'" << std::endl;
         type_error = true;
     }
-    return Boolean;
+    return "boolean";
 }
 
 NegativeExp::NegativeExp(Exp *e, int lineno): e(e), lineno(lineno) {}
-Types NegativeExp::visit() {
+std::string NegativeExp::visit() {
     PRINTDEBUG("(NegativeExp)")
-    if(e->visit() != Integer) {
+    if(e->visit() != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types for binary operator '-'" << std::endl;
         type_error = true;
     }
-    return Integer;
+    return "int";
 }
 
 PositiveExp::PositiveExp(Exp *e, int lineno): e(e), lineno(lineno) {}
-Types PositiveExp::visit() {
+std::string PositiveExp::visit() {
     PRINTDEBUG("(PositiveExp)")
-    if(e->visit() != Integer) {
+    if(e->visit() != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types for binary operator '+'" << std::endl;
         type_error = true;
     }
-    return Integer;
+    return "int";
 }
 
 /*******************    STATEMENT CLASS    ****************************/
@@ -293,9 +284,8 @@ void Block::visit() {
 If::If(Exp *e, Statement *s1, Statement *s2, int lineno): e(e), s1(s1), s2(s2), lineno(lineno) {}
 void If::visit() {
     PRINTDEBUG("(If)")
-    Types result = e->visit();
 
-    if(result != Boolean) {
+    if(e->visit() != "boolean") {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types" << std::endl;
         type_error = true;
     }
@@ -303,9 +293,7 @@ void If::visit() {
 
 While::While(Exp *e, Statement *s, int lineno): e(e), s(s), lineno(lineno) {} 
 void While::visit() {
-    int result = e->visit();
-    
-    if(result != Boolean) {
+    if(e->visit() != "boolean") {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types" << std::endl;
         type_error = true;
     }
@@ -314,7 +302,7 @@ void While::visit() {
 
 Print::Print(Exp *e, int lineno): e(e), lineno(lineno) {}
 void Print::visit() {
-    if(e->visit() != Integer) {
+    if(e->visit() != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types" << std::endl;
         type_error = true;
     }
@@ -324,7 +312,7 @@ void Print::visit() {
 Println::Println(Exp *e, int lineno): e(e), lineno(lineno) {}
 void Println::visit() {
     PRINTDEBUG("(Println)");
-    if(e->visit() != Integer) {
+    if(e->visit() != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types" << std::endl;
         type_error = true;
     }
@@ -345,7 +333,7 @@ void Assign::visit() {
     PRINTDEBUG("(Assign)")
     
     VarDecl *var = type_local_scope[i->toString()];
-    if(var->t->getType() != e->visit()) {
+    if(var->t->getType() != (e->visit())) {
         std::cerr << "Type Violation in Line " << lineno << " : invalid assignment type" << std::endl;
         type_error = true;
     }
@@ -358,25 +346,25 @@ void ArrayAssign::visit() {
 }
 
 /*******************    TYPE CLASS    ****************************/
-Types IntArrayType::getType() {
+std::string IntArrayType::getType() {
     PRINTDEBUG("(IntArrayType)")
-    return Array;
+    return "int []";
 }
 
-Types BooleanType::getType() {
+std::string BooleanType::getType() {
     PRINTDEBUG("(BooleanType)")
-    return Boolean;
+    return "boolean";
 }
 
-Types IntegerType::getType() {
+std::string IntegerType::getType() {
     PRINTDEBUG("(IntegerType)")
-    return Integer;
+    return "int";
 }
 
 IdentifierType::IdentifierType(const std::string s): str(s) {}
-Types IdentifierType::getType() {
+std::string IdentifierType::getType() {
     PRINTDEBUG("(IdentifierType)")
-    return Object;
+    return str;
 }
 
 /*******************    VAR CLASS    ****************************/
@@ -447,7 +435,7 @@ void MethodDecl::visit() {
     }
 
     //evaluate return Expression
-    if(t->getType() != e->visit()) {
+    if(t->getType() != (e->visit())) {
         std::cerr << "Type Violation in Line " << lineno << " : error: incompatible return types" << std::endl;
         type_error = true;
     }

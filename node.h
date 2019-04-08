@@ -3,7 +3,7 @@
 #include <map>
 #include <iostream>
 
-enum Types { Integer, Array, Boolean, Object };
+//enum std::string { Integer, Array, Boolean, Object };
 
 /*******************    IDENTIFIER CLASS    *********************/
 class Identifier {
@@ -18,7 +18,7 @@ public:
 /* Exp Abstract-Class */
 class Exp {
 public:
-    virtual Types visit() = 0;
+    virtual std::string visit() = 0;
 };
 
 /* Exp Sub-Classes */
@@ -29,7 +29,7 @@ protected:
     int lineno;
 public:
     And(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class Or : public Exp {
@@ -39,7 +39,7 @@ protected:
     int lineno;
 public:
     Or(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class Is : public Exp {
@@ -49,7 +49,7 @@ protected:
     int lineno;
 public:
     Is(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class IsNot : public Exp {
@@ -59,7 +59,7 @@ protected:
     int lineno;
 public:
     IsNot(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class LessThan : public Exp {
@@ -69,7 +69,7 @@ protected:
     int lineno;
 public:
     LessThan(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class LessThanEqual : public Exp {
@@ -79,7 +79,7 @@ protected:
     int lineno;
 public:
     LessThanEqual(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class GreaterThan : public Exp {
@@ -89,7 +89,7 @@ protected:
     int lineno;
 public:
     GreaterThan(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class GreaterThanEqual : public Exp {
@@ -99,7 +99,7 @@ protected:
     int lineno;
 public:
     GreaterThanEqual(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class Plus : public Exp {
@@ -109,7 +109,7 @@ protected:
     int lineno;
 public:
     Plus(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class Minus : public Exp {
@@ -119,7 +119,7 @@ protected:
     int lineno;
 public:
     Minus(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class Times : public Exp {
@@ -129,7 +129,7 @@ protected:
     int lineno;
 public:
     Times(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class Div : public Exp {
@@ -139,7 +139,7 @@ protected:
     int lineno;
 public:
     Div(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class ArrayLookup : public Exp {
@@ -149,7 +149,7 @@ protected:
     int lineno;
 public:
     ArrayLookup(Exp *lhs, Exp *rhs, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class ArrayLength : public Exp {
@@ -157,7 +157,7 @@ protected:
     Exp * e;
 public:
     ArrayLength(Exp *e);
-    Types visit();
+    std::string visit();
 };
 
 class Call : public Exp {
@@ -167,7 +167,7 @@ protected:
     std::list<Exp *> * el;
 public:
     Call(Exp *e, Identifier *i, std::list<Exp *> *el);
-    Types visit();
+    std::string visit();
 };
 
 class IntegerLiteral : public Exp {
@@ -175,19 +175,19 @@ protected:
     int num;
 public:
     IntegerLiteral(int i);
-    Types visit();
+    std::string visit();
 };
 
 class True : public Exp {
 public:
     True() {}
-    Types visit();
+    std::string visit();
 };
 
 class False : public Exp {
 public:
     False() {}
-    Types visit();
+    std::string visit();
 };
 
 class IdentifierExp : public Exp {
@@ -195,13 +195,13 @@ protected:
     std::string id;
 public:
     IdentifierExp(std::string str);
-    Types visit();
+    std::string visit();
 };
 
 class This : public Exp {
 public:
     This() {}
-    Types visit();
+    std::string visit();
 };
 
 class NewArray : public Exp {
@@ -209,7 +209,7 @@ protected:
     Exp * e;
 public:
     NewArray(Exp *e);
-    Types visit();
+    std::string visit();
 };
 
 class NewObject : public Exp {
@@ -217,7 +217,7 @@ protected:
     Identifier * i;
 public:
     NewObject(Identifier *i);
-    Types visit();
+    std::string visit();
 };
 
 class Not : public Exp {
@@ -226,7 +226,7 @@ protected:
     int lineno;
 public:
     Not(Exp *e, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class NegativeExp : public Exp {
@@ -235,7 +235,7 @@ protected:
     int lineno;
 public:
     NegativeExp(Exp *e, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 class PositiveExp : public Exp {
@@ -244,7 +244,7 @@ protected:
     int lineno;
 public:
     PositiveExp(Exp *e, int lineno);
-    Types visit();
+    std::string visit();
 };
 
 
@@ -346,25 +346,25 @@ public:
 /*******************    TYPE CLASS    ****************************/
 class Type {
 public:
-    virtual Types getType() = 0;
+    virtual std::string getType() = 0;
 };
 
 class IntArrayType : public Type {
 public:
     IntArrayType() {}
-    Types getType();
+    std::string getType();
 };
 
 class BooleanType : public Type {
 public:    
     BooleanType() {}
-    Types getType();
+    std::string getType();
 };
 
 class IntegerType : public Type {
 public:
     IntegerType() {}
-    Types getType();
+    std::string getType();
 };
 
 class IdentifierType : public Type {  
@@ -372,7 +372,7 @@ protected:
     std::string str;
 public:
     IdentifierType(const std::string s);
-    Types getType();
+    std::string getType();
 };
 
 /*******************    VAR CLASS    ****************************/
