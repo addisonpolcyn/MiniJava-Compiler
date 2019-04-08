@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 %type <id> ID
 
 /* Non-Terminals */
-%type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object
+%type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object ExpRest
 %type <stmt> Statement 
 %type <type> Type PrimeType 
 %type <formal> FormalRest
@@ -157,19 +157,19 @@ MethodDeclList:
         ;
 
 FormalList:
-        Type ID FormalRestList { $$ = new std::list<Formal *>(); $$->push_back(new Formal($1, new Identifier($2)));
-        PRINTDEBUG("formal list wanted upstream&&&&&&&&&&&&&&&&& ^^^^^^^^^^^^^^^^^^^^^\n") }
-        | /* Empty */ { $$ = new std::list<Formal *>(); PRINTDEBUG("formlist empty, creating new list") }
+        Type ID FormalRestList { $$ = $3; $$->push_back(new Formal($1, new Identifier($2)));
+        PRINTDEBUG("Wrapping up formal list\n") }
+        | { $$ = new std::list<Formal *>(); PRINTDEBUG("formlist empty creating dummy list ##############") }
         ;
 
 FormalRest:
-        COMMA Type ID { }
+        COMMA Type ID { $$ = new Formal($2, new Identifier($3)); PRINTDEBUG("loaded FormalRest>>>>>>>>>>>>>>>>>>") }
         ;
 
 FormalRestList:
-        FormalRestList FormalRest { $$=$1; $1->push_back($2); PRINTDEBUG("fired formal @@@@@@@@@@@@@@@2\n"); 
+        FormalRestList FormalRest { $$ = $1; $$->push_back($2); /*$$=$1; $1->push_back($2); PRINTDEBUG("fired formal @@@@@@@@@@@@@@@2\n") */ ; 
         PRINTDEBUG("formal rest list list wanted upstream ??????????????????????????\n") }
-        | /* Empty */
+        | { $$ = new std::list<Formal *>(); PRINTDEBUG("formal list finished_____________") }
         ;
 
 PrimeType:
@@ -320,18 +320,35 @@ Object:
         ;
 
 ExpList:
-        Exp ExpRestList { PRINTDEBUG("@@@@@@@@@@gubub&*^%#TESTTESTTESTTESTTEST> exp exprest list\n") $2->push_back($1); } 
-        | /* Empty */ { $$ = new std::list<Exp *>(); PRINTDEBUG("explist empty, creating new list") }
+        Exp ExpRestList { $$ = $2; $$->push_back($1); PRINTDEBUG("@@@@@@@@@@gubub&*^%#TESTTESTTESTTESTTEST> exp exprest list\n") } 
+        | { $$ = new std::list<Exp *>(); PRINTDEBUG("explist empty, creating dummy list") }
         ;
 
 ExpRest:
-        COMMA Exp { PRINTDEBUG("@@@@@@@@@@@@@@@@TESTTESTESTESTESTES> exprest comma\n")
+        COMMA Exp { $$ = $2;
         std::cout << "loaded up exp list push\n"; }
         ;
 
 ExpRestList:
-        ExpRestList ExpRest { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprestlist") }  
-        | /* Empty */
+        ExpRestList ExpRest { $$ = $1; $$->push_back($2); PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprestlist") }  
+        | { $$ = new std::list<Exp *>(); PRINTDEBUG("explist finsished________") }  
         ;
+/*
+FormalList:
+        Type ID FormalRestList { $$ = $3; $$->push_back(new Formal($1, new Identifier($2)));
+        PRINTDEBUG("Wrapping up formal list\n") }
+        | { $$ = new std::list<Formal *>(); PRINTDEBUG("formlist empty creating dummy list ##############") }
+        ;
+
+FormalRest:
+        COMMA Type ID { $$ = new Formal($2, new Identifier($3)); PRINTDEBUG("loaded FormalRest>>>>>>>>>>>>>>>>>>") }
+        ;
+
+FormalRestList:
+        FormalRestList FormalRest { $$ = $1; $$->push_back($2); $$=$1; $1->push_back($2); PRINTDEBUG("fired formal @@@@@@@@@@@@@@@2\n")  ; 
+        PRINTDEBUG("formal rest list list wanted upstream ??????????????????????????\n") }
+        | { $$ = new std::list<Formal *>(); PRINTDEBUG("formal list finished_____________") }
+        ;*/
+
 
 %%

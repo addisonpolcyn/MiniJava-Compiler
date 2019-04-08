@@ -224,31 +224,24 @@ std::string Call::visit() {
         return "";
     }
     
-    std::cerr << "danGER :DANGER: IN CALL IN NODE.CPP NO PARAMETERS EXPLIST FOR METHOD CALL CHECKING" << std::endl;
     //check if parameters are valid
-    /*
-    
-    std::list<Formal *> *fl = methods->fl;
-
-
     std::list<Formal *>::iterator formalIter;
+    std::list<Exp *>::iterator expIter = el->begin();
     for(formalIter = fl->begin(); formalIter != fl->end(); formalIter++){
-        std::string paramName = (*formalIter)->i->toString();
+        std::string param_Type = (*formalIter)->t->getType();
+        std::string expr_Type = (*expIter)->visit();
         
         //type check parameter 
-        if(parameters.count(paramName)){
-            std::cerr << "Type Violation in Line " << lineno << " : error: duplicate parameter: " << paramName << std::endl;
+        if(param_Type != expr_Type) {
+            std::cerr << "Type Violation in Line " << lineno << " : error invalid arg types for method:" << methodName << std::endl;
             type_error = true;
-        } else {
-            parameters[paramName] = *formalIter;
-            type_local_scope[paramName] = new VarDecl((*formalIter)->t, (*formalIter)->i);
-            (*formalIter)->visit();
-
+            return "";
         }
+        expIter++;
     }
-    */
-    std::string returnType = method->t->getType();
-    return returnType;
+
+    //iterate over exper list for shits
+    return method->t->getType();
 }
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
