@@ -6,7 +6,7 @@
 #include "node.h"
 
 #define YYDEBUG 1
-#define PRINTDEBUG(x) std::cout << x; // comment out print statement to remove the printing
+#define PRINTDEBUG(x) std::cout << x << std::endl;// comment out print statement to remove the printing
 
 //root of AST
 Program *root;
@@ -151,9 +151,9 @@ MethodDecl:
         ;
 
 MethodDeclList:
-        MethodDeclList MethodDecl { PRINTDEBUG("method list wanted upstream ^^^^^^^^^^^^^^^^^^^^^\n");
-        $$ = $1; $1->push_back($2); PRINTDEBUG("loaded up methoddecl list push\n") }
-        | /* Empty */  {  PRINTDEBUG("method list wanted DOWNSTREAM EMPTY\n"); $$ = new std::list<MethodDecl *>(); PRINTDEBUG("alocated new list\n") }
+        MethodDeclList MethodDecl { PRINTDEBUG("(method list wanted upstream)");
+        $$ = $1; $1->push_back($2); PRINTDEBUG("(loaded up methoddecl list push)") }
+        | /* Empty */  {  PRINTDEBUG("(method list wanted DOWNSTREAM EMPTY)"); $$ = new std::list<MethodDecl *>(); PRINTDEBUG("(alocated new list)") }
         ;
 
 FormalList:
@@ -271,11 +271,11 @@ I_Exp:
         ;
 
 J_Exp:
-        PLUS K_Exp { $$ = new PositiveExp($2, yylineno); PRINTDEBUG("fired exp (+) #############\n") }
+        PLUS K_Exp { $$ = new PositiveExp($2, yylineno); PRINTDEBUG("fired exp (+)") }
         |
-        MINUS K_Exp  { $$ = new NegativeExp($2, yylineno); PRINTDEBUG("fired exp (-) ##############\n") }
+        MINUS K_Exp  { $$ = new NegativeExp($2, yylineno); PRINTDEBUG("fired exp (-)") }
         |
-        NOT K_Exp { $$ = new Not($2, yylineno); PRINTDEBUG("fired Not #############\n") }
+        NOT K_Exp { $$ = new Not($2, yylineno); PRINTDEBUG("fired Not") }
         |
         K_Exp
         ;
@@ -284,7 +284,7 @@ K_Exp:
         K_Exp DOT LENGTH { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp dot length\n") }
         |
         K_Exp DOT ID OPARANTHESIS ExpList EPARANTHESIS { $$ = new Call($1, new Identifier($3), $5, yylineno); 
-        PRINTDEBUG("call exp #########################3\n") }
+        PRINTDEBUG("(call exp)") }
         |
         L_Exp
         ;
@@ -296,59 +296,41 @@ L_Exp:
         ;
         
 Root_Exp:  
-        OPARANTHESIS Exp EPARANTHESIS { $$ = $2; PRINTDEBUG("fired (exp) ###########") }
+        OPARANTHESIS Exp EPARANTHESIS { $$ = $2; PRINTDEBUG("fired (exp)") }
         |
         ID Index { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp id index\n") }
         |
-        INTEGER_LITERAL { $$ = new IntegerLiteral($1); PRINTDEBUG("fired integer literal ###########\n") }
+        INTEGER_LITERAL { $$ = new IntegerLiteral($1); PRINTDEBUG("fired integer literal") }
         |
-        TRUE { $$ = new True(); PRINTDEBUG("fired True #############\n") }
+        TRUE { $$ = new True(); PRINTDEBUG("fired True") }
         |
-        FALSE { $$ = new False(); PRINTDEBUG("fired False #############\n") }
+        FALSE { $$ = new False(); PRINTDEBUG("fired False") }
         |
         Object
         ;  
 
 Object:
-        ID { $$ = new IdentifierExp($1); PRINTDEBUG("fired IdentExp #############\n") }
+        ID { $$ = new IdentifierExp($1); PRINTDEBUG("fired IdentExp") }
         |
-        THIS { $$ = new This(); PRINTDEBUG("fired This #############\n") }
+        THIS { $$ = new This(); PRINTDEBUG("fired This") }
         |
-        NEW ID OPARANTHESIS EPARANTHESIS { $$ = new NewObject(new Identifier($2)); PRINTDEBUG("fired exp new id() ###############\n") }
+        NEW ID OPARANTHESIS EPARANTHESIS { $$ = new NewObject(new Identifier($2)); PRINTDEBUG("fired exp new id()") }
         |
         NEW PrimeType Index { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX exp new object prime\n") }
         ;
 
 ExpList:
-        Exp ExpRestList { $$ = $2; $$->push_back($1); PRINTDEBUG("@@@@@@@@@@gubub&*^%#TESTTESTTESTTESTTEST> exp exprest list\n") } 
+        Exp ExpRestList { $$ = $2; $$->push_back($1); PRINTDEBUG("exp list expr") } 
         | { $$ = new std::list<Exp *>(); PRINTDEBUG("explist empty, creating dummy list") }
         ;
 
 ExpRest:
-        COMMA Exp { $$ = $2;
-        std::cout << "loaded up exp list push\n"; }
+        COMMA Exp { $$ = $2; }
         ;
 
 ExpRestList:
-        ExpRestList ExpRest { $$ = $1; $$->push_back($2); PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exprestlist") }  
-        | { $$ = new std::list<Exp *>(); PRINTDEBUG("explist finsished________") }  
+        ExpRestList ExpRest { $$ = $1; $$->push_back($2); PRINTDEBUG("(exprestlist loaded)") }  
+        | { $$ = new std::list<Exp *>(); PRINTDEBUG("(explist finsished)") }  
         ;
-/*
-FormalList:
-        Type ID FormalRestList { $$ = $3; $$->push_back(new Formal($1, new Identifier($2)));
-        PRINTDEBUG("Wrapping up formal list\n") }
-        | { $$ = new std::list<Formal *>(); PRINTDEBUG("formlist empty creating dummy list ##############") }
-        ;
-
-FormalRest:
-        COMMA Type ID { $$ = new Formal($2, new Identifier($3)); PRINTDEBUG("loaded FormalRest>>>>>>>>>>>>>>>>>>") }
-        ;
-
-FormalRestList:
-        FormalRestList FormalRest { $$ = $1; $$->push_back($2); $$=$1; $1->push_back($2); PRINTDEBUG("fired formal @@@@@@@@@@@@@@@2\n")  ; 
-        PRINTDEBUG("formal rest list list wanted upstream ??????????????????????????\n") }
-        | { $$ = new std::list<Formal *>(); PRINTDEBUG("formal list finished_____________") }
-        ;*/
-
 
 %%

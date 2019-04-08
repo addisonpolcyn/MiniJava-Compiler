@@ -199,7 +199,7 @@ std::string Call::visit() {
     if(!classTable.count(objectType)){
         std::cerr << "Type Violation in Line " << lineno << " : error cannot find class:" << objectType << std::endl;
         type_error = true;
-        return "";
+        return "int";
     }
     ClassDecl *cl = classTable[objectType];
     std::string methodName = i->toString();
@@ -209,10 +209,11 @@ std::string Call::visit() {
     if(!methods.count(methodName)){
         std::cerr << "Type Violation in Line " << lineno << " : error method:" << methodName << " does not belong to class:" << objectType << std::endl;
         type_error = true;
-        return "";
+        return "int";
     }
     MethodDecl *method = methods[methodName];
     std::list<Formal *> *fl = method->fl;
+    std::string returnType = method->t->getType();
 
     //check if arguments size matches parameters size
     int defSize = fl->size();
@@ -221,7 +222,7 @@ std::string Call::visit() {
     if(defSize != argSize) {
         std::cerr << "Type Violation in Line " << lineno << " : error expected:" << defSize << " argument(s) but recieved:" << argSize << std::endl;
         type_error = true;
-        return "";
+        return returnType;
     }
     
     //check if parameters are valid
@@ -235,13 +236,13 @@ std::string Call::visit() {
         if(param_Type != expr_Type) {
             std::cerr << "Type Violation in Line " << lineno << " : error invalid arg types for method:" << methodName << std::endl;
             type_error = true;
-            return "";
+            return returnType;
         }
         expIter++;
     }
 
     //iterate over exper list for shits
-    return method->t->getType();
+    return returnType;
 }
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
@@ -328,11 +329,15 @@ void Block::visit() {
 If::If(Exp *e, Statement *s1, Statement *s2, int lineno): e(e), s1(s1), s2(s2), lineno(lineno) {}
 void If::visit() {
     PRINTDEBUG("(If)")
-
     if(e->visit() != "boolean") {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types" << std::endl;
         type_error = true;
     }
+    s1->visit();
+
+    PRINTDEBUG("(Else)")
+    s2->visit();
+
 }
 
 While::While(Exp *e, Statement *s, int lineno): e(e), s(s), lineno(lineno) {} 
@@ -341,6 +346,7 @@ void While::visit() {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types" << std::endl;
         type_error = true;
     }
+    s->visit();
     PRINTDEBUG("(While)")
 }
 
@@ -452,7 +458,6 @@ void MethodDecl::visit() {
             parameters[paramName] = *formalIter;
             type_local_scope[paramName] = new VarDecl((*formalIter)->t, (*formalIter)->i);
             (*formalIter)->visit();
-
         }
     }
 
@@ -514,7 +519,7 @@ void ClassDeclSimple::visit() {
     std::list<MethodDecl *>::iterator methodDeclIter;
     for(methodDeclIter = ml->begin(); methodDeclIter != ml->end(); methodDeclIter++){
         std::string methodName = (*methodDeclIter)->i->toString();
-
+        std::cout << methodName << "CINEPSNCPESNC" <<std::endl;
         //type check method
         if(methods.count(methodName)){
             std::cerr << "Type Violation in Line " << lineno << " : error: duplicate method: " << methodName << std::endl;
