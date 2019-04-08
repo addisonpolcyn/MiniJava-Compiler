@@ -6,7 +6,7 @@
 #include "node.h"
 
 #define YYDEBUG 1
-#define PRINTDEBUG(x) std::cout << x << std::endl;// comment out print statement to remove the printing
+#define PRINTDEBUG(x) // std::cout << x << std::endl;// comment out print statement to remove the printing
 
 //root of AST
 Program *root;
@@ -37,7 +37,10 @@ int main(int argc, char **argv) {
     fclose(yyin);
 
     /* Traverse AST */
-    root->visit();
+    root->traverse();
+    
+    /* Interpret AST */
+    root->interpret();
 
     /* Finish */
     return 0;

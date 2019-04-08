@@ -18,7 +18,11 @@ public:
 /* Exp Abstract-Class */
 class Exp {
 public:
+    //type checking returns string type for visit()
     virtual std::string visit() = 0;
+
+    //interpret expression returning void * value
+    virtual void * evaluate() = 0;
 };
 
 /* Exp Sub-Classes */
@@ -30,6 +34,7 @@ protected:
 public:
     And(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class Or : public Exp {
@@ -40,6 +45,7 @@ protected:
 public:
     Or(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class Is : public Exp {
@@ -50,6 +56,7 @@ protected:
 public:
     Is(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class IsNot : public Exp {
@@ -60,6 +67,7 @@ protected:
 public:
     IsNot(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class LessThan : public Exp {
@@ -70,6 +78,7 @@ protected:
 public:
     LessThan(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class LessThanEqual : public Exp {
@@ -80,6 +89,7 @@ protected:
 public:
     LessThanEqual(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class GreaterThan : public Exp {
@@ -90,6 +100,7 @@ protected:
 public:
     GreaterThan(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class GreaterThanEqual : public Exp {
@@ -100,6 +111,7 @@ protected:
 public:
     GreaterThanEqual(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class Plus : public Exp {
@@ -110,6 +122,7 @@ protected:
 public:
     Plus(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class Minus : public Exp {
@@ -120,6 +133,7 @@ protected:
 public:
     Minus(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class Times : public Exp {
@@ -130,6 +144,7 @@ protected:
 public:
     Times(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class Div : public Exp {
@@ -140,6 +155,7 @@ protected:
 public:
     Div(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class ArrayLookup : public Exp {
@@ -150,6 +166,7 @@ protected:
 public:
     ArrayLookup(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class ArrayLength : public Exp {
@@ -158,6 +175,7 @@ protected:
 public:
     ArrayLength(Exp *e);
     std::string visit();
+    void * evaluate();
 };
 
 class Call : public Exp {
@@ -170,6 +188,7 @@ protected:
 public:
     Call(Exp *e, Identifier *i, std::list<Exp *> *el, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class IntegerLiteral : public Exp {
@@ -178,18 +197,21 @@ protected:
 public:
     IntegerLiteral(int i);
     std::string visit();
+    void * evaluate();
 };
 
 class True : public Exp {
 public:
     True() {}
     std::string visit();
+    void * evaluate();
 };
 
 class False : public Exp {
 public:
     False() {}
     std::string visit();
+    void * evaluate();
 };
 
 class IdentifierExp : public Exp {
@@ -198,12 +220,14 @@ protected:
 public:
     IdentifierExp(std::string str);
     std::string visit();
+    void * evaluate();
 };
 
 class This : public Exp {
 public:
     This() {}
     std::string visit();
+    void * evaluate();
 };
 
 class NewArray : public Exp {
@@ -212,6 +236,7 @@ protected:
 public:
     NewArray(Exp *e);
     std::string visit();
+    void * evaluate();
 };
 
 class NewObject : public Exp {
@@ -220,6 +245,7 @@ protected:
 public:
     NewObject(Identifier *i);
     std::string visit();
+    void * evaluate();
 };
 
 class Not : public Exp {
@@ -229,6 +255,7 @@ protected:
 public:
     Not(Exp *e, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class NegativeExp : public Exp {
@@ -238,6 +265,7 @@ protected:
 public:
     NegativeExp(Exp *e, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 class PositiveExp : public Exp {
@@ -247,6 +275,7 @@ protected:
 public:
     PositiveExp(Exp *e, int lineno);
     std::string visit();
+    void * evaluate();
 };
 
 
@@ -255,6 +284,7 @@ public:
 class Statement {
 public:
     virtual void visit() = 0;
+    virtual void evaluate() = 0;
 };
 
 class Block : public Statement {
@@ -263,6 +293,7 @@ protected:
 public:
     Block(std::list<Statement *> *sl);
     void visit();
+    void evaluate();
 };
 
 class If : public Statement {
@@ -275,6 +306,7 @@ protected:
 public:
     If(Exp *e, Statement *s1, Statement *s2, int lineno);
     void visit();
+    void evaluate();
 };
 
 class While : public Statement {
@@ -286,6 +318,7 @@ protected:
 public:
     While(Exp *e, Statement *s, int lineno);
     void visit();
+    void evaluate();
 };
 
 class Print : public Statement {
@@ -296,6 +329,7 @@ protected:
 public:
     Print(Exp *e, int lineno);
     void visit();
+    void evaluate();
 };
 
 class Println : public Statement {
@@ -306,6 +340,7 @@ protected:
 public:
     Println(Exp *e, int lineno);
     void visit();
+    void evaluate();
 };
 
 class PrintString : public Statement {
@@ -314,6 +349,7 @@ protected:
 public:
     PrintString(const std::string str);
     void visit();
+    void evaluate();
 };
 
 class PrintStringln : public Statement {
@@ -322,6 +358,7 @@ protected:
 public:
     PrintStringln(const std::string str);
     void visit();
+    void evaluate();
 };
 
 class Assign : public Statement {
@@ -333,6 +370,7 @@ protected:
 public:
     Assign(Identifier *i, Exp *e, int lineno);
     void visit();
+    void evaluate();
 };
 
 class ArrayAssign : public Statement {
@@ -343,6 +381,7 @@ protected:
 public:
    ArrayAssign(Identifier *i, Exp *e1, Exp *e2);
    void visit();
+   void evaluate();
 };
 
 /*******************    TYPE CLASS    ****************************/
@@ -403,16 +442,16 @@ protected:
     std::list<Statement *> *sl;
     int lineno;
 
-    std::map<std::string, VarDecl *> localVariables;
-    std::map<std::string, Formal *> parameters;
-
 public:
     Type *t; //return type
     Identifier *i; //method id
+    std::map<std::string, VarDecl *> localVariables;
+    std::map<std::string, Formal *> parameters;
     std::list<Formal *> *fl;
     
     MethodDecl(Type *t, Identifier *i, std::list<Formal *> *fl, std::list<VarDecl *> *vl, std::list<Statement *> *sl, Exp *e, int lineno);
     void visit();
+    void * evaluate();
 };
 
 
@@ -463,6 +502,7 @@ public:
     Identifier *i1;
     MainClass(Identifier *i1, Identifier *i2, Statement *s);
     void visit();
+    void evaluate();
 };
 
 /*******************    PROGRAM CLASS ****************************/
@@ -474,7 +514,8 @@ protected:
 
 public:
     Program(MainClass *m, std::list<ClassDecl *> *cl, int lineno);
-    void visit();
+    void traverse();
+    void interpret();
 };
 
 extern std::map<std::string, int> varTable;

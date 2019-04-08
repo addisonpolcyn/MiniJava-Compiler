@@ -12,6 +12,8 @@ std::map<std::string, ClassDecl *> classTable;      //map of classes in program
 std::map<std::string, VarDecl *> type_class_scope;  //map of fields in current class scope
 std::map<std::string, VarDecl *> type_local_scope;  //map of variables in current scope inlcuding current class variables and method variables
 
+std::map<std::string, std::string> scope_type;
+std::map<std::string, void *> scope;
 
 /*******************    IDENTIFIER CLASS    *********************/
 Identifier::Identifier(const std::string str): id(str) {}
@@ -32,6 +34,12 @@ std::string And::visit() {
     }
     return "boolean";
 }
+void * And::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 Or::Or(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
 std::string Or::visit() {
@@ -44,6 +52,12 @@ std::string Or::visit() {
         type_error = true;
     }
     return "boolean";
+}
+void * Or::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
 }
 
 Is::Is(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -58,6 +72,12 @@ std::string Is::visit() {
     }
     return "boolean";
 }
+void * Is::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 IsNot::IsNot(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
 std::string IsNot::visit() {
@@ -70,6 +90,12 @@ std::string IsNot::visit() {
         type_error = true;
     }
     return "boolean";
+}
+void * IsNot::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
 }
 
 LessThan::LessThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -84,6 +110,12 @@ std::string LessThan::visit() {
     }
     return "boolean";
 }
+void * LessThan::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 LessThanEqual::LessThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
 std::string LessThanEqual::visit() {
@@ -96,6 +128,12 @@ std::string LessThanEqual::visit() {
         type_error = true;
     }
     return "boolean";
+}
+void * LessThanEqual::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
 }
 
 GreaterThan::GreaterThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -110,6 +148,12 @@ std::string GreaterThan::visit() {
     }
     return "boolean";
 }
+void * GreaterThan::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 GreaterThanEqual::GreaterThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
 std::string GreaterThanEqual::visit() {
@@ -122,6 +166,12 @@ std::string GreaterThanEqual::visit() {
         type_error = true;
     }
     return "boolean";
+}
+void * GreaterThanEqual::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
 }
 
 Plus::Plus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -137,6 +187,12 @@ std::string Plus::visit() {
     return "int";
 
 }
+void * Plus::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 Minus::Minus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
 std::string Minus::visit() {
@@ -151,6 +207,12 @@ std::string Minus::visit() {
     return "int";
 
 }
+void * Minus::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 Times::Times(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
 std::string Times::visit() {
@@ -163,6 +225,12 @@ std::string Times::visit() {
         type_error = true;
     }
     return "int";
+}
+void * Times::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
 }
 
 Div::Div(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -177,17 +245,35 @@ std::string Div::visit() {
     }
     return "int";
 }
+void * Div::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 ArrayLookup::ArrayLookup(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
 std::string ArrayLookup::visit() {
     PRINTDEBUG("(ArrayLookup)")
     return "int";
 }
+void * ArrayLookup::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 ArrayLength::ArrayLength(Exp *e): e(e) {}
 std::string ArrayLength::visit() {
     PRINTDEBUG("(ArrayLength)")
     return "int";
+}
+void * ArrayLength::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
 }
 
 Call::Call(Exp *e, Identifier *i, std::list<Exp *> *el, int lineno): e(e), i(i), el(el), lineno(lineno) {}
@@ -218,7 +304,6 @@ std::string Call::visit() {
     //check if arguments size matches parameters size
     int defSize = fl->size();
     int argSize = el->size();
-    std::cout << "recieved:" << defSize << argSize;
     if(defSize != argSize) {
         std::cerr << "Type Violation in Line " << lineno << " : error expected:" << defSize << " argument(s) but recieved:" << argSize << std::endl;
         type_error = true;
@@ -244,26 +329,84 @@ std::string Call::visit() {
     //iterate over exper list for shits
     return returnType;
 }
+void * Call::evaluate() {
+    //get object class and method pointers
+    ClassDecl *cl = (ClassDecl *)e->evaluate();
+    std::string methodName = i->toString();
+    MethodDecl *method = cl->methods[methodName];
+    
+    //init scope
+    scope.clear();
+    scope_type.clear();
+
+    //load class formal variables keys
+    for (auto const& x : cl->fieldVariables) {
+        scope[x.first];
+        scope_type[x.first] = x.second->t->getType();
+    }
+    //load method local variable keys
+    for (auto const& x : method->localVariables) {
+        scope[x.first];
+        scope_type[x.first] = x.second->t->getType();
+    }
+
+    //load and input argument parameter values
+    std::list<Formal *> *fl = method->fl;
+    std::list<Formal *>::iterator formalIter;
+    std::list<Exp *>::iterator expIter = el->begin();
+    for(formalIter = fl->begin(); formalIter != fl->end(); formalIter++){
+        std::string key = (*formalIter)->i->toString();
+        std::string expr_Type = (*expIter)->visit();
+        void * expr_value = (*expIter)->evaluate();
+        
+        scope[key] = expr_value;
+        scope_type[key] = expr_Type;
+        expIter++;
+    }
+    return method->evaluate();
+}
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
 std::string IntegerLiteral::visit() {
     PRINTDEBUG("(IntegerLiteral)")
     return "int";
 }
+void * IntegerLiteral::evaluate() {
+    int val = num;
+    void *ptr = &val;
+    return ptr;
+}
 
 std::string True::visit() {
     PRINTDEBUG("(True)")
     return "boolean";
+}
+void * True::evaluate() {
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
 }
 
 std::string False::visit() {
     PRINTDEBUG("(False)")
     return "boolean";
 }
+void * False::evaluate() {
+    int val = 0;
+    void *ptr = &val;
+    return ptr;
+}
+
 
 std::string This::visit() {
     PRINTDEBUG("(This) XXXXX")
     return "THIS";
+}
+void * This::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
 }
 
 IdentifierExp::IdentifierExp(std::string str): id(str) {}
@@ -271,17 +414,31 @@ std::string IdentifierExp::visit() {
     PRINTDEBUG("(IdentifierExp)")
     return type_local_scope[id]->t->getType();
 }
+void * IdentifierExp::evaluate() {
+    return scope[id];
+}
 
 NewArray::NewArray(Exp *e): e(e) {}
 std::string NewArray::visit() {
     PRINTDEBUG("(NewArray)")
     return "int []";
 }
+void * NewArray::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 NewObject::NewObject(Identifier *i): i(i) {}
 std::string NewObject::visit() {
     PRINTDEBUG("(NewObject)")
     return i->toString();
+}
+void * NewObject::evaluate() {
+    ClassDecl *cl = classTable[i->toString()];
+    void *ptr = &(*cl);
+    return ptr;
 }
 
 Not::Not(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -293,6 +450,12 @@ std::string Not::visit() {
     }
     return "boolean";
 }
+void * Not::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 NegativeExp::NegativeExp(Exp *e, int lineno): e(e), lineno(lineno) {}
 std::string NegativeExp::visit() {
@@ -302,6 +465,12 @@ std::string NegativeExp::visit() {
         type_error = true;
     }
     return "int";
+}
+void * NegativeExp::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
 }
 
 PositiveExp::PositiveExp(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -313,6 +482,12 @@ std::string PositiveExp::visit() {
     }
     return "int";
 }
+void * PositiveExp::evaluate() {
+    PRINTDEBUG("BROKEN EXPR EVAL")
+    int val = 1;
+    void *ptr = &val;
+    return ptr;
+}
 
 /*******************    STATEMENT CLASS    ****************************/
 Block::Block(std::list<Statement *> *sl): sl(sl) {}
@@ -321,7 +496,16 @@ void Block::visit() {
     std::list<Statement *>::iterator stmtIter;
     for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
         (*stmtIter)->visit();
-        std::cout << "(Statement)" << std::endl;
+        PRINTDEBUG("(Statement)")
+    }
+    PRINTDEBUG("(Block)")
+}
+void Block::evaluate() {
+    //evaluate Block
+    std::list<Statement *>::iterator stmtIter;
+    for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
+        (*stmtIter)->evaluate();
+        PRINTDEBUG("(Statement)")
     }
     PRINTDEBUG("(Block)")
 }
@@ -339,6 +523,13 @@ void If::visit() {
     s2->visit();
 
 }
+void If::evaluate() {
+    if(*(int *)e->evaluate()) {
+        s1->evaluate();
+    } else {
+        s2->evaluate();        
+    }
+}
 
 While::While(Exp *e, Statement *s, int lineno): e(e), s(s), lineno(lineno) {} 
 void While::visit() {
@@ -349,6 +540,10 @@ void While::visit() {
     s->visit();
     PRINTDEBUG("(While)")
 }
+void While::evaluate() {
+
+    PRINTDEBUG("(Statment Evaluation Broken)")
+}
 
 Print::Print(Exp *e, int lineno): e(e), lineno(lineno) {}
 void Print::visit() {
@@ -356,6 +551,10 @@ void Print::visit() {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types" << std::endl;
         type_error = true;
     }
+    PRINTDEBUG("(Print)")
+}
+void Print::evaluate() {
+    std::cout << *(int *)e->evaluate();
     PRINTDEBUG("(Print)")
 }
 
@@ -367,14 +566,26 @@ void Println::visit() {
         type_error = true;
     }
 }
+void Println::evaluate() {
+    std::cout << *(int *)e->evaluate() << std::endl;
+    PRINTDEBUG("(Println)")
+}
 
 PrintString::PrintString(std::string str): str(str) {}
 void PrintString::visit() {
     PRINTDEBUG("(PrintString)")
 }
+void PrintString::evaluate() {
+    std::cout << str;
+    PRINTDEBUG("(PrintString)")
+}
 
 PrintStringln::PrintStringln(const std::string str): str(str) {}
 void PrintStringln::visit() {
+    PRINTDEBUG("(PrintStringln)")
+}
+void PrintStringln::evaluate() {
+    std::cout << str << std::endl;
     PRINTDEBUG("(PrintStringln)")
 }
 
@@ -388,11 +599,18 @@ void Assign::visit() {
         type_error = true;
     }
 }
+void Assign::evaluate() {
+
+    PRINTDEBUG("(Statment Evaluation Broken)")
+}
 
 ArrayAssign::ArrayAssign(Identifier *i, Exp *e1, Exp *e2): i(i), e1(e1), e2(e2) {}
 void ArrayAssign::visit() {
-    PRINTDEBUG("(ArrayAssign)")
-    std::cout << "(ArrayAssign) XXXXXXXXX" << std::endl;
+    PRINTDEBUG("(ArrayAssign XXXXXXXX)")
+}
+void ArrayAssign::evaluate() {
+
+    PRINTDEBUG("(Statment Evaluation Broken)")
 }
 
 /*******************    TYPE CLASS    ****************************/
@@ -489,6 +707,14 @@ void MethodDecl::visit() {
         type_error = true;
     }
 }
+void * MethodDecl::evaluate() {
+    //evaluate Statement Declarations
+    std::list<Statement *>::iterator stmtIter;
+    for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
+        (*stmtIter)->evaluate();
+    }
+    return e->evaluate();
+}
 
 /******************    CLASS DECLARATION SUB-CLASS    ************/
 ClassDeclSimple::ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml, int lineno): i(i), vl(vl), ml(ml), lineno(lineno) {}
@@ -519,7 +745,7 @@ void ClassDeclSimple::visit() {
     std::list<MethodDecl *>::iterator methodDeclIter;
     for(methodDeclIter = ml->begin(); methodDeclIter != ml->end(); methodDeclIter++){
         std::string methodName = (*methodDeclIter)->i->toString();
-        std::cout << methodName << "CINEPSNCPESNC" <<std::endl;
+        
         //type check method
         if(methods.count(methodName)){
             std::cerr << "Type Violation in Line " << lineno << " : error: duplicate method: " << methodName << std::endl;
@@ -539,7 +765,6 @@ std::string ClassDeclSimple::getName() {
 ClassDeclExtends::ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml, int lineno): i(i), j(j), vl(vl), ml(ml), lineno(lineno) {}
 void ClassDeclExtends::visit() {
     PRINTDEBUG("(ClassDeclExtends)")
-    std::cout << "(ClassDeclExtends)" << std::endl;
 }
 std::string ClassDeclExtends::getName() {
     return i->toString();
@@ -557,11 +782,16 @@ void MainClass::visit() {
     s->visit();
     
     PRINTDEBUG("(MainClass)")
-};
+}
+void MainClass::evaluate() {
+    //evaluate statements
+    s->evaluate();    
+    PRINTDEBUG("(MainClass)")
+}
 
 /*******************    PROGRAM CLASS ****************************/
 Program::Program(MainClass *m, std::list<ClassDecl *> *cl, int lineno): m(m), cl(cl), lineno(lineno) {}
-void Program::visit() {
+void Program::traverse() {
     PRINTDEBUG("\n^ (Program Start)...\n")
     
     //load main class name into global variable
@@ -590,5 +820,10 @@ void Program::visit() {
         exit(1);
     }
     PRINTDEBUG("\n...(Program End Type Check Completed Gracefully) $")
-};
-
+}
+void Program::interpret() {
+    PRINTDEBUG("\n^ (Program Interpreter Start)...\n")
+    //Start evaluation of program from MainClass
+    m->evaluate();  
+    PRINTDEBUG("\n...(Program End Run Time Completed Successfully) $")
+}
