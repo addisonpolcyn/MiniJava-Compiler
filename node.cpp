@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 #include "node.h"
-#define PRINTDEBUG(x) //std::cout << x << std::endl; // comment out print statement to remove the printing
+#define PRINTDEBUG(x) std::cout << x << std::endl; // comment out print statement to remove the printing
 
 bool type_error = false;    //boolean value true denotes type_error present in Tree, false Tree syntax is type valid
 std::string mainClassName;  //string name of the main class 
@@ -14,6 +14,8 @@ std::map<std::string, VarDecl *> type_local_scope;  //map of variables in curren
 
 std::map<std::string, std::string> scope_type;
 std::map<std::string, int> scope;
+
+ClassDecl *currentClass;
 
 /*******************    IDENTIFIER CLASS    *********************/
 Identifier::Identifier(const std::string str): id(str) {}
@@ -223,7 +225,7 @@ std::string Minus::visit() {
 
 }
 void * Minus::evaluate() {
-    int result = *(int *)lhs->evaluate() || *(int *)rhs->evaluate();
+    int result = *(int *)lhs->evaluate() - *(int *)rhs->evaluate();
     void *ptr = &result;
     return ptr;
 }
@@ -348,8 +350,8 @@ void * Call::evaluate() {
     MethodDecl *method = cl->methods[methodName];
     
     //init scope
-    scope.clear();
-    scope_type.clear();
+ //   scope.clear();
+  //  scope_type.clear();
 
     //load class formal variables keys
     for (auto const& x : cl->fieldVariables) {
@@ -411,13 +413,11 @@ void * False::evaluate() {
 
 
 std::string This::visit() {
-    PRINTDEBUG("(This) XXXXX")
-    return "THIS";
+    return currentClass->getName();
 }
 void * This::evaluate() {
-    PRINTDEBUG("BROKEN EXPR EVAL")
-    int val = 1;
-    void *ptr = &val;
+    ClassDecl *cl = currentClass;
+    void *ptr = &(*cl);
     return ptr;
 }
 
@@ -499,7 +499,7 @@ std::string PositiveExp::visit() {
     return "int";
 }
 void * PositiveExp::evaluate() {
-    int val = -(*(int *)e->evaluate());
+    int val = +(*(int *)e->evaluate());
     void *ptr = &val;
     return ptr;
 }
@@ -556,8 +556,9 @@ void While::visit() {
     PRINTDEBUG("(While)")
 }
 void While::evaluate() {
-
-    PRINTDEBUG("(Statment Evaluation Broken)")
+    while(*(int *)e->evaluate()) {
+        s->evaluate();        
+    }
 }
 
 Print::Print(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -615,15 +616,8 @@ void Assign::visit() {
     }
 }
 void Assign::evaluate() {
-//    std::cout << "value of asssign exp:" << *(int *)e->evaluate() << " for:" << i->toString();
-  //  std::cout << "value of asssign exp:" << e->evaluate() << " for:" << i->toString();
-    //void * ptr = e->evaluate();
     int val = *(int *)e->evaluate();
-    //std::cout << "OICINEOCN    >" << val << "< OCINECEINC>";
     scope[i->toString()] = val;
-    
-    //std::cout << "value of asssign  AFTER exp:" << *(int *)ptr << " for:" << i->toString();
-    //std::cout << "value of asssign  AFTER exp:" << scope[i->toString()] << " for:" << i->toString();
 }
 
 ArrayAssign::ArrayAssign(Identifier *i, Exp *e1, Exp *e2): i(i), e1(e1), e2(e2) {}
@@ -735,7 +729,12 @@ void * MethodDecl::evaluate() {
     for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
         (*stmtIter)->evaluate();
     }
-    return e->evaluate();
+    int returnVal = *(int *)e->evaluate();
+    //clean scopes
+    //scope.clear();
+    //scope_type.clear();
+    void * ptr = &returnVal;
+    return ptr;
 }
 
 /******************    CLASS DECLARATION SUB-CLASS    ************/
@@ -774,10 +773,14 @@ void ClassDeclSimple::visit() {
             type_error = true;
         } else {
             methods[methodName] = *methodDeclIter;
-            (*methodDeclIter)->visit();
         }
 
     }
+    //iterate over methods
+    for (auto const& method : methods) {
+        (method.second)->visit();
+    }
+
 
 }
 std::string ClassDeclSimple::getName() {
@@ -807,6 +810,7 @@ void MainClass::visit() {
 }
 void MainClass::evaluate() {
     //evaluate statements
+
     s->evaluate();    
     PRINTDEBUG("(MainClass)")
 }
@@ -823,16 +827,22 @@ void Program::traverse() {
     std::list<ClassDecl *>::iterator classDeclIter;
     for(classDeclIter = cl->begin(); classDeclIter != cl->end(); classDeclIter++){
         std::string className = (*classDeclIter)->getName();
-
+        
         //type check class
         if(classTable.count(className) || className == mainClassName){
             std::cerr << "Type Violation in Line " << lineno << " : error: duplicate class: " << className << std::endl;
             type_error = true;
         } else {
             classTable[className] = (*classDeclIter);
-            (*classDeclIter)->visit();
         }
     }
+    //iterate over classes
+    for (auto const& x : classTable) {
+        ClassDecl * clptr = x.second;
+        currentClass = clptr;
+        (clptr)->visit();
+    }
+
 
     //evaluate MainClass    
     m->visit();
