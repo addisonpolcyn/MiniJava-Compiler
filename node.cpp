@@ -112,12 +112,25 @@ std::string IsNot::visit() {
     return "boolean";
 }
 void IsNot::evaluate() {
-    int result = 0;
-   // if(*(int *)lhs->evaluate() != *(int *)rhs->evaluate()){
-     //   result = 1;
-    //}
-    void *ptr = &result;
-     
+    //evaluate expr
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+
+    //compare equality
+    buffer += "    cmp r0, r1\n";
+    buffer += "    bne 1f\n";
+    buffer += "    ldr r0, =0\n";
+    buffer += "    b 2f\n";
+    
+    //branch 1
+    buffer += "1:      \n";
+    buffer += "    ldr r0, =1\n";
+    
+    //branch 2
+    buffer += "2:      \n";
+
 }
 
 LessThan::LessThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -132,12 +145,24 @@ std::string LessThan::visit() {
     return "boolean";
 }
 void LessThan::evaluate() {
-    int result = 0;
-    //if(*(int *)lhs->evaluate() < *(int *)rhs->evaluate()){
-      //  result = 1;
-    //}
-    void *ptr = &result;
-     
+    //evaluate expr
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+
+    //compare equality
+    buffer += "    cmp r0, r1\n";
+    buffer += "    blt 1f\n";
+    buffer += "    ldr r0, =0\n";
+    buffer += "    b 2f\n";
+    
+    //branch 1
+    buffer += "1:      \n";
+    buffer += "    ldr r0, =1\n";
+    
+    //branch 2
+    buffer += "2:      \n";
 }
 
 LessThanEqual::LessThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -398,8 +423,7 @@ std::string IntegerLiteral::visit() {
 }
 void IntegerLiteral::evaluate() {
     int val = num;
-    void *ptr = &val;
-    buffer += "    ldr "+current_reg+", ="+std::to_string(num)+"\n";  //load value into r0    
+    buffer += "    ldr "+current_reg+", ="+std::to_string(val)+"\n";  //load value into r0    
 }
 
 std::string True::visit() {
@@ -490,8 +514,8 @@ std::string NegativeExp::visit() {
     return "int";
 }
 void NegativeExp::evaluate() {
-   // int val = -(*(int *)e->evaluate());
-    //void *ptr = &val;
+    e->evaluate();
+    buffer += "    neg "+current_reg+","+current_reg+"\n"; 
 }
 
 PositiveExp::PositiveExp(Exp *e, int lineno): e(e), lineno(lineno) {}
