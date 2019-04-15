@@ -18,9 +18,7 @@ std::map<std::string, VarDecl *> type_local_scope;  //map of variables in curren
 
 std::map<std::string, std::string> scope_type;
 std::map<std::string, int> scope;
-
 std::string buffer;
-
 ClassDecl *currentClass;
 
 /*******************    IDENTIFIER CLASS    *********************/
@@ -34,21 +32,19 @@ And::And(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno)  {}
 std::string And::visit() {
     PRINTDEBUG("(And)");
     std::string left = lhs->visit();
-    std::string right = rhs->visit();
-    
+    std::string right = rhs->visit();    
     if(left != "boolean" || right != "boolean") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '&&'" << std::endl;
         type_error = true;
     }
     return "boolean";
 }
-void * And::evaluate() {
+void And::evaluate() {
     int result = 0;
-    if(*(int *)lhs->evaluate() && *(int *)rhs->evaluate()){
-        result = 1;
-    }
+    //if(*(int *)lhs->evaluate() && *(int *)rhs->evaluate()){
+      //  result = 1;
+    //}
     void *ptr = &result;
-    return ptr;
 }
 
 Or::Or(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -63,13 +59,12 @@ std::string Or::visit() {
     }
     return "boolean";
 }
-void * Or::evaluate() {
+void Or::evaluate() {
     int result = 0;
-    if(*(int *)lhs->evaluate() || *(int *)rhs->evaluate()){
-        result = 1;
-    }
+    //if(*(int *)lhs->evaluate() || *(int *)rhs->evaluate()){
+      //  result = 1;
+    //}
     void *ptr = &result;
-    return ptr;
 }
 
 Is::Is(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -84,13 +79,12 @@ std::string Is::visit() {
     }
     return "boolean";
 }
-void * Is::evaluate() {
+void Is::evaluate() {
     int result = 0;
-    if(*(int *)lhs->evaluate() == *(int *)rhs->evaluate()){
-        result = 1;
-    }
+   // if(*(int *)lhs->evaluate() == *(int *)rhs->evaluate()){
+     //   result = 1;
+    //}
     void *ptr = &result;
-    return ptr;
 }
 
 IsNot::IsNot(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -105,13 +99,13 @@ std::string IsNot::visit() {
     }
     return "boolean";
 }
-void * IsNot::evaluate() {
+void IsNot::evaluate() {
     int result = 0;
-    if(*(int *)lhs->evaluate() != *(int *)rhs->evaluate()){
-        result = 1;
-    }
+   // if(*(int *)lhs->evaluate() != *(int *)rhs->evaluate()){
+     //   result = 1;
+    //}
     void *ptr = &result;
-    return ptr;
+     
 }
 
 LessThan::LessThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -126,13 +120,13 @@ std::string LessThan::visit() {
     }
     return "boolean";
 }
-void * LessThan::evaluate() {
+void LessThan::evaluate() {
     int result = 0;
-    if(*(int *)lhs->evaluate() < *(int *)rhs->evaluate()){
-        result = 1;
-    }
+    //if(*(int *)lhs->evaluate() < *(int *)rhs->evaluate()){
+      //  result = 1;
+    //}
     void *ptr = &result;
-    return ptr;
+     
 }
 
 LessThanEqual::LessThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -147,13 +141,13 @@ std::string LessThanEqual::visit() {
     }
     return "boolean";
 }
-void * LessThanEqual::evaluate() {
+void LessThanEqual::evaluate() {
     int result = 0;
-    if(*(int *)lhs->evaluate() <= *(int *)rhs->evaluate()){
-        result = 1;
-    }
+   // if(*(int *)lhs->evaluate() <= *(int *)rhs->evaluate()){
+     //   result = 1;
+    //}
     void *ptr = &result;
-    return ptr;
+     
 }
 
 GreaterThan::GreaterThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -168,13 +162,13 @@ std::string GreaterThan::visit() {
     }
     return "boolean";
 }
-void * GreaterThan::evaluate() {
+void GreaterThan::evaluate() {
     int result = 0;
-    if(*(int *)lhs->evaluate() > *(int *)rhs->evaluate()){
-        result = 1;
-    }
+    //if(*(int *)lhs->evaluate() > *(int *)rhs->evaluate()){
+      //  result = 1;
+    //}
     void *ptr = &result;
-    return ptr;
+     
 }
 
 GreaterThanEqual::GreaterThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -189,13 +183,13 @@ std::string GreaterThanEqual::visit() {
     }
     return "boolean";
 }
-void * GreaterThanEqual::evaluate() {
+void GreaterThanEqual::evaluate() {
     int result = 0;
-    if(*(int *)lhs->evaluate() >= *(int *)rhs->evaluate()){
-        result = 1;
-    }
+    //if(*(int *)lhs->evaluate() >= *(int *)rhs->evaluate()){
+      //  result = 1;
+    //}
     void *ptr = &result;
-    return ptr;
+     
 }
 
 Plus::Plus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -211,7 +205,7 @@ std::string Plus::visit() {
     return "int";
 
 }
-void * Plus::evaluate() {
+void Plus::evaluate() {
     int result = -1; 
     lhs->evaluate();
     current_reg = "r1";
@@ -220,7 +214,7 @@ void * Plus::evaluate() {
     buffer += "    add r0, r0, r1\n"; //add values from r0 and r1, store in r0
 
     void *ptr = &result;
-    return ptr;
+     
 }
 
 Minus::Minus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -236,7 +230,7 @@ std::string Minus::visit() {
     return "int";
 
 }
-void * Minus::evaluate() {
+void Minus::evaluate() {
     int result = -1;
     lhs->evaluate();
     current_reg = "r1";
@@ -245,7 +239,7 @@ void * Minus::evaluate() {
     
     buffer += "    sub r0, r0, r1\n"; //add values from r0 and r1, store in r0
     void *ptr = &result;
-    return ptr;
+     
 }
 
 Times::Times(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -260,7 +254,7 @@ std::string Times::visit() {
     }
     return "int";
 }
-void * Times::evaluate() {
+void Times::evaluate() {
     int result = -1;
     lhs->evaluate();
     current_reg = "r1";
@@ -268,7 +262,7 @@ void * Times::evaluate() {
     current_reg = "r0";
     buffer += "    mul r0, r0, r1\n"; //add values from r0 and r1, store in r0
     void *ptr = &result;
-    return ptr;
+     
 }
 
 Div::Div(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -283,10 +277,10 @@ std::string Div::visit() {
     }
     return "int";
 }
-void * Div::evaluate() {
-    int result = *(int *)lhs->evaluate() / *(int *)rhs->evaluate();
-    void *ptr = &result;
-    return ptr;
+void Div::evaluate() {
+    //int result = *(int *)lhs->evaluate() / *(int *)rhs->evaluate();
+    //void *ptr = &result;
+     //
 }
 
 ArrayLookup::ArrayLookup(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -294,11 +288,11 @@ std::string ArrayLookup::visit() {
     PRINTDEBUG("(ArrayLookup)")
     return "int";
 }
-void * ArrayLookup::evaluate() {
+void ArrayLookup::evaluate() {
     PRINTDEBUG("BROKEN EXPR EVAL")
     int val = 1;
     void *ptr = &val;
-    return ptr;
+     
 }
 
 ArrayLength::ArrayLength(Exp *e): e(e) {}
@@ -306,11 +300,11 @@ std::string ArrayLength::visit() {
     PRINTDEBUG("(ArrayLength)")
     return "int";
 }
-void * ArrayLength::evaluate() {
+void ArrayLength::evaluate() {
     PRINTDEBUG("BROKEN EXPR EVAL")
     int val = 1;
     void *ptr = &val;
-    return ptr;
+     
 }
 
 Call::Call(Exp *e, Identifier *i, std::list<Exp *> *el, int lineno): e(e), i(i), el(el), lineno(lineno) {}
@@ -366,8 +360,9 @@ std::string Call::visit() {
     //iterate over exper list for shits
     return returnType;
 }
-void * Call::evaluate() {
+void Call::evaluate() {
     //get object class and method pointers
+    /*
     ClassDecl *cl = (ClassDecl *)e->evaluate();
     std::string methodName = i->toString();
     MethodDecl *method = cl->methods[methodName];
@@ -400,7 +395,7 @@ void * Call::evaluate() {
         scope_type[key] = expr_Type;
         expIter++;
     }
-    return method->evaluate();
+    return method->evaluate();*/
 }
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
@@ -408,43 +403,39 @@ std::string IntegerLiteral::visit() {
     PRINTDEBUG("(IntegerLiteral)")
     return "int";
 }
-void * IntegerLiteral::evaluate() {
+void IntegerLiteral::evaluate() {
     int val = num;
     void *ptr = &val;
     buffer += "    ldr "+current_reg+", ="+std::to_string(num)+"\n";  //load value into r0    
-    return ptr;
 }
 
 std::string True::visit() {
     PRINTDEBUG("(True)")
     return "boolean";
 }
-void * True::evaluate() {
+void True::evaluate() {
     int val = 1;
     void *ptr = &val;
     buffer += "    ldr "+current_reg+", =1\n";  //load value into r0    
-    return ptr;
 }
 
 std::string False::visit() {
     PRINTDEBUG("(False)")
     return "boolean";
 }
-void * False::evaluate() {
+void False::evaluate() {
     int val = 0;
     void *ptr = &val;
     buffer += "    ldr "+current_reg+", =0\n";  //load value into r0    
-    return ptr;
 }
 
 
 std::string This::visit() {
     return currentClass->getName();
 }
-void * This::evaluate() {
+void This::evaluate() {
     ClassDecl *cl = currentClass;
     void *ptr = &(*cl);
-    return ptr;
 }
 
 IdentifierExp::IdentifierExp(std::string str): id(str) {}
@@ -452,11 +443,10 @@ std::string IdentifierExp::visit() {
     PRINTDEBUG("(IdentifierExp)")
     return type_local_scope[id]->t->getType();
 }
-void * IdentifierExp::evaluate() {
+void IdentifierExp::evaluate() {
     PRINTDEBUG("(IdentifierExp)")
     int val = scope[id];
     void * ptr = &val;
-    return ptr;
 }
 
 NewArray::NewArray(Exp *e): e(e) {}
@@ -464,11 +454,10 @@ std::string NewArray::visit() {
     PRINTDEBUG("(NewArray)")
     return "int []";
 }
-void * NewArray::evaluate() {
+void NewArray::evaluate() {
     PRINTDEBUG("BROKEN EXPR EVAL")
     int val = 1;
     void *ptr = &val;
-    return ptr;
 }
 
 NewObject::NewObject(Identifier *i): i(i) {}
@@ -476,10 +465,9 @@ std::string NewObject::visit() {
     PRINTDEBUG("(NewObject)")
     return i->toString();
 }
-void * NewObject::evaluate() {
+void NewObject::evaluate() {
     ClassDecl *cl = classTable[i->toString()];
     void *ptr = &(*cl);
-    return ptr;
 }
 
 Not::Not(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -491,13 +479,12 @@ std::string Not::visit() {
     }
     return "boolean";
 }
-void * Not::evaluate() {
+void Not::evaluate() {
     int val = 0;
-    if(*(int *)e->evaluate() == 0) {
-        val = 1;
-    }
+//    if(*(int *)e->evaluate() == 0) {
+  //      val = 1;
+    //}
     void *ptr = &val;
-    return ptr;
 }
 
 NegativeExp::NegativeExp(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -509,10 +496,9 @@ std::string NegativeExp::visit() {
     }
     return "int";
 }
-void * NegativeExp::evaluate() {
-    int val = -(*(int *)e->evaluate());
-    void *ptr = &val;
-    return ptr;
+void NegativeExp::evaluate() {
+   // int val = -(*(int *)e->evaluate());
+    //void *ptr = &val;
 }
 
 PositiveExp::PositiveExp(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -524,10 +510,10 @@ std::string PositiveExp::visit() {
     }
     return "int";
 }
-void * PositiveExp::evaluate() {
-    int val = +(*(int *)e->evaluate());
-    void *ptr = &val;
-    return ptr;
+void PositiveExp::evaluate() {
+//    int val = +(*(int *)e->evaluate());
+  //  void *ptr = &val;
+    // 
 }
 
 /*******************    STATEMENT CLASS    ****************************/
@@ -591,9 +577,9 @@ void While::visit() {
     PRINTDEBUG("(While)")
 }
 void While::evaluate() {
-    while(*(int *)e->evaluate()) {
-        s->evaluate();        
-    }
+//    while(*(int *)e->evaluate()) {
+  //      s->evaluate();        
+    //}
 }
 
 Print::Print(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -605,7 +591,7 @@ void Print::visit() {
     PRINTDEBUG("(Print)")
 }
 void Print::evaluate() {
-    std::cout << *(int *)e->evaluate();
+    e->evaluate();
     PRINTDEBUG("(Print)")
 
     buffer += "    mov r1, r0\n";
@@ -622,7 +608,7 @@ void Println::visit() {
     }
 }
 void Println::evaluate() {
-    std::cout << *(int *)e->evaluate() << std::endl;
+    e->evaluate();
     PRINTDEBUG("(Println)")
     
     buffer += "    mov r1, r0\n";
@@ -662,8 +648,8 @@ void Assign::visit() {
     }
 }
 void Assign::evaluate() {
-    int val = *(int *)e->evaluate();
-    scope[i->toString()] = val;
+    //int val = *(int *)e->evaluate();
+    //scope[i->toString()] = val;
 }
 
 ArrayAssign::ArrayAssign(Identifier *i, Exp *e1, Exp *e2): i(i), e1(e1), e2(e2) {}
@@ -671,7 +657,6 @@ void ArrayAssign::visit() {
     PRINTDEBUG("(ArrayAssign XXXXXXXX)")
 }
 void ArrayAssign::evaluate() {
-
     PRINTDEBUG("(Statment Evaluation Broken)")
 }
 
@@ -769,18 +754,19 @@ void MethodDecl::visit() {
         type_error = true;
     }
 }
-void * MethodDecl::evaluate() {
+void MethodDecl::evaluate() {
     //evaluate Statement Declarations
     std::list<Statement *>::iterator stmtIter;
     for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
         (*stmtIter)->evaluate();
     }
-    int returnVal = *(int *)e->evaluate();
+    //int returnVal = *(int *)e->evaluate();
+    
     //clean scopes
     //scope.clear();
     //scope_type.clear();
-    void * ptr = &returnVal;
-    return ptr;
+    //void * ptr = &returnVal;
+     
 }
 
 /******************    CLASS DECLARATION SUB-CLASS    ************/
