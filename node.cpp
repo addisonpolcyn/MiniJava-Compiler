@@ -217,7 +217,6 @@ void * Plus::evaluate() {
     current_reg = "r1";
     rhs->evaluate();
     current_reg = "r0";
-
     buffer += "    add r0, r0, r1\n"; //add values from r0 and r1, store in r0
 
     void *ptr = &result;
@@ -262,7 +261,12 @@ std::string Times::visit() {
     return "int";
 }
 void * Times::evaluate() {
-    int result = *(int *)lhs->evaluate() * *(int *)rhs->evaluate();
+    int result = -1;
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+    buffer += "    mul r0, r0, r1\n"; //add values from r0 and r1, store in r0
     void *ptr = &result;
     return ptr;
 }
@@ -418,6 +422,7 @@ std::string True::visit() {
 void * True::evaluate() {
     int val = 1;
     void *ptr = &val;
+    buffer += "    ldr "+current_reg+", =1\n";  //load value into r0    
     return ptr;
 }
 
@@ -428,6 +433,7 @@ std::string False::visit() {
 void * False::evaluate() {
     int val = 0;
     void *ptr = &val;
+    buffer += "    ldr "+current_reg+", =0\n";  //load value into r0    
     return ptr;
 }
 
@@ -559,11 +565,20 @@ void If::visit() {
 
 }
 void If::evaluate() {
+    e->evaluate();
+    buffer += "    cmp r0, #1\n";
+    buffer += "    beq success\n";
+    s2->evaluate();
+    buffer += "    b fail\n";
+    buffer += "  success:\n";
+    s1->evaluate();
+    buffer += "  fail:\n";
+/*
     if(*(int *)e->evaluate()) {
         s1->evaluate();
     } else {
         s2->evaluate();        
-    }
+    }*/
 }
 
 While::While(Exp *e, Statement *s, int lineno): e(e), s(s), lineno(lineno) {} 
