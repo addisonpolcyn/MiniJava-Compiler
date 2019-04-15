@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
     /* Traverse AST */
     root->traverse();
     
-    /* Interpret AST */
-    root->interpret();
+    /* Convert AST To ARM */
+    root->compile();
 
     /* Finish */
     return 0;

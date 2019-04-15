@@ -4,22 +4,24 @@
 #include <iostream>
 #include <fstream>
 #include <iostream>
+#include <vector> 
 
 #include "node.h"
 #define PRINTDEBUG(x) //std::cout << x << std::endl; // comment out print statement to remove the printing
 
 bool type_error = false;    //boolean value true denotes type_error present in Tree, false Tree syntax is type valid
 std::string mainClassName;  //string name of the main class 
-std::string current_reg("r0");    //current temp storage register ex. "r1"
 
+ClassDecl *currentClass;
 std::map<std::string, ClassDecl *> classTable;      //map of classes in program
 std::map<std::string, VarDecl *> type_class_scope;  //map of fields in current class scope
 std::map<std::string, VarDecl *> type_local_scope;  //map of variables in current scope inlcuding current class variables and method variables
-
 std::map<std::string, std::string> scope_type;
 std::map<std::string, int> scope;
+
 std::string buffer;
-ClassDecl *currentClass;
+std::vector<std::string> text;
+std::string current_reg("r0");    //current temp storage register ex. "r1"
 
 /*******************    IDENTIFIER CLASS    *********************/
 Identifier::Identifier(const std::string str): id(str) {}
@@ -40,11 +42,11 @@ std::string And::visit() {
     return "boolean";
 }
 void And::evaluate() {
-    int result = 0;
-    //if(*(int *)lhs->evaluate() && *(int *)rhs->evaluate()){
-      //  result = 1;
-    //}
-    void *ptr = &result;
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+    buffer += "    and r0, r0, r1\n"; //add values from r0 and r1, store in r0
 }
 
 Or::Or(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -52,7 +54,6 @@ std::string Or::visit() {
     PRINTDEBUG("(Or)");
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-    
     if(left != "boolean" || right != "boolean") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '||'" << std::endl;
         type_error = true;
@@ -60,11 +61,11 @@ std::string Or::visit() {
     return "boolean";
 }
 void Or::evaluate() {
-    int result = 0;
-    //if(*(int *)lhs->evaluate() || *(int *)rhs->evaluate()){
-      //  result = 1;
-    //}
-    void *ptr = &result;
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+    buffer += "    orr r0, r0, r1\n"; //add values from r0 and r1, store in r0
 }
 
 Is::Is(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -72,7 +73,6 @@ std::string Is::visit() {
     PRINTDEBUG("(Is)");
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-    
     if(left != right) {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types for binary operator '=='" << std::endl;
         type_error = true;
@@ -80,11 +80,24 @@ std::string Is::visit() {
     return "boolean";
 }
 void Is::evaluate() {
-    int result = 0;
-   // if(*(int *)lhs->evaluate() == *(int *)rhs->evaluate()){
-     //   result = 1;
-    //}
-    void *ptr = &result;
+    //evaluate expr
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+
+    //compare equality
+    buffer += "    cmp r0, r1\n";
+    buffer += "    beq 1f\n";
+    buffer += "    ldr r0, =0\n";
+    buffer += "    b 2f\n";
+    
+    //branch 1
+    buffer += "1:      \n";
+    buffer += "    ldr r0, =1\n";
+    
+    //branch 2
+    buffer += "2:      \n";
 }
 
 IsNot::IsNot(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -92,7 +105,6 @@ std::string IsNot::visit() {
     PRINTDEBUG("(IsNot)")
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-    
     if(left != right) {
         std::cerr << "Type Violation in Line " << lineno << " : incomparable types for binary operator '!='" << std::endl;
         type_error = true;
@@ -113,7 +125,6 @@ std::string LessThan::visit() {
     PRINTDEBUG("(LessThan)")
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-    
     if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '<'" << std::endl;
         type_error = true;
@@ -134,7 +145,6 @@ std::string LessThanEqual::visit() {
     PRINTDEBUG("LessThanEqual)")
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-
     if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '<='" << std::endl;
         type_error = true;
@@ -155,7 +165,6 @@ std::string GreaterThan::visit() {
     PRINTDEBUG("(GreaterThan)")
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-
     if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '>'" << std::endl;
         type_error = true;
@@ -176,7 +185,6 @@ std::string GreaterThanEqual::visit() {
     PRINTDEBUG("(GreaterThanEqual)")
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-
     if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '>='" << std::endl;
         type_error = true;
@@ -197,7 +205,6 @@ std::string Plus::visit() {
     PRINTDEBUG("(Plus)")
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-    
     if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '+'" << std::endl;
         type_error = true;
@@ -206,15 +213,11 @@ std::string Plus::visit() {
 
 }
 void Plus::evaluate() {
-    int result = -1; 
     lhs->evaluate();
     current_reg = "r1";
     rhs->evaluate();
     current_reg = "r0";
     buffer += "    add r0, r0, r1\n"; //add values from r0 and r1, store in r0
-
-    void *ptr = &result;
-     
 }
 
 Minus::Minus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -222,7 +225,6 @@ std::string Minus::visit() {
     PRINTDEBUG("(Minus)")
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-    
     if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '-'" << std::endl;
         type_error = true;
@@ -231,15 +233,11 @@ std::string Minus::visit() {
 
 }
 void Minus::evaluate() {
-    int result = -1;
     lhs->evaluate();
     current_reg = "r1";
     rhs->evaluate();
     current_reg = "r0";
-    
     buffer += "    sub r0, r0, r1\n"; //add values from r0 and r1, store in r0
-    void *ptr = &result;
-     
 }
 
 Times::Times(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -247,7 +245,6 @@ std::string Times::visit() {
     PRINTDEBUG("(Times)")
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-    
     if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '*'" << std::endl;
         type_error = true;
@@ -255,14 +252,11 @@ std::string Times::visit() {
     return "int";
 }
 void Times::evaluate() {
-    int result = -1;
     lhs->evaluate();
     current_reg = "r1";
     rhs->evaluate();
     current_reg = "r0";
     buffer += "    mul r0, r0, r1\n"; //add values from r0 and r1, store in r0
-    void *ptr = &result;
-     
 }
 
 Div::Div(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -270,7 +264,6 @@ std::string Div::visit() {
     PRINTDEBUG("(Div)")
     std::string left = lhs->visit();
     std::string right = rhs->visit();
-    
     if(left != "int" || right != "int") {
         std::cerr << "Type Violation in Line " << lineno << " : bad operand types for binary operator '/'" << std::endl;
         type_error = true;
@@ -535,6 +528,7 @@ void Block::evaluate() {
         PRINTDEBUG("(Statement)")
     }
     PRINTDEBUG("(Block)")
+    buffer += "\n";
 }
 
 If::If(Exp *e, Statement *s1, Statement *s2, int lineno): e(e), s1(s1), s2(s2), lineno(lineno) {}
@@ -551,20 +545,21 @@ void If::visit() {
 
 }
 void If::evaluate() {
+    //evaluate boolean expr
     e->evaluate();
+
+    //compare equality
     buffer += "    cmp r0, #1\n";
-    buffer += "    beq success\n";
+    buffer += "    beq 1f\n";
     s2->evaluate();
-    buffer += "    b fail\n";
-    buffer += "  success:\n";
-    s1->evaluate();
-    buffer += "  fail:\n";
-/*
-    if(*(int *)e->evaluate()) {
-        s1->evaluate();
-    } else {
-        s2->evaluate();        
-    }*/
+    buffer += "    b 2f\n";
+    
+    //branch 1
+    buffer += "1:      \n";
+    s1->evaluate();            
+    
+    //branch 2
+    buffer += "2:      \n";
 }
 
 While::While(Exp *e, Statement *s, int lineno): e(e), s(s), lineno(lineno) {} 
@@ -621,11 +616,13 @@ void PrintString::visit() {
     PRINTDEBUG("(PrintString)")
 }
 void PrintString::evaluate() {
-    std::cout << str;
     PRINTDEBUG("(PrintString)")
 
-    buffer += "    ldr r0, =\"a string to print\"\n";
+    int n = text.size() + 1;
+    std::string txt = "string"+std::to_string(n)+": .asciz \""+str+"\"\n";
+    buffer += "    ldr r0, =string"+std::to_string(n)+"\n";
     buffer += "    bl  printf\n";
+    text.push_back(txt);
 }
 
 PrintStringln::PrintStringln(const std::string str): str(str) {}
@@ -633,8 +630,12 @@ void PrintStringln::visit() {
     PRINTDEBUG("(PrintStringln)")
 }
 void PrintStringln::evaluate() {
-    std::cout << str << std::endl;
     PRINTDEBUG("(PrintStringln)")
+    int n = text.size() + 1;
+    std::string txt = "string"+std::to_string(n)+": .asciz \""+str+"\\n\"\n";
+    buffer += "    ldr r0, =string"+std::to_string(n)+"\n";
+    buffer += "    bl  printf\n";
+    text.push_back(txt);
 }
 
 Assign::Assign(Identifier *i, Exp *e, int lineno): i(i), e(e), lineno(lineno) {}
@@ -891,36 +892,43 @@ void Program::traverse() {
     }
     PRINTDEBUG("\n...(Program End Type Check Completed Gracefully) $")
 }
-void Program::interpret() {
+void Program::compile() {
+    std::string program;
     PRINTDEBUG("\n^ (Program Interpreter Start)...\n")
     
     //ARMS HEADER DATA
-    buffer += ".section .data\n";
-    buffer += "@ everything here is in the data section\n";
-    buffer += "\n";
-    buffer += ".section .text\n";
-    buffer += "int_print: .asciz \"%d\"\n";
-    buffer += "int_println: .asciz \"%d\\n\"\n";
-    buffer += "string_print: .asciz \"%s\"\n";
-    buffer += "string_println: .asciz \"%s\\n\"\n";
-    buffer += "\n";
+    std::string header;
+    header += ".section .data\n";
+    header += "@ everything here is in the data section\n";
+    header += "\n";
+    header += ".section .text\n";
+    header += "int_print: .asciz \"%d\"\n";
+    header += "int_println: .asciz \"%d\\n\"\n";
     
     //Start evaluation of program from MainClass
     m->evaluate();  
-    PRINTDEBUG("\n...(Program End Run Time Completed Successfully) $")
 
+    //build program
+    //add program default header
+    program += header;
+        
+    //fill out text field
+    for(auto const& value: text)
+        program += value; 
+    program += "\n";
+
+    //unload buffer
+    program += buffer;
+
+    //print output 
+    PRINTDEBUG("\n...(Program End Run Time Completed Successfully) $")
     std::cout << "ARMS PROGRAM FOLLOWS" << std::endl;
     std::cout << "--------------------" << std::endl;
-    std::cout << buffer << std::endl;
+    std::cout << program << std::endl;
 
-    //write arms to file
-    //std::cin >> buffer;
-    //std::ofstream out("test.s");
-    //out << buffer;
-    //o/ut.close();
-
+    //Write program to file
     std::ofstream myfile;
     myfile.open("test.s");
-    myfile << buffer;
+    myfile << program;
     myfile.close();
 }
