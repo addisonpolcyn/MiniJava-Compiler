@@ -2,8 +2,11 @@
 #include <list>
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <iostream>
+
 #include "node.h"
-#define PRINTDEBUG(x) std::cout << x << std::endl; // comment out print statement to remove the printing
+#define PRINTDEBUG(x) //std::cout << x << std::endl; // comment out print statement to remove the printing
 
 bool type_error = false;    //boolean value true denotes type_error present in Tree, false Tree syntax is type valid
 std::string mainClassName;  //string name of the main class 
@@ -14,6 +17,8 @@ std::map<std::string, VarDecl *> type_local_scope;  //map of variables in curren
 
 std::map<std::string, std::string> scope_type;
 std::map<std::string, int> scope;
+
+std::string buffer;
 
 ClassDecl *currentClass;
 
@@ -388,6 +393,7 @@ std::string IntegerLiteral::visit() {
 void * IntegerLiteral::evaluate() {
     int val = num;
     void *ptr = &val;
+    buffer += "    ldr r0, ="+std::to_string(num)+"\n";  //load value into r0    
     return ptr;
 }
 
@@ -572,6 +578,14 @@ void Print::visit() {
 void Print::evaluate() {
     std::cout << *(int *)e->evaluate();
     PRINTDEBUG("(Print)")
+
+    //buffer += "    ldr r0, =int_print  @ load print format string into r0\n";
+    //buffer += "    add r1, sp, #0        @ store the address for 'a' in r1\n";
+    //buffer += "    ldr r1, [r1]          @ load into r1 the value stored at the stack location sp + 0\n";
+    //buffer += "    bl  printf            @ call printf\n";
+    buffer += "    mov r1, r0\n";
+    buffer += "    ldr r0, =int_print  @ load print format string into r0\n";
+    buffer += "    bl  printf            @ call printf\n";
 }
 
 Println::Println(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -585,6 +599,17 @@ void Println::visit() {
 void Println::evaluate() {
     std::cout << *(int *)e->evaluate() << std::endl;
     PRINTDEBUG("(Println)")
+    
+    buffer += "    mov r1, r0\n";
+    buffer += "    ldr r0, =int_println  @ load print format string into r0\n";
+    buffer += "    bl  printf            @ call printf\n";
+    
+    /*
+    buffer += "    ldr r0, =int_println  @ load print format string into r0\n";
+    buffer += "    add r1, sp, #0        @ store the address for 'a' in r1\n";
+    buffer += "    ldr r1, [r1]          @ load into r1 the value stored at the stack location sp + 0\n";
+    buffer += "    bl  printf            @ call printf\n";
+    */
 }
 
 PrintString::PrintString(std::string str): str(str) {}
@@ -810,9 +835,15 @@ void MainClass::visit() {
 }
 void MainClass::evaluate() {
     //evaluate statements
+    buffer += ".global main\n";
+    buffer += ".balign 4\n";
+    buffer += "main:\n";
+    buffer += "    push {lr}\n";
 
     s->evaluate();    
     PRINTDEBUG("(MainClass)")
+    
+    buffer += "    pop {pc}\n";
 }
 
 /*******************    PROGRAM CLASS ****************************/
@@ -855,7 +886,34 @@ void Program::traverse() {
 }
 void Program::interpret() {
     PRINTDEBUG("\n^ (Program Interpreter Start)...\n")
+    
+    //ARMS HEADER DATA
+    buffer += ".section .data\n";
+    buffer += "@ everything here is in the data section\n";
+    buffer += "\n";
+    buffer += ".section .text\n";
+    buffer += "int_print: .asciz \"%d\"\n";
+    buffer += "int_println: .asciz \"%d\\n\"\n";
+    buffer += "string_print: .asciz \"%s\"\n";
+    buffer += "string_println: .asciz \"%s\\n\"\n";
+    buffer += "\n";
+    
     //Start evaluation of program from MainClass
     m->evaluate();  
     PRINTDEBUG("\n...(Program End Run Time Completed Successfully) $")
+
+    std::cout << "ARMS PROGRAM FOLLOWS" << std::endl;
+    std::cout << "--------------------" << std::endl;
+    std::cout << buffer << std::endl;
+
+    //write arms to file
+    //std::cin >> buffer;
+    //std::ofstream out("test.s");
+    //out << buffer;
+    //o/ut.close();
+
+    std::ofstream myfile;
+    myfile.open("test.s");
+    myfile << buffer;
+    myfile.close();
 }
