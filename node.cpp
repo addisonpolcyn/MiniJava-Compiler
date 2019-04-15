@@ -177,12 +177,24 @@ std::string LessThanEqual::visit() {
     return "boolean";
 }
 void LessThanEqual::evaluate() {
-    int result = 0;
-   // if(*(int *)lhs->evaluate() <= *(int *)rhs->evaluate()){
-     //   result = 1;
-    //}
-    void *ptr = &result;
-     
+    //evaluate expr
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+
+    //compare equality
+    buffer += "    cmp r0, r1\n";
+    buffer += "    ble 1f\n";
+    buffer += "    ldr r0, =0\n";
+    buffer += "    b 2f\n";
+    
+    //branch 1
+    buffer += "1:      \n";
+    buffer += "    ldr r0, =1\n";
+    
+    //branch 2
+    buffer += "2:      \n";
 }
 
 GreaterThan::GreaterThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -197,12 +209,24 @@ std::string GreaterThan::visit() {
     return "boolean";
 }
 void GreaterThan::evaluate() {
-    int result = 0;
-    //if(*(int *)lhs->evaluate() > *(int *)rhs->evaluate()){
-      //  result = 1;
-    //}
-    void *ptr = &result;
-     
+    //evaluate expr
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+
+    //compare equality
+    buffer += "    cmp r0, r1\n";
+    buffer += "    bgt 1f\n";
+    buffer += "    ldr r0, =0\n";
+    buffer += "    b 2f\n";
+    
+    //branch 1
+    buffer += "1:      \n";
+    buffer += "    ldr r0, =1\n";
+    
+    //branch 2
+    buffer += "2:      \n";
 }
 
 GreaterThanEqual::GreaterThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -217,12 +241,25 @@ std::string GreaterThanEqual::visit() {
     return "boolean";
 }
 void GreaterThanEqual::evaluate() {
-    int result = 0;
-    //if(*(int *)lhs->evaluate() >= *(int *)rhs->evaluate()){
-      //  result = 1;
-    //}
-    void *ptr = &result;
-     
+    //evaluate expr
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+
+    //compare equality
+    buffer += "    cmp r0, r1\n";
+    buffer += "    bge 1f\n";
+    buffer += "    ldr r0, =0\n";
+    buffer += "    b 2f\n";
+    
+    //branch 1
+    buffer += "1:      \n";
+    buffer += "    ldr r0, =1\n";
+    
+    //branch 2
+    buffer += "2:      \n";
+
 }
 
 Plus::Plus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -431,8 +468,6 @@ std::string True::visit() {
     return "boolean";
 }
 void True::evaluate() {
-    int val = 1;
-    void *ptr = &val;
     buffer += "    ldr "+current_reg+", =1\n";  //load value into r0    
 }
 
@@ -441,8 +476,6 @@ std::string False::visit() {
     return "boolean";
 }
 void False::evaluate() {
-    int val = 0;
-    void *ptr = &val;
     buffer += "    ldr "+current_reg+", =0\n";  //load value into r0    
 }
 
@@ -497,11 +530,20 @@ std::string Not::visit() {
     return "boolean";
 }
 void Not::evaluate() {
-    int val = 0;
-//    if(*(int *)e->evaluate() == 0) {
-  //      val = 1;
-    //}
-    void *ptr = &val;
+    e->evaluate();
+    
+    //compare equality
+    buffer += "    cmp r0, #0\n";
+    buffer += "    beq 1f\n";
+    buffer += "    ldr r0, =0\n";
+    buffer += "    b 2f\n";
+    
+    //branch 1
+    buffer += "1:      \n";
+    buffer += "    ldr r0, =1\n";
+    
+    //branch 2
+    buffer += "2:      \n";
 }
 
 NegativeExp::NegativeExp(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -528,9 +570,7 @@ std::string PositiveExp::visit() {
     return "int";
 }
 void PositiveExp::evaluate() {
-//    int val = +(*(int *)e->evaluate());
-  //  void *ptr = &val;
-    // 
+    e->evaluate();
 }
 
 /*******************    STATEMENT CLASS    ****************************/

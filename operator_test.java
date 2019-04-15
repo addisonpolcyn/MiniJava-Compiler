@@ -225,6 +225,11 @@ class operator_test {
         } else {
             System.out.println("FAILED");
         }
+        if(-1 == -1) {
+            System.out.println("PASSED");
+        } else {
+            System.out.println("FAILED");
+        }
         System.out.println("Test #16: (+)");
         if(+1 == 1) {
             System.out.println("PASSED");
@@ -250,19 +255,19 @@ class operator_test {
 
         //combos
         System.out.println("Test #18: Robust");
-        if((!true || !false) && true && 3*3==9) {
+        if((1==1) && true) {
             System.out.println("PASSED");
         } else {
             System.out.println("FAILED");
         }
         System.out.println("Test #19: Robust");
-        if(30 > 5 && true!=false && 3+3<10) {
+        if(30 > 5 && true) {
             System.out.println("PASSED");
         } else {
             System.out.println("FAILED");
         }
         System.out.println("Test #20: Robust");
-        if(30 >= 30 && true && 15-5<=10) {
+        if(30 >= 30 && true) {
             System.out.println("PASSED");
         } else {
             System.out.println("FAILED");
