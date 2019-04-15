@@ -10,6 +10,7 @@
 
 bool type_error = false;    //boolean value true denotes type_error present in Tree, false Tree syntax is type valid
 std::string mainClassName;  //string name of the main class 
+std::string current_reg("r0");    //current temp storage register ex. "r1"
 
 std::map<std::string, ClassDecl *> classTable;      //map of classes in program
 std::map<std::string, VarDecl *> type_class_scope;  //map of fields in current class scope
@@ -211,7 +212,14 @@ std::string Plus::visit() {
 
 }
 void * Plus::evaluate() {
-    int result = *(int *)lhs->evaluate() + *(int *)rhs->evaluate();
+    int result = -1; 
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+
+    buffer += "    add r0, r0, r1\n"; //add values from r0 and r1, store in r0
+
     void *ptr = &result;
     return ptr;
 }
@@ -230,7 +238,13 @@ std::string Minus::visit() {
 
 }
 void * Minus::evaluate() {
-    int result = *(int *)lhs->evaluate() - *(int *)rhs->evaluate();
+    int result = -1;
+    lhs->evaluate();
+    current_reg = "r1";
+    rhs->evaluate();
+    current_reg = "r0";
+    
+    buffer += "    sub r0, r0, r1\n"; //add values from r0 and r1, store in r0
     void *ptr = &result;
     return ptr;
 }
@@ -393,7 +407,7 @@ std::string IntegerLiteral::visit() {
 void * IntegerLiteral::evaluate() {
     int val = num;
     void *ptr = &val;
-    buffer += "    ldr r0, ="+std::to_string(num)+"\n";  //load value into r0    
+    buffer += "    ldr "+current_reg+", ="+std::to_string(num)+"\n";  //load value into r0    
     return ptr;
 }
 
@@ -579,13 +593,9 @@ void Print::evaluate() {
     std::cout << *(int *)e->evaluate();
     PRINTDEBUG("(Print)")
 
-    //buffer += "    ldr r0, =int_print  @ load print format string into r0\n";
-    //buffer += "    add r1, sp, #0        @ store the address for 'a' in r1\n";
-    //buffer += "    ldr r1, [r1]          @ load into r1 the value stored at the stack location sp + 0\n";
-    //buffer += "    bl  printf            @ call printf\n";
     buffer += "    mov r1, r0\n";
-    buffer += "    ldr r0, =int_print  @ load print format string into r0\n";
-    buffer += "    bl  printf            @ call printf\n";
+    buffer += "    ldr r0, =int_print\n";
+    buffer += "    bl  printf\n";
 }
 
 Println::Println(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -601,15 +611,8 @@ void Println::evaluate() {
     PRINTDEBUG("(Println)")
     
     buffer += "    mov r1, r0\n";
-    buffer += "    ldr r0, =int_println  @ load print format string into r0\n";
-    buffer += "    bl  printf            @ call printf\n";
-    
-    /*
-    buffer += "    ldr r0, =int_println  @ load print format string into r0\n";
-    buffer += "    add r1, sp, #0        @ store the address for 'a' in r1\n";
-    buffer += "    ldr r1, [r1]          @ load into r1 the value stored at the stack location sp + 0\n";
-    buffer += "    bl  printf            @ call printf\n";
-    */
+    buffer += "    ldr r0, =int_println\n";
+    buffer += "    bl  printf\n";
 }
 
 PrintString::PrintString(std::string str): str(str) {}
@@ -619,6 +622,9 @@ void PrintString::visit() {
 void PrintString::evaluate() {
     std::cout << str;
     PRINTDEBUG("(PrintString)")
+
+    buffer += "    ldr r0, =\"a string to print\"\n";
+    buffer += "    bl  printf\n";
 }
 
 PrintStringln::PrintStringln(const std::string str): str(str) {}
