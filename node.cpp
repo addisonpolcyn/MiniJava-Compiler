@@ -636,9 +636,25 @@ void While::visit() {
     PRINTDEBUG("(While)")
 }
 void While::evaluate() {
-//    while(*(int *)e->evaluate()) {
-  //      s->evaluate();        
-    //}
+    e->evaluate();
+
+    //check if loop should begin
+    buffer += "    cmp r0, #1\n";
+    buffer += "    beq 1f\n";
+    
+    //done
+    buffer += "    b 2f\n";
+    
+    //branch 1
+    buffer += "1:      \n";
+    s->evaluate();
+    e->evaluate();
+    buffer += "    cmp r0, #1\n";
+    buffer += "    beq 1b\n";
+    buffer += "    b 2f\n";
+    
+    //done
+    buffer += "2:      \n";
 }
 
 Print::Print(Exp *e, int lineno): e(e), lineno(lineno) {}
