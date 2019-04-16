@@ -844,6 +844,7 @@ void MethodDecl::visit() {
     }
 }
 void MethodDecl::evaluate() {
+    buffer += "    push {lr}\n";     
     //evaluate Statement Declarations
     std::list<Statement *>::iterator stmtIter;
     for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
@@ -858,6 +859,7 @@ void MethodDecl::evaluate() {
     //void * ptr = &returnVal;
     //evaluate return 
     e->evaluate();
+    buffer += "    pop {pc}\n";     
     buffer += "    bx lr\n";     
 }
 
