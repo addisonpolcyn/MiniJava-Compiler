@@ -18,6 +18,7 @@ std::map<std::string, VarDecl *> type_class_scope;  //map of fields in current c
 std::map<std::string, VarDecl *> type_local_scope;  //map of variables in current scope inlcuding current class variables and method variables
 std::map<std::string, std::string> scope_type;
 std::map<std::string, int> scope;
+std::map<std::string, int> class_scope;
 
 std::string buffer;
 std::vector<std::string> text;
@@ -502,8 +503,13 @@ std::string IdentifierExp::visit() {
 }
 void IdentifierExp::evaluate() {
     PRINTDEBUG("(IdentifierExp)")
-    int val = scope[id];
-    void * ptr = &val;
+    //int val = scope[id];
+    //void * ptr = &val;
+    int offset = scope[id];
+
+    //load value of var from stack
+    buffer += "    add r1, sp, #"+std::to_string(offset)+"\n"; //store the address of sp + offset in r1
+    buffer += "    ldr r0, [r1]\n"; //load into r0 the value store at r1 stack location
 }
 
 NewArray::NewArray(Exp *e): e(e) {}
@@ -739,6 +745,17 @@ void Assign::visit() {
 void Assign::evaluate() {
     //int val = *(int *)e->evaluate();
     //scope[i->toString()] = val;
+    std::string id = i->toString();
+    int offset = scope[id];
+    
+    //evaluate expr
+    e->evaluate();
+    
+    std::cout << "assigning at sp+" << offset << " to var:" << id << std::endl;
+
+    //assign onto the stack
+    buffer += "    add r1, sp, #"+std::to_string(offset)+"\n";  //store the location sp + offset in r1
+    buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
 }
 
 ArrayAssign::ArrayAssign(Identifier *i, Exp *e1, Exp *e2): i(i), e1(e1), e2(e2) {}
@@ -845,6 +862,19 @@ void MethodDecl::visit() {
 }
 void MethodDecl::evaluate() {
     buffer += "    push {lr}\n";     
+
+    //iterate over local variables
+    int offset = 0;
+    for (auto const& var : localVariables) {
+        scope[var.first] = offset; //offset in stack
+        std::cout << "added item:" << var.first << " to the stack at offset:" << offset << std::endl;
+        offset += 4;
+    }
+
+    //make space for offset
+    if(offset)
+        buffer += "    sub sp, sp, #"+std::to_string(offset)+"\n";
+
     //evaluate Statement Declarations
     std::list<Statement *>::iterator stmtIter;
     for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
@@ -859,8 +889,19 @@ void MethodDecl::evaluate() {
     //void * ptr = &returnVal;
     //evaluate return 
     e->evaluate();
-    buffer += "    pop {pc}\n";     
+    
+    //restore stack pointer to original location before function
+    if(offset)
+        buffer += "    add sp, sp, #"+std::to_string(offset)+"\n";
+
+    //return program counter
+    buffer += "    pop {pc}\n";
+
+    //return branch stmt
     buffer += "    bx lr\n";     
+
+    //clean scope
+    scope.clear();
 }
 
 /******************    CLASS DECLARATION SUB-CLASS    ************/
@@ -911,7 +952,7 @@ void ClassDeclSimple::visit() {
 }
 void ClassDeclSimple::evaluate() {
     //check formal variables
-    //TODO
+    //TODO upodate the class scope
    
     //iterate over methods
     for (auto const& method : methods) {
