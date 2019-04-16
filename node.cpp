@@ -508,8 +508,8 @@ void IdentifierExp::evaluate() {
     int offset = scope[id];
 
     //load value of var from stack
-    buffer += "    add r1, sp, #"+std::to_string(offset)+"\n"; //store the address of sp + offset in r1
-    buffer += "    ldr r0, [r1]\n"; //load into r0 the value store at r1 stack location
+    buffer += "    add r2, sp, #"+std::to_string(offset)+"\n"; //store the address of sp + offset in r1
+    buffer += "    ldr "+current_reg+", [r2]\n"; //load into r0 the value store at r1 stack location
 }
 
 NewArray::NewArray(Exp *e): e(e) {}
