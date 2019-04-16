@@ -460,6 +460,7 @@ public:
 class ClassDecl {
 public:
     virtual void visit() = 0;
+    virtual void evaluate() = 0;
     virtual std::string getName() = 0;
     std::map<std::string, VarDecl *> fieldVariables;
     std::map<std::string, MethodDecl *> methods;
@@ -475,6 +476,7 @@ protected:
 public:
     ClassDeclSimple(Identifier *i, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml, int lineno);
     void visit();
+    void evaluate();
     std::string getName();
 };
 
@@ -489,6 +491,7 @@ protected:
 public:
     ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml, int lineno);
     void visit();
+    void evaluate();
     std::string getName();
 };
 

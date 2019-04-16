@@ -417,11 +417,18 @@ std::string Call::visit() {
 }
 void Call::evaluate() {
     //get object class and method pointers
-    /*
-    ClassDecl *cl = (ClassDecl *)e->evaluate();
-    std::string methodName = i->toString();
-    MethodDecl *method = cl->methods[methodName];
     
+
+    
+    //ClassDecl *cl = (ClassDecl *)e->evaluate();
+    std::string className = currentClass->getName();    
+    std::string methodName = i->toString();
+    
+    //call function
+    buffer += "    bl "+className+"_"+methodName+"\n";
+    //MethodDecl *method = cl->methods[methodName];
+    
+    /*
     //init scope
  //   scope.clear();
   //  scope_type.clear();
@@ -518,6 +525,7 @@ std::string NewObject::visit() {
 void NewObject::evaluate() {
     ClassDecl *cl = classTable[i->toString()];
     void *ptr = &(*cl);
+    currentClass = cl;
 }
 
 Not::Not(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -840,6 +848,7 @@ void MethodDecl::evaluate() {
     std::list<Statement *>::iterator stmtIter;
     for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
         (*stmtIter)->evaluate();
+        std::cout << "exectuing statment" << std::endl;
     }
     //int returnVal = *(int *)e->evaluate();
     
@@ -847,7 +856,9 @@ void MethodDecl::evaluate() {
     //scope.clear();
     //scope_type.clear();
     //void * ptr = &returnVal;
-     
+    //evaluate return 
+    e->evaluate();
+    buffer += "    bx lr\n";     
 }
 
 /******************    CLASS DECLARATION SUB-CLASS    ************/
@@ -896,6 +907,16 @@ void ClassDeclSimple::visit() {
 
 
 }
+void ClassDeclSimple::evaluate() {
+    //check formal variables
+    //TODO
+   
+    //iterate over methods
+    for (auto const& method : methods) {
+        buffer += "\n"+i->toString()+"_"+method.first+":\n";
+        (method.second)->evaluate();
+    }
+}
 std::string ClassDeclSimple::getName() {
     return i->toString();
 }
@@ -903,6 +924,9 @@ std::string ClassDeclSimple::getName() {
 ClassDeclExtends::ClassDeclExtends(Identifier *i, Identifier *j, std::list<VarDecl *> *vl, std::list<MethodDecl *> *ml, int lineno): i(i), j(j), vl(vl), ml(ml), lineno(lineno) {}
 void ClassDeclExtends::visit() {
     PRINTDEBUG("(ClassDeclExtends)")
+}
+void ClassDeclExtends::evaluate() {
+    //TODO
 }
 std::string ClassDeclExtends::getName() {
     return i->toString();
@@ -973,8 +997,8 @@ void Program::traverse() {
     PRINTDEBUG("\n...(Program End Type Check Completed Gracefully) $")
 }
 void Program::compile() {
+    //string buffer to hold ARM Program
     std::string program;
-    PRINTDEBUG("\n^ (Program Interpreter Start)...\n")
     
     //ARMS HEADER DATA
     std::string header;
@@ -988,8 +1012,14 @@ void Program::compile() {
     //Start evaluation of program from MainClass
     m->evaluate();  
 
+    //iterate over classes to build functions
+    for (auto const& x : classTable) {
+        ClassDecl * clptr = x.second;
+        currentClass = clptr;
+        (clptr)->evaluate();
+    }
+
     //build program
-    //add program default header
     program += header;
         
     //fill out text field
@@ -1000,15 +1030,15 @@ void Program::compile() {
     //unload buffer
     program += buffer;
 
-    //print output 
-    PRINTDEBUG("\n...(Program End Run Time Completed Successfully) $")
-    std::cout << "ARMS PROGRAM FOLLOWS" << std::endl;
-    std::cout << "--------------------" << std::endl;
-    std::cout << program << std::endl;
-
     //Write program to file
     std::ofstream myfile;
     myfile.open("test.s");
     myfile << program;
     myfile.close();
+
+    //print output 
+    PRINTDEBUG("\n...(Program End Run Time Completed Successfully) $")
+    std::cout << "ARMS PROGRAM FOLLOWS" << std::endl;
+    std::cout << "--------------------" << std::endl;
+    std::cout << program << std::endl;
 }
