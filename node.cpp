@@ -23,7 +23,6 @@ std::vector<std::string> class_variables;
 
 std::string buffer;
 std::vector<std::string> text;
-std::string current_reg("r0");    //current temp storage register ex. "r1"
 
 /*******************    IDENTIFIER CLASS    *********************/
 Identifier::Identifier(const std::string str): id(str) {}
@@ -43,11 +42,9 @@ std::string And::visit() {
     }
     return "boolean";
 }
-void And::evaluate() {
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
+void And::evaluate(std::string reg) {
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
     buffer += "    and r0, r0, r1\n"; //add values from r0 and r1, store in r0
 }
 
@@ -62,11 +59,9 @@ std::string Or::visit() {
     }
     return "boolean";
 }
-void Or::evaluate() {
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
+void Or::evaluate(std::string reg) {
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
     buffer += "    orr r0, r0, r1\n"; //add values from r0 and r1, store in r0
 }
 
@@ -81,22 +76,20 @@ std::string Is::visit() {
     }
     return "boolean";
 }
-void Is::evaluate() {
+void Is::evaluate(std::string reg) {
     //evaluate expr
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
 
     //compare equality
     buffer += "    cmp r0, r1\n";
     buffer += "    beq 1f\n";
-    buffer += "    ldr r0, =0\n";
+    buffer += "    ldr "+reg+", =0\n";
     buffer += "    b 2f\n";
     
     //branch 1
     buffer += "1:      \n";
-    buffer += "    ldr r0, =1\n";
+    buffer += "    ldr "+reg+", =1\n";
     
     //branch 2
     buffer += "2:      \n";
@@ -113,12 +106,10 @@ std::string IsNot::visit() {
     }
     return "boolean";
 }
-void IsNot::evaluate() {
+void IsNot::evaluate(std::string reg) {
     //evaluate expr
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
 
     //compare equality
     buffer += "    cmp r0, r1\n";
@@ -146,12 +137,10 @@ std::string LessThan::visit() {
     }
     return "boolean";
 }
-void LessThan::evaluate() {
+void LessThan::evaluate(std::string reg) {
     //evaluate expr
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
 
     //compare equality
     buffer += "    cmp r0, r1\n";
@@ -178,12 +167,10 @@ std::string LessThanEqual::visit() {
     }
     return "boolean";
 }
-void LessThanEqual::evaluate() {
+void LessThanEqual::evaluate(std::string reg) {
     //evaluate expr
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
 
     //compare equality
     buffer += "    cmp r0, r1\n";
@@ -210,12 +197,10 @@ std::string GreaterThan::visit() {
     }
     return "boolean";
 }
-void GreaterThan::evaluate() {
+void GreaterThan::evaluate(std::string reg) {
     //evaluate expr
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
 
     //compare equality
     buffer += "    cmp r0, r1\n";
@@ -242,12 +227,10 @@ std::string GreaterThanEqual::visit() {
     }
     return "boolean";
 }
-void GreaterThanEqual::evaluate() {
+void GreaterThanEqual::evaluate(std::string reg) {
     //evaluate expr
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
 
     //compare equality
     buffer += "    cmp r0, r1\n";
@@ -276,12 +259,10 @@ std::string Plus::visit() {
     return "int";
 
 }
-void Plus::evaluate() {
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
-    buffer += "    add r0, r0, r1\n"; //add values from r0 and r1, store in r0
+void Plus::evaluate(std::string reg) {
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
+    buffer += "    add "+reg+", r0, r1\n"; //add values from r0 and r1, store in r0
 }
 
 Minus::Minus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -296,11 +277,9 @@ std::string Minus::visit() {
     return "int";
 
 }
-void Minus::evaluate() {
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
+void Minus::evaluate(std::string reg) {
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
     buffer += "    sub r0, r0, r1\n"; //add values from r0 and r1, store in r0
 }
 
@@ -315,11 +294,9 @@ std::string Times::visit() {
     }
     return "int";
 }
-void Times::evaluate() {
-    lhs->evaluate();
-    current_reg = "r1";
-    rhs->evaluate();
-    current_reg = "r0";
+void Times::evaluate(std::string reg) {
+    lhs->evaluate("r0");
+    rhs->evaluate("r1");
     buffer += "    mul r0, r0, r1\n"; //add values from r0 and r1, store in r0
 }
 
@@ -334,7 +311,7 @@ std::string Div::visit() {
     }
     return "int";
 }
-void Div::evaluate() {
+void Div::evaluate(std::string reg) {
     //int result = *(int *)lhs->evaluate() / *(int *)rhs->evaluate();
     //void *ptr = &result;
      //
@@ -345,7 +322,7 @@ std::string ArrayLookup::visit() {
     PRINTDEBUG("(ArrayLookup)")
     return "int";
 }
-void ArrayLookup::evaluate() {
+void ArrayLookup::evaluate(std::string reg) {
     PRINTDEBUG("BROKEN EXPR EVAL")
     int val = 1;
     void *ptr = &val;
@@ -357,7 +334,7 @@ std::string ArrayLength::visit() {
     PRINTDEBUG("(ArrayLength)")
     return "int";
 }
-void ArrayLength::evaluate() {
+void ArrayLength::evaluate(std::string reg) {
     PRINTDEBUG("BROKEN EXPR EVAL")
     int val = 1;
     void *ptr = &val;
@@ -417,7 +394,7 @@ std::string Call::visit() {
     //iterate over exper list for shits
     return returnType;
 }
-void Call::evaluate() {
+void Call::evaluate(std::string reg) {
     //get object class and method pointers
     
 
@@ -467,32 +444,32 @@ std::string IntegerLiteral::visit() {
     PRINTDEBUG("(IntegerLiteral)")
     return "int";
 }
-void IntegerLiteral::evaluate() {
+void IntegerLiteral::evaluate(std::string reg) {
     int val = num;
-    buffer += "    ldr "+current_reg+", ="+std::to_string(val)+"\n";  //load value into r0    
+    buffer += "    ldr "+reg+", ="+std::to_string(val)+"\n";  //load value into register
 }
 
 std::string True::visit() {
     PRINTDEBUG("(True)")
     return "boolean";
 }
-void True::evaluate() {
-    buffer += "    ldr "+current_reg+", =1\n";  //load value into r0    
+void True::evaluate(std::string reg) {
+    buffer += "    ldr "+reg+", =1\n";  //load value into r0    
 }
 
 std::string False::visit() {
     PRINTDEBUG("(False)")
     return "boolean";
 }
-void False::evaluate() {
-    buffer += "    ldr "+current_reg+", =0\n";  //load value into r0    
+void False::evaluate(std::string reg) {
+    buffer += "    ldr "+reg+", =0\n";  //load value into r0    
 }
 
 
 std::string This::visit() {
     return currentClass->getName();
 }
-void This::evaluate() {
+void This::evaluate(std::string reg) {
     ClassDecl *cl = currentClass;
     void *ptr = &(*cl);
 }
@@ -502,7 +479,7 @@ std::string IdentifierExp::visit() {
     PRINTDEBUG("(IdentifierExp)")
     return type_local_scope[id]->t->getType();
 }
-void IdentifierExp::evaluate() {
+void IdentifierExp::evaluate(std::string reg) {
     PRINTDEBUG("(IdentifierExp)")
     //int val = scope[id];
     //void * ptr = &val;
@@ -510,7 +487,7 @@ void IdentifierExp::evaluate() {
 
     //load value of var from stack
     buffer += "    add r2, sp, #"+std::to_string(offset)+"\n"; //store the address of sp + offset in r1
-    buffer += "    ldr "+current_reg+", [r2]\n"; //load into r0 the value store at r1 stack location
+    buffer += "    ldr "+reg+", [r2]\n"; //load into r0 the value store at r1 stack location
 }
 
 NewArray::NewArray(Exp *e): e(e) {}
@@ -518,7 +495,7 @@ std::string NewArray::visit() {
     PRINTDEBUG("(NewArray)")
     return "int []";
 }
-void NewArray::evaluate() {
+void NewArray::evaluate(std::string reg) {
     PRINTDEBUG("BROKEN EXPR EVAL")
     int val = 1;
     void *ptr = &val;
@@ -529,7 +506,7 @@ std::string NewObject::visit() {
     PRINTDEBUG("(NewObject)")
     return i->toString();
 }
-void NewObject::evaluate() {
+void NewObject::evaluate(std::string reg) {
     ClassDecl *cl = classTable[i->toString()];
     void *ptr = &(*cl);
     currentClass = cl;
@@ -544,8 +521,8 @@ std::string Not::visit() {
     }
     return "boolean";
 }
-void Not::evaluate() {
-    e->evaluate();
+void Not::evaluate(std::string reg) {
+    e->evaluate("r0");
     
     //compare equality
     buffer += "    cmp r0, #0\n";
@@ -570,9 +547,9 @@ std::string NegativeExp::visit() {
     }
     return "int";
 }
-void NegativeExp::evaluate() {
-    e->evaluate();
-    buffer += "    neg "+current_reg+","+current_reg+"\n"; 
+void NegativeExp::evaluate(std::string reg) {
+    e->evaluate("r0");
+    buffer += "    neg "+reg+","+reg+"\n"; 
 }
 
 PositiveExp::PositiveExp(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -584,8 +561,8 @@ std::string PositiveExp::visit() {
     }
     return "int";
 }
-void PositiveExp::evaluate() {
-    e->evaluate();
+void PositiveExp::evaluate(std::string reg) {
+    e->evaluate("r0");
 }
 
 /*******************    STATEMENT CLASS    ****************************/
@@ -625,7 +602,7 @@ void If::visit() {
 }
 void If::evaluate() {
     //evaluate boolean expr
-    e->evaluate();
+    e->evaluate("r0");
 
     //compare equality
     buffer += "    cmp r0, #1\n";
@@ -651,7 +628,7 @@ void While::visit() {
     PRINTDEBUG("(While)")
 }
 void While::evaluate() {
-    e->evaluate();
+    e->evaluate("r0");
 
     //check if loop should begin
     buffer += "    cmp r0, #1\n";
@@ -663,7 +640,7 @@ void While::evaluate() {
     //branch 1
     buffer += "1:      \n";
     s->evaluate();
-    e->evaluate();
+    e->evaluate("r0");
     buffer += "    cmp r0, #1\n";
     buffer += "    beq 1b\n";
     buffer += "    b 2f\n";
@@ -681,9 +658,7 @@ void Print::visit() {
     PRINTDEBUG("(Print)")
 }
 void Print::evaluate() {
-    e->evaluate();
-    PRINTDEBUG("(Print)")
-
+    e->evaluate("r0");
     buffer += "    mov r1, r0\n";
     buffer += "    ldr r0, =int_print\n";
     buffer += "    bl  printf\n";
@@ -698,9 +673,7 @@ void Println::visit() {
     }
 }
 void Println::evaluate() {
-    e->evaluate();
-    PRINTDEBUG("(Println)")
-    
+    e->evaluate("r0");
     buffer += "    mov r1, r0\n";
     buffer += "    ldr r0, =int_println\n";
     buffer += "    bl  printf\n";
@@ -711,8 +684,6 @@ void PrintString::visit() {
     PRINTDEBUG("(PrintString)")
 }
 void PrintString::evaluate() {
-    PRINTDEBUG("(PrintString)")
-
     int n = text.size() + 1;
     std::string txt = "string"+std::to_string(n)+": .asciz \""+str+"\"\n";
     buffer += "    ldr r0, =string"+std::to_string(n)+"\n";
@@ -725,7 +696,6 @@ void PrintStringln::visit() {
     PRINTDEBUG("(PrintStringln)")
 }
 void PrintStringln::evaluate() {
-    PRINTDEBUG("(PrintStringln)")
     int n = text.size() + 1;
     std::string txt = "string"+std::to_string(n)+": .asciz \""+str+"\\n\"\n";
     buffer += "    ldr r0, =string"+std::to_string(n)+"\n";
@@ -750,7 +720,7 @@ void Assign::evaluate() {
     int offset = scope[id];
     
     //evaluate expr
-    e->evaluate();
+    e->evaluate("r0");
     
     std::cout << "assigning at sp+" << offset << " to var:" << id << std::endl;
 
@@ -911,7 +881,7 @@ void MethodDecl::evaluate() {
     //scope_type.clear();
     //void * ptr = &returnVal;
     //evaluate return 
-    e->evaluate();
+    e->evaluate("r0");
     
     //restore stack pointer to original location before function
     if(offset)
