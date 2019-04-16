@@ -17,8 +17,9 @@ std::map<std::string, ClassDecl *> classTable;      //map of classes in program
 std::map<std::string, VarDecl *> type_class_scope;  //map of fields in current class scope
 std::map<std::string, VarDecl *> type_local_scope;  //map of variables in current scope inlcuding current class variables and method variables
 std::map<std::string, std::string> scope_type;
+
 std::map<std::string, int> scope;
-std::map<std::string, int> class_scope;
+std::vector<std::string> class_variables;
 
 std::string buffer;
 std::vector<std::string> text;
@@ -861,19 +862,41 @@ void MethodDecl::visit() {
     }
 }
 void MethodDecl::evaluate() {
+    //prepare function
     buffer += "    push {lr}\n";     
-
-    //iterate over local variables
     int offset = 0;
-    for (auto const& var : localVariables) {
-        scope[var.first] = offset; //offset in stack
-        std::cout << "added item:" << var.first << " to the stack at offset:" << offset << std::endl;
+    
+    //allocate class variables
+    for (auto const& var : class_variables) {
+        scope[var] = offset; //offset in stack
+        std::cout << "added item:" << var << " to the stack at offset:" << offset << std::endl;
         offset += 4;
+    }
+
+    //allocate local variables
+    for (auto const& var : localVariables) {
+        if(scope.count(var.first) < 1){
+            scope[var.first] = offset; //offset in stack
+            std::cout << "added item:" << var.first << " to the stack at offset:" << offset << std::endl;
+            offset += 4;
+        }
+    }
+
+    //allocate parameters
+    for (auto const& var : parameters) {
+        if(scope.count(var.first) < 1){
+            scope[var.first] = offset; //offset in stack
+            std::cout << "added item:" << var.first << " to the stack at offset:" << offset << std::endl;
+            offset += 4;
+        }
     }
 
     //make space for offset
     if(offset)
         buffer += "    sub sp, sp, #"+std::to_string(offset)+"\n";
+
+    //assign parameters
+    //TODO
 
     //evaluate Statement Declarations
     std::list<Statement *>::iterator stmtIter;
@@ -953,7 +976,10 @@ void ClassDeclSimple::visit() {
 void ClassDeclSimple::evaluate() {
     //check formal variables
     //TODO upodate the class scope
-   
+    for (auto const& variable : fieldVariables) {
+        class_variables.push_back(variable.first);
+    }
+
     //iterate over methods
     for (auto const& method : methods) {
         buffer += "\n"+i->toString()+"_"+method.first+":\n";
