@@ -6,7 +6,7 @@
 #include "node.h"
 
 #define YYDEBUG 1
-#define PRINTDEBUG(x) // std::cout << x << std::endl;// comment out print statement to remove the printing
+#define PRINTDEBUG(x)  std::cout << x << std::endl;// comment out print statement to remove the printing
 
 //root of AST
 Program *root;
@@ -21,6 +21,7 @@ extern "C" FILE *yyin;
 void yyerror(const char *str)
 {
     fprintf(stderr, "Syntax error on line: %d\n", yylineno);
+    exit(1);
 }
  
 extern "C" int yywrap()
@@ -96,7 +97,7 @@ int main(int argc, char **argv) {
 /* Non-Terminals */
 %type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object ExpRest
 %type <stmt> Statement 
-%type <type> Type PrimeType 
+%type <type> Type PrimeType
 %type <formal> FormalRest
 %type <method> MethodDecl
 %type <var> VarDecl
@@ -111,6 +112,7 @@ int main(int argc, char **argv) {
 %type <methodDeclList> MethodDeclList
 %type <stmtList> StatementList
 %type <varDeclList> VarDeclList
+
 
 %%
 
@@ -139,7 +141,7 @@ ClassDeclList:
         ;
 
 VarDecl:
-        PrimeType ID SEMICOLON { $$ = new VarDecl($1, new Identifier($2)); PRINTDEBUG("fired Var Decl ###############\n") }
+        Type ID SEMICOLON { $$ = new VarDecl($1, new Identifier($2)); PRINTDEBUG("fired Var Decl ###############\n") }
         ;
 
 VarDeclList:
@@ -174,6 +176,8 @@ FormalRestList:
         ;
 
 PrimeType:
+        /*ID { $$ = new IdentifierType($1); PRINTDEBUG("fired id type #############\n") }
+        |*/
         INT { $$ = new IntegerType(); PRINTDEBUG("fired int type #############\n") }
         |
         BOOL { $$ = new BooleanType(); PRINTDEBUG("fired bool type #############\n") } 
@@ -181,8 +185,6 @@ PrimeType:
 
 Type:
         PrimeType 
-        |
-        ID { $$ = new IdentifierType($1); PRINTDEBUG("fired id type #############\n") }
         |
         Type OBRACK EBRACK { $$ = new IntArrayType(); PRINTDEBUG("fired int array type #############\n") }
         ;
