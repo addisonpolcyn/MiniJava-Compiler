@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 %type <id> ID
 
 /* Non-Terminals */
-%type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object ExpRest
+%type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object ExpRest Index
 %type <stmt> Statement 
 %type <type> Type PrimeType
 %type <formal> FormalRest
@@ -220,11 +220,13 @@ StatementList:
         ;
 
 Index:
-        OBRACK Exp EBRACK { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index (exp)\n") }
+        OBRACK Exp EBRACK { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index (exp)\n")
+        $$ = new Index($2); }
         |
-        Index OBRACK Exp EBRACK { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index [exp]\n") }
-       ;
-
+        Index OBRACK Exp EBRACK { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index  empty [exp]\n") 
+        $$ = new Index($3); PRINTDEBUG("exp list expr") }
+        ;
+ 
 Exp: 
         Exp OR T_Exp { $$ = new Or($1, $3, yylineno); PRINTDEBUG("fired exp OR #################\n") }
         |
@@ -319,7 +321,7 @@ Object:
         |
         NEW ID OPARANTHESIS EPARANTHESIS { $$ = new NewObject(new Identifier($2)); PRINTDEBUG("fired exp new id()") }
         |
-        NEW PrimeType Index { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX exp new object prime\n") }
+        NEW PrimeType Index { $$ = new NewArray($3); PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX exp new object prime\n") }
         ;
 
 ExpList:

@@ -276,6 +276,14 @@ public:
     void evaluate();
 };
 
+class Index : public Exp {
+    Exp * e;
+
+public:
+    Index(Exp * e);
+    std::string visit();
+    void evaluate();
+};
 
 /*******************    STATEMENT CLASS    ****************************/
 //abstract Statement class
