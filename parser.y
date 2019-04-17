@@ -180,11 +180,11 @@ PrimeType:
         ;
 
 Type:
+        PrimeType 
+        |
         ID { $$ = new IdentifierType($1); PRINTDEBUG("fired id type #############\n") }
         |
         Type OBRACK EBRACK { $$ = new IntArrayType(); PRINTDEBUG("fired int array type #############\n") }
-        |
-        PrimeType 
         ;
 
 Statement:

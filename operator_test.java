@@ -8,7 +8,6 @@ class operator_test {
         {
         //start test
         System.out.println("Operator Test");
-        
         //boolean ops
         System.out.println("Test #1: &&");
         if(true && true) {
@@ -94,8 +93,6 @@ class operator_test {
         } else {
             System.out.println("FAILED");
         }
-        
-        /*
         //comparators
         System.out.println("Test #5: <");
         if(-1 < 1) {
@@ -261,7 +258,6 @@ class operator_test {
         } else {
             System.out.println("PASSED");
         }
-
         //not
         System.out.println("Test #14: !");
         if(!false) {
@@ -333,7 +329,12 @@ class operator_test {
             System.out.println("PASSED");
         } else {
             System.out.println("FAILED");
-        }*/
+        }
+        if(true != !(!false) && 1 != 3 && !(-18>=18) && 3*4+69+5*7-4-7*2*2*2 == 12-2+5*7-2+69-7*8) {
+            System.out.println("PASSED");
+        } else {
+            System.out.println("FAILED");
+        }
         
         }
     }

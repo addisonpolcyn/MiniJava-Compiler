@@ -24,6 +24,8 @@ std::vector<std::string> class_variables;
 std::string buffer;
 std::vector<std::string> text;
 
+int _offset = 0;
+
 /*******************    IDENTIFIER CLASS    *********************/
 Identifier::Identifier(const std::string str): id(str) {}
 std::string Identifier::toString() {
@@ -45,7 +47,12 @@ std::string And::visit() {
 void And::evaluate(std::string reg) {
     lhs->evaluate("r0");
     rhs->evaluate("r1");
+    
+    buffer += "    pop {r1}\n";
+    buffer += "    pop {r0}\n";
     buffer += "    and r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    buffer += "    push {r0}\n";
+
 }
 
 Or::Or(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -60,9 +67,19 @@ std::string Or::visit() {
     return "boolean";
 }
 void Or::evaluate(std::string reg) {
-    lhs->evaluate("r0");
+  /*  lhs->evaluate("r0");
     rhs->evaluate("r1");
     buffer += "    orr r0, r0, r1\n"; //add values from r0 and r1, store in r0
+*/
+lhs->evaluate("r0");
+    rhs->evaluate("r1");
+//    b
+    buffer += "    pop {r1}\n";
+    buffer += "    pop {r0}\n";
+    buffer += "    orr r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    buffer += "    push {r0}\n";
+
+
 }
 
 Is::Is(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -81,18 +98,41 @@ void Is::evaluate(std::string reg) {
     lhs->evaluate("r0");
     rhs->evaluate("r1");
 
+/*    _offset -= 4;
+    //load left value from stack
+    buffer += "    add r0, sp, #"+std::to_string(_offset)+"\n"; //store the address of sp + offset in r1
+    buffer += "    ldr r0, [r0]\n"; //load into r0 the value store at r1 stack location
+   
+    _offset -= 4;
+    //load right value from stack
+    buffer += "    add r1, sp, #"+std::to_string(_offset)+"\n"; //store the address of sp + offset in r1
+    buffer += "    ldr r1, [r1]\n"; //load into r0 the value store at r1 stack location
+     
+    //pop the stack
+    buffer += "    add sp, sp, #8\n";
+  */
+    buffer += "    pop {r1}\n";
+    buffer += "    pop {r0}\n";
+
     //compare equality
     buffer += "    cmp r0, r1\n";
     buffer += "    beq 1f\n";
-    buffer += "    ldr "+reg+", =0\n";
+    buffer += "    ldr r0, =0\n";
     buffer += "    b 2f\n";
     
     //branch 1
     buffer += "1:      \n";
-    buffer += "    ldr "+reg+", =1\n";
+    buffer += "    ldr r0, =1\n";
     
     //branch 2
     buffer += "2:      \n";
+
+    //push result to stack
+ /*   buffer += "    sub sp, sp, #4\n";                          //create space for stack pointer
+    buffer += "    add r2, sp, #"+std::to_string(_offset)+"\n"; //store location of sp + offset in register 1
+    buffer += "    str r1, [r2]\n";                            //store value of register 0 at stack location sp + offset
+    _offset += 4;       */
+    buffer += "    push {r0}\n";
 }
 
 IsNot::IsNot(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -111,6 +151,13 @@ void IsNot::evaluate(std::string reg) {
     lhs->evaluate("r0");
     rhs->evaluate("r1");
 
+     buffer += "    pop {r1}\n";
+    buffer += "    pop {r0}\n";
+    //buffer += "    and r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    //buffer += "    push {r0}\n";
+
+
+
     //compare equality
     buffer += "    cmp r0, r1\n";
     buffer += "    bne 1f\n";
@@ -124,6 +171,7 @@ void IsNot::evaluate(std::string reg) {
     //branch 2
     buffer += "2:      \n";
 
+    buffer += "    push {r0}\n";
 }
 
 LessThan::LessThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -142,6 +190,9 @@ void LessThan::evaluate(std::string reg) {
     lhs->evaluate("r0");
     rhs->evaluate("r1");
 
+buffer += "    pop {r1}\n";
+    buffer += "    pop {r0}\n";
+    
     //compare equality
     buffer += "    cmp r0, r1\n";
     buffer += "    blt 1f\n";
@@ -154,6 +205,9 @@ void LessThan::evaluate(std::string reg) {
     
     //branch 2
     buffer += "2:      \n";
+
+    buffer += "    push {r0}\n";
+    
 }
 
 LessThanEqual::LessThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -172,6 +226,9 @@ void LessThanEqual::evaluate(std::string reg) {
     lhs->evaluate("r0");
     rhs->evaluate("r1");
 
+buffer += "    pop {r1}\n";
+    buffer += "    pop {r0}\n";
+ 
     //compare equality
     buffer += "    cmp r0, r1\n";
     buffer += "    ble 1f\n";
@@ -184,6 +241,10 @@ void LessThanEqual::evaluate(std::string reg) {
     
     //branch 2
     buffer += "2:      \n";
+
+//buffer += "    pop {r1}\n";
+    buffer += "    push {r0}\n";
+ 
 }
 
 GreaterThan::GreaterThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -202,6 +263,9 @@ void GreaterThan::evaluate(std::string reg) {
     lhs->evaluate("r0");
     rhs->evaluate("r1");
 
+buffer += "    pop {r1}\n";
+    buffer += "    pop {r0}\n";
+ 
     //compare equality
     buffer += "    cmp r0, r1\n";
     buffer += "    bgt 1f\n";
@@ -214,6 +278,9 @@ void GreaterThan::evaluate(std::string reg) {
     
     //branch 2
     buffer += "2:      \n";
+//buffer += "    pop {r1}\n";
+    buffer += "    push {r0}\n";
+ 
 }
 
 GreaterThanEqual::GreaterThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -231,7 +298,9 @@ void GreaterThanEqual::evaluate(std::string reg) {
     //evaluate expr
     lhs->evaluate("r0");
     rhs->evaluate("r1");
-
+buffer += "    pop {r1}\n";
+    buffer += "    pop {r0}\n";
+ 
     //compare equality
     buffer += "    cmp r0, r1\n";
     buffer += "    bge 1f\n";
@@ -244,7 +313,9 @@ void GreaterThanEqual::evaluate(std::string reg) {
     
     //branch 2
     buffer += "2:      \n";
-
+//buffer += "    pop {r1}\n";
+    buffer += "    push {r0}\n";
+ 
 }
 
 Plus::Plus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -260,9 +331,22 @@ std::string Plus::visit() {
 
 }
 void Plus::evaluate(std::string reg) {
-    lhs->evaluate("r0");
-    rhs->evaluate("r1");
-    buffer += "    add "+reg+", r0, r1\n"; //add values from r0 and r1, store in r0
+    /*if(reg == "r0") {
+        lhs->evaluate("r0");
+        rhs->evaluate("r1");
+        buffer += "    add "+reg+", r0, r1\n"; //add values from r0 and r1, store in r0
+    } else {
+        lhs->evaluate("r2");
+        rhs->evaluate("r3");
+        buffer += "    add "+reg+", r2, r3\n"; //add values from r0 and r1, store in r0
+    }*/
+         lhs->evaluate("r2");
+        rhs->evaluate("r3");
+        
+    buffer += "    pop {r1}\n";    
+    buffer += "    pop {r0}\n";    
+    buffer += "    add r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    buffer += "    push {r0}\n";    
 }
 
 Minus::Minus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -278,9 +362,27 @@ std::string Minus::visit() {
 
 }
 void Minus::evaluate(std::string reg) {
-    lhs->evaluate("r0");
-    rhs->evaluate("r1");
+    /*if(reg == "r0") {
+        lhs->evaluate("r0");
+        rhs->evaluate("r1");
+        buffer += "    sub "+reg+", r0, r1\n"; //add values from r0 and r1, store in r0
+    } else {
+        lhs->evaluate("r2");
+        rhs->evaluate("r3");
+        buffer += "    sub "+reg+", r2, r3\n"; //add values from r0 and r1, store in r0
+    }*/
+
+//    lhs->evaluate("r0");
+  //  rhs->evaluate("r1");
+   // buffer += "    sub r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    lhs->evaluate("r2");
+    rhs->evaluate("r3");
+    
+    buffer += "    pop {r1}\n";
+    buffer += "    pop {r0}\n";
     buffer += "    sub r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    buffer += "    push {r0}\n";
+
 }
 
 Times::Times(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -295,9 +397,26 @@ std::string Times::visit() {
     return "int";
 }
 void Times::evaluate(std::string reg) {
-    lhs->evaluate("r0");
-    rhs->evaluate("r1");
+    //lhs->evaluate("r0");
+    //rhs->evaluate("r1");
+    //buffer += "    mul r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    /*if(reg == "r0") {
+        lhs->evaluate("r0");
+        rhs->evaluate("r1");
+        buffer += "    mul "+reg+", r0, r1\n"; //add values from r0 and r1, store in r0
+    } else {
+        lhs->evaluate("r2");
+        rhs->evaluate("r3");
+        buffer += "    mul "+reg+", r2, r3\n"; //add values from r0 and r1, store in r0
+    }
+    */
+    lhs->evaluate("r2");
+    rhs->evaluate("r3");
+    
+    buffer += "    pop {r1}\n";
+    buffer += "    pop {r0}\n";
     buffer += "    mul r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    buffer += "    push {r0}\n";
 }
 
 Div::Div(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -446,7 +565,14 @@ std::string IntegerLiteral::visit() {
 }
 void IntegerLiteral::evaluate(std::string reg) {
     int val = num;
-    buffer += "    ldr "+reg+", ="+std::to_string(val)+"\n";  //load value into register
+    //buffer += "    ldr "+reg+", ="+std::to_string(val)+"\n";  //load value into register
+
+//    buffer += "    sub sp, sp, #4\n";                          //create space for stack pointer
+    buffer += "    ldr r0, ="+std::to_string(val)+"\n";        //load value into register 0
+//    buffer += "    add r1, sp, #"+std::to_string(_offset)+"\n"; //store location of sp + offset in register 1
+  //  buffer += "    str r0, [r1]\n";                            //store value of register 0 at stack location sp + offset
+    //_offset += 4;                                              //increment offset
+    buffer += "    push {r0}\n";
 }
 
 std::string True::visit() {
@@ -454,7 +580,9 @@ std::string True::visit() {
     return "boolean";
 }
 void True::evaluate(std::string reg) {
-    buffer += "    ldr "+reg+", =1\n";  //load value into r0    
+    buffer += "    ldr r0, =1\n";  //load value into r0    
+
+    buffer += "    push {r0}\n";
 }
 
 std::string False::visit() {
@@ -462,7 +590,8 @@ std::string False::visit() {
     return "boolean";
 }
 void False::evaluate(std::string reg) {
-    buffer += "    ldr "+reg+", =0\n";  //load value into r0    
+    buffer += "    ldr r0, =0\n";  //load value into r0    
+    buffer += "    push {r0}\n";
 }
 
 
@@ -524,6 +653,8 @@ std::string Not::visit() {
 void Not::evaluate(std::string reg) {
     e->evaluate("r0");
     
+    buffer += "    pop {r0}\n";
+    
     //compare equality
     buffer += "    cmp r0, #0\n";
     buffer += "    beq 1f\n";
@@ -536,6 +667,7 @@ void Not::evaluate(std::string reg) {
     
     //branch 2
     buffer += "2:      \n";
+    buffer += "    push {r0}\n";
 }
 
 NegativeExp::NegativeExp(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -549,7 +681,9 @@ std::string NegativeExp::visit() {
 }
 void NegativeExp::evaluate(std::string reg) {
     e->evaluate("r0");
-    buffer += "    neg "+reg+","+reg+"\n"; 
+    buffer += "    pop {r0}\n";
+    buffer += "    neg r0, r0\n"; 
+    buffer += "    push {r0}\n";
 }
 
 PositiveExp::PositiveExp(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -604,6 +738,14 @@ void If::evaluate() {
     //evaluate boolean expr
     e->evaluate("r0");
 
+/*    _offset -= 4;
+
+    //load value from stack
+    buffer += "    add r2, sp, #"+std::to_string(_offset)+"\n"; //store the address of sp + offset in r1
+    buffer += "    ldr r0, [r2]\n"; //load into r0 the value store at r1 stack location
+  */
+    buffer += "    pop {r0}\n";
+
     //compare equality
     buffer += "    cmp r0, #1\n";
     buffer += "    beq 1f\n";
@@ -616,6 +758,9 @@ void If::evaluate() {
     
     //branch 2
     buffer += "2:      \n";
+
+    //pop the stack
+    //buffer += "    add sp, sp, #4\n";
 }
 
 While::While(Exp *e, Statement *s, int lineno): e(e), s(s), lineno(lineno) {} 
@@ -659,9 +804,21 @@ void Print::visit() {
 }
 void Print::evaluate() {
     e->evaluate("r0");
-    buffer += "    mov r1, r0\n";
+    
+    _offset -= 4;
+
+    //load value from stack
+    buffer += "    add r2, sp, #"+std::to_string(_offset)+"\n"; //store the address of sp + offset in r1
+    buffer += "    ldr r1, [r2]\n"; //load into r0 the value store at r1 stack location
+    
+    //print value 
+
+    //buffer += "    mov r1, r0\n";
     buffer += "    ldr r0, =int_print\n";
     buffer += "    bl  printf\n";
+
+    //pop the stack
+    buffer += "    add sp, sp, #4\n";
 }
 
 Println::Println(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -674,9 +831,25 @@ void Println::visit() {
 }
 void Println::evaluate() {
     e->evaluate("r0");
-    buffer += "    mov r1, r0\n";
+    //buffer += "    mov r1, r0\n";
+    //buffer += "    ldr r0, =int_println\n";
+    //buffer += "    bl  printf\n";
+
+//    _offset -= 4;
+
+    //load value from stack
+//    buffer += "    add r2, sp, #"+std::to_string(_offset)+"\n"; //store the address of sp + offset in r1
+  //  buffer += "    ldr r1, [r2]\n"; //load into r0 the value store at r1 stack location
+    buffer += "    pop {r1}\n";
+ //pop the stack
+   // buffer += "    add sp, sp, #4\n";
+   
+    //print value 
+
+    //buffer += "    mov r1, r0\n";
     buffer += "    ldr r0, =int_println\n";
     buffer += "    bl  printf\n";
+
 }
 
 PrintString::PrintString(std::string str): str(str) {}
@@ -834,8 +1007,8 @@ void MethodDecl::visit() {
 void MethodDecl::evaluate() {
     //prepare function
     buffer += "    push {lr}\n";     
-    int offset = 0;
-    
+    int offset = _offset;
+
     //allocate class variables
     for (auto const& var : class_variables) {
         scope[var] = offset; //offset in stack
