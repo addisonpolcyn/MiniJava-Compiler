@@ -442,11 +442,21 @@ std::string Call::visit() {
     return returnType;
 }
 void Call::evaluate() {
+    //init method and class name
     std::string className = currentClass->getName();    
     std::string methodName = i->toString();
     
+    //push parameters onto stack
+    std::list<Exp *>::iterator expIter = el->begin();
+    for(expIter = el->begin(); expIter != el->end(); expIter++){
+        std::cerr << "param bam\n";
+        (*expIter)->evaluate();
+    }
+
     //call function
     buffer += "    bl "+className+"_"+methodName+"\n";
+    
+    //push return value onto stack
     buffer += "    push {r0}\n";
 }
 
@@ -513,6 +523,8 @@ std::string NewArray::visit() {
 void NewArray::evaluate() {
     int val = 1;
     void *ptr = &val;
+    std::cerr << "new array\n";
+    e->evaluate();
 }
 
 NewObject::NewObject(Identifier *i): i(i) {}
@@ -582,6 +594,15 @@ std::string PositiveExp::visit() {
 }
 void PositiveExp::evaluate() {
     e->evaluate();
+}
+
+Index::Index(Exp *e): e(e) {}
+std::string Index::visit() {
+    PRINTDEBUG("(Index)")
+}
+void Index::evaluate() {
+    e->evaluate();
+    std::cerr << "calculating index\n";
 }
 
 /*******************    STATEMENT CLASS    ****************************/
@@ -861,10 +882,43 @@ void MethodDecl::visit() {
 }
 void MethodDecl::evaluate() {
     std::string classname = currentClass->getName();
+    int offset = 0;
+    
+    //evaluate Formal Declarations
+    std::list<Formal *>::reverse_iterator formalIter;
+    for(formalIter = fl->rbegin(); formalIter != fl->rend(); ++formalIter){
+        std::string paramName = (*formalIter)->i->toString();
+        scope[paramName] = offset; //offset in stack
+        std::cout << "added item:" << paramName << " to the stack at offset:" << offset << std::endl;
+        offset += 4;
+        data.push_back(classname+"_"+paramName+": .skip 4\n");
+        
+        buffer += "    pop {r0}\n";
 
+        //assign into data
+        buffer += "    ldr r1, ="+classname+"_"+paramName+"\n";  //store the location sp + offset in r1
+        buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+    }
+
+/*
+    //allocate parameters
+    for (auto const& var : parameters) {
+        if(scope.count(var.first) < 1){
+            scope[var.first] = offset; //offset in stack
+            std::cout << "added item:" << var.first << " to the stack at offset:" << offset << std::endl;
+            offset += 4;
+            data.push_back(classname+"_"+var.first+": .skip 4\n");
+            
+            buffer += "    pop {r0}\n";
+
+            //assign into data
+            buffer += "    ldr r1, ="+classname+"_"+var.first+"\n";  //store the location sp + offset in r1
+            buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+        }
+    }
+  */  
     //prepare function
     buffer += "    push {lr}\n";     
-    int offset = 0;
 
     //allocate class variables
     for (auto const& var : class_variables) {
@@ -884,16 +938,7 @@ void MethodDecl::evaluate() {
         }
     }
 
-    //allocate parameters
-    for (auto const& var : parameters) {
-        if(scope.count(var.first) < 1){
-            scope[var.first] = offset; //offset in stack
-            std::cout << "added item:" << var.first << " to the stack at offset:" << offset << std::endl;
-            offset += 4;
-        data.push_back(classname+"_"+var.first+": .skip 4\n");
-        }
-    }
-
+   
     //make space for offset
     //if(offset)
         //buffer += "    sub sp, sp, #"+std::to_string(offset)+"\n";
