@@ -12,7 +12,9 @@
 bool type_error = false;    //boolean value true denotes type_error present in Tree, false Tree syntax is type valid
 std::string mainClassName;  //string name of the main class 
 
+
 ClassDecl *currentClass;
+std::string currentClassName;
 std::map<std::string, ClassDecl *> classTable;      //map of classes in program
 std::map<std::string, VarDecl *> type_class_scope;  //map of fields in current class scope
 std::map<std::string, VarDecl *> type_local_scope;  //map of variables in current scope inlcuding current class variables and method variables
@@ -20,6 +22,8 @@ std::map<std::string, std::string> scope_type;
 
 std::map<std::string, int> scope;
 std::vector<std::string> class_variables;
+
+std::string currentMethodName;
 
 std::string buffer;
 std::vector<std::string> text;
@@ -494,6 +498,7 @@ std::string This::visit() {
 void This::evaluate() {
     ClassDecl *cl = currentClass;
     void *ptr = &(*cl);
+    currentClassName = cl->getName();
 }
 
 IdentifierExp::IdentifierExp(std::string str): id(str) {}
@@ -510,21 +515,38 @@ void IdentifierExp::evaluate() {
    // buffer += "    push {r0}\n";
 
     //load var from data
-    buffer += "    ldr r0, ="+currentClass->getName()+"_"+id+"\n"; //store the address of sp + offset in r0
+    buffer += "    ldr r0, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n"; //store the address of sp + offset in r0
     buffer += "    ldr r0, [r0]\n"; //load into r0 the value store at r0 stack location
     buffer += "    push {r0}\n";
 }
 
-NewArray::NewArray(Exp *e): e(e) {}
+NewArray::NewArray(std::list<Exp *> *el): el(el) {}
 std::string NewArray::visit() {
     PRINTDEBUG("(NewArray)")
     return "int []";
 }
 void NewArray::evaluate() {
-    int val = 1;
-    void *ptr = &val;
     std::cerr << "new array\n";
-    e->evaluate();
+    
+    //iterate over index epxressions
+    std::list<Exp *>::iterator expIter = el->begin();
+    for(expIter = el->begin(); expIter != el->end(); expIter++){
+        (*expIter)->evaluate();   
+        break;
+        //only works for 1D array TODO
+    }
+    buffer += "    pop {r0}\n"; //add values from r0 and r1, store in r0
+    buffer += "    mov r1, #4\n"; //add values from r0 and r1, store in r0
+    buffer += "    mul r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    
+    //push total size
+    //buffer += "    push {r0}\n"; //add values from r0 and r1, store in r0
+
+    //malloc
+    buffer += "    bl malloc\n"; //add values from r0 and r1, store in r0
+    
+    //return regist address to malloc memory
+    buffer += "    push {r0}\n"; //add values from r0 and r1, store in r0
 }
 
 NewObject::NewObject(Identifier *i): i(i) {}
@@ -536,6 +558,7 @@ void NewObject::evaluate() {
     ClassDecl *cl = classTable[i->toString()];
     void *ptr = &(*cl);
     currentClass = cl;
+    currentClassName = cl->getName();
 }
 
 Not::Not(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -763,6 +786,7 @@ void Assign::evaluate() {
     std::string id = i->toString();
     int offset = scope[id];
     
+    std::cerr << "Assign\n";
     //evaluate expr
     e->evaluate();
     buffer += "    pop {r0}\n";
@@ -774,16 +798,17 @@ void Assign::evaluate() {
     //buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
 
     //assign into data
-    buffer += "    ldr r1, ="+currentClass->getName()+"_"+id+"\n";  //store the location sp + offset in r1
+    buffer += "    ldr r1, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n";  //store the location sp + offset in r1
     buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
 }
 
 ArrayAssign::ArrayAssign(Identifier *i, Exp *e1, Exp *e2): i(i), e1(e1), e2(e2) {}
 void ArrayAssign::visit() {
-    PRINTDEBUG("(ArrayAssign XXXXXXXX)")
+    PRINTDEBUG("(ArrayAssign DANGER: no type checking for array assignment established)")
 }
 void ArrayAssign::evaluate() {
     PRINTDEBUG("(Statment Evaluation Broken)")
+    
 }
 
 /*******************    TYPE CLASS    ****************************/
@@ -881,7 +906,9 @@ void MethodDecl::visit() {
     }
 }
 void MethodDecl::evaluate() {
-    std::string classname = currentClass->getName();
+    std::string currentClassName = currentClass->getName();
+    std::string methodName = i->toString();
+    currentMethodName = methodName;
     int offset = 0;
     
     //evaluate Formal Declarations
@@ -891,12 +918,12 @@ void MethodDecl::evaluate() {
         scope[paramName] = offset; //offset in stack
         std::cout << "added item:" << paramName << " to the stack at offset:" << offset << std::endl;
         offset += 4;
-        data.push_back(classname+"_"+paramName+": .skip 4\n");
+        data.push_back(currentClassName+"_"+methodName+"_"+paramName+": .skip 4\n");
         
         buffer += "    pop {r0}\n";
 
         //assign into data
-        buffer += "    ldr r1, ="+classname+"_"+paramName+"\n";  //store the location sp + offset in r1
+        buffer += "    ldr r1, ="+currentClassName+"_"+methodName+"_"+paramName+"\n";  //store the location sp + offset in r1
         buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
     }
 
@@ -925,7 +952,7 @@ void MethodDecl::evaluate() {
         scope[var] = offset; //offset in stack
         std::cout << "added item:" << var << " to the stack at offset:" << offset << std::endl;
         offset += 4;
-        data.push_back(classname+"_"+var+": .skip 4\n");
+        data.push_back(currentClassName+"_"+methodName+"_"+var+": .skip 4\n");
     }
 
     //allocate local variables
@@ -934,7 +961,7 @@ void MethodDecl::evaluate() {
             scope[var.first] = offset; //offset in stack
             std::cout << "added item:" << var.first << " to the stack at offset:" << offset << std::endl;
             offset += 4;
-        data.push_back(classname+"_"+var.first+": .skip 4\n");
+        data.push_back(currentClassName+"_"+methodName+"_"+var.first+": .skip 4\n");
         }
     }
 

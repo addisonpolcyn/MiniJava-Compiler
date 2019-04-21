@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 %type <id> ID
 
 /* Non-Terminals */
-%type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object ExpRest Index
+%type <expr> Exp H_Exp I_Exp J_Exp K_Exp L_Exp T_Exp F_Exp G_Exp Root_Exp Object ExpRest
 %type <stmt> Statement 
 %type <type> Type PrimeType
 %type <formal> FormalRest
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 
 /* Lists */
 %type <classDeclList> ClassDeclList
-%type <expList> ExpList ExpRestList
+%type <expList> ExpList ExpRestList Index
 %type <formalList> FormalList FormalRestList
 %type <methodDeclList> MethodDeclList
 %type <stmtList> StatementList
@@ -220,11 +220,11 @@ StatementList:
         ;
 
 Index:
-        OBRACK Exp EBRACK { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index (exp)\n")
-        $$ = new Index($2); }
+        OBRACK Exp EBRACK { $$ = new std::list<Exp *>(); $$->push_back($2); PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index (exp)\n")
+        /*$$ = new Index($2);*/ }
         |
-        Index OBRACK Exp EBRACK { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index  empty [exp]\n") 
-        $$ = new Index($3); PRINTDEBUG("exp list expr") }
+        Index OBRACK Exp EBRACK { $$=$1; $$->push_back($3); PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> index  empty [exp]\n") 
+        /*$$ = new Index($3);*/ PRINTDEBUG("exp list expr") }
         ;
  
 Exp: 

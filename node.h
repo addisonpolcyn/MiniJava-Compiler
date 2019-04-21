@@ -230,9 +230,9 @@ public:
 
 class NewArray : public Exp {
 protected:
-    Exp * e;
+    std::list<Exp *> * el;
 public:
-    NewArray(Exp *e);
+    NewArray(std::list<Exp *> * el);
     std::string visit();
     void evaluate();
 };
