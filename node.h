@@ -158,11 +158,12 @@ public:
 
 class ArrayLookup : public Exp {
 protected:
-    Exp * lhs;
-    Exp * rhs;
+    Identifier * i;
+    std::list<Exp *> * el;
+    
     int lineno;
 public:
-    ArrayLookup(Exp *lhs, Exp *rhs, int lineno);
+    ArrayLookup(Identifier *i, std::list<Exp *> * el);
     std::string visit();
     void evaluate();
 };
@@ -382,10 +383,10 @@ public:
 class ArrayAssign : public Statement {
 protected:
     Identifier *i;
-    Exp * e1;
-    Exp * e2;
+    std::list<Exp *> * el;
+    Exp * e;
 public:
-   ArrayAssign(Identifier *i, Exp *e1, Exp *e2);
+   ArrayAssign(Identifier *i, std::list<Exp *> * el, Exp * e);
    void visit();
    void evaluate();
 };

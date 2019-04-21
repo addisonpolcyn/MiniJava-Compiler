@@ -372,14 +372,27 @@ void Div::evaluate() {
     exit(1);
 }
 
-ArrayLookup::ArrayLookup(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
+ArrayLookup::ArrayLookup(Identifier *i, std::list<Exp *> *el): i(i), el(el) {}
 std::string ArrayLookup::visit() {
     PRINTDEBUG("(ArrayLookup)")
     return "int";
 }
 void ArrayLookup::evaluate() {
-    int val = 1;
-    void *ptr = &val;
+    //iterate over index epxressions
+    std::string id = i->toString();
+    std::list<Exp *>::iterator expIter = el->begin();
+    for(expIter = el->begin(); expIter != el->end(); expIter++){
+        (*expIter)->evaluate();   
+        break;
+        //only works for 1D array TODO
+    }
+    //offset stored in r3
+    buffer += "    pop {r3}\n";
+    
+    buffer += "    ldr r1, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n"; //store the address of sp + offset in r0
+//    buffer += "    ldr r0, [r1, #8]!\n"; //load into r0 the value store at r0 stack location
+    buffer += "    ldr r0, [r1, #0]!\n"; //load into r0 the value store at r0 stack location
+    buffer += "    push {r0}\n";
 }
 
 ArrayLength::ArrayLength(Exp *e): e(e) {}
@@ -802,13 +815,40 @@ void Assign::evaluate() {
     buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
 }
 
-ArrayAssign::ArrayAssign(Identifier *i, Exp *e1, Exp *e2): i(i), e1(e1), e2(e2) {}
+ArrayAssign::ArrayAssign(Identifier *i, std::list<Exp *> *el, Exp *e): i(i), el(el), e(e) {}
 void ArrayAssign::visit() {
     PRINTDEBUG("(ArrayAssign DANGER: no type checking for array assignment established)")
 }
 void ArrayAssign::evaluate() {
     PRINTDEBUG("(Statment Evaluation Broken)")
+    std::string id = i->toString();
+    //iterate over index epxressions
+    std::list<Exp *>::iterator expIter = el->begin();
+    for(expIter = el->begin(); expIter != el->end(); expIter++){
+        (*expIter)->evaluate();   
+        break;
+        //only works for 1D array TODO
+    }
+    buffer += "    pop {r0}\n"; //add values from r0 and r1, store in r0
+    buffer += "    mov r1, #4\n"; //add values from r0 and r1, store in r0
+    buffer += "    mul r3, r0, r1\n"; //add values from r0 and r1, store in r0
+    //index is stored in r3
+
+     //evaluate expr
+    e->evaluate();
+    buffer += "    pop {r1}\n";
+    //expr value is stored in r1
     
+    //assign into data
+    buffer += "    ldr r0, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n";  //store the location sp + offset in r1
+    
+    //load at immediate offset
+    //buffer += "    ldr r0, [r2, +r3]\n";  //store the location sp + offset in r1
+//    buffer += "    ldr r0, [r0]\n";  //store the location sp + offset in r1
+//    buffer += "    str r1, [r0, #8]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
+  //  buffer += "    str r1, [r0, #4]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
+    //buffer += "    str r1, [r0, #12]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
+    buffer += "    str r1, [r0, #0]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
 }
 
 /*******************    TYPE CLASS    ****************************/

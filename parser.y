@@ -206,7 +206,7 @@ Statement:
         |
         ID EQUAL Exp SEMICOLON { $$ = new Assign(new Identifier($1), $3, yylineno); PRINTDEBUG("fired Assign #############\n") }
         |
-        ID Index EQUAL Exp SEMICOLON { PRINTDEBUG("fired ArrayAssign @@@@@@@@@@@\n") }
+        ID Index EQUAL Exp SEMICOLON { $$ = new ArrayAssign(new Identifier($1), $2, $4); PRINTDEBUG("fired ArrayAssign @@@@@@@@@@@\n") }
         |
         RETURN Exp SEMICOLON { PRINTDEBUG("fired return @@@@@@@@@@@@@@@@@@@") }
         ;
@@ -303,7 +303,7 @@ L_Exp:
 Root_Exp:  
         OPARANTHESIS Exp EPARANTHESIS { $$ = $2; PRINTDEBUG("fired (exp)") }
         |
-        ID Index { PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp id index\n") }
+        ID Index { $$ = new ArrayLookup(new Identifier($1), $2); PRINTDEBUG("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX> exp id index\n") }
         |
         INTEGER_LITERAL { $$ = new IntegerLiteral($1); PRINTDEBUG("fired integer literal") }
         |
