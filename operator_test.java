@@ -9,8 +9,7 @@ class operator_test {
         //start test
         System.out.println("Operator Test");
         //boolean ops
-        
-/*        
+        /*
         System.out.println("Test #1: &&");
         if(true && true) {
             System.out.println("PASSED");
@@ -95,6 +94,7 @@ class operator_test {
         } else {
             System.out.println("FAILED");
         }
+
         //comparators
         System.out.println("Test #5: <");
         if(-1 < 1) {
@@ -186,6 +186,8 @@ class operator_test {
         } else {
             System.out.println("FAILED");
         }
+       
+       */
         //ops
         System.out.println("Test #9: +");
         if(1+1==2) {
@@ -198,7 +200,6 @@ class operator_test {
         } else {
             System.out.println("FAILED");
         }
-*/
         if(1+1+1+0+10==10+1+1+1) {
             System.out.println("PASSED");
         } else {
@@ -337,7 +338,6 @@ class operator_test {
         } else {
             System.out.println("FAILED");
         }
-        
         }
     }
 }
