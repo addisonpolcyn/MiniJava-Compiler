@@ -391,7 +391,7 @@ void ArrayLookup::evaluate() {
     
     buffer += "    ldr r1, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n"; //store the address of sp + offset in r0
 //    buffer += "    ldr r0, [r1, #8]!\n"; //load into r0 the value store at r0 stack location
-    buffer += "    ldr r0, [r1, #0]!\n"; //load into r0 the value store at r0 stack location
+    buffer += "    ldr r0, [r1, #8]!\n"; //load into r0 the value store at r0 stack location
     buffer += "    push {r0}\n";
 }
 
@@ -848,7 +848,7 @@ void ArrayAssign::evaluate() {
 //    buffer += "    str r1, [r0, #8]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
   //  buffer += "    str r1, [r0, #4]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
     //buffer += "    str r1, [r0, #12]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
-    buffer += "    str r1, [r0, #0]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
+    buffer += "    str r1, [r0, #8]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
 }
 
 /*******************    TYPE CLASS    ****************************/
