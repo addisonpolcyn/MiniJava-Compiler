@@ -44,7 +44,7 @@ std::string r_pop() {
  * if the stack is full (r11 already reserved) the register must be spilled into stack memory
  */
 std::string r_push() {
-    int register_number = registerStack.size()+1;
+    int register_number = registerStack.size()+4;
     if(register_number > 11) {
         //stack is full, spill the register
         //TODO
@@ -540,15 +540,66 @@ void Call::evaluate() {
     for(expIter = el->begin(); expIter != el->end(); expIter++){
         std::cerr << "param bam\n";
         (*expIter)->evaluate();
+    //    std::string reg = r_pop();
+      //  std::cout << "exprlist popped:" << reg << "\n";
+
+        //assign onto the stack
+    //    buffer += "    add r0, sp, #"+std::to_string(offset)+"\n";  //store the location sp + offset in r1
+    //    buffer += "    str "+reg+", [r0]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+      //  offset += 4;
     }
+    
+    std::stack<std::string> callerStack;
+  //  std::string reg_0 = r_pop();
+    
+    int n = el->size();
+    for(int i = 0; i < n; i++){
+     //   std::cout << "exprlist popped:" << reg << "\n";
+        std::string reg = r_pop();
+        if(i >= 4) {
+            std::cerr << "DANGER more than 4 parameters in call stack unhandled, program exiting.."  << "\n";
+            exit(1);
+        }
+        //std::string reg = callerStack.top();
+        //callerStack.pop();
+        std::cout << "exprlist popped:" << reg << "\n";
+
+        //mov reg to r0-3
+        std::string newReg = "r" + std::to_string(i);
+        buffer += "    mov "+newReg+", "+reg+"\n";
+    
+
+       // callerStack.push(reg);
+        //assign onto the stack
+    //    buffer += "    add r0, sp, #"+std::to_string(offset)+"\n";  //store the location sp + offset in r1
+    //    buffer += "    str "+reg+", [r0]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+      //  offset += 4;
+    }
+    //push reg 0
+    //callerStack.push(reg_0);
+/*
+    for(int i = 0; i < n; i++) {
+        if(i >= 4) {
+            std::cerr << "DANGER more than 4 parameters in call stack unhandled, program exiting.."  << "\n";
+            exit(1);
+        }
+        std::string reg = callerStack.top();
+        callerStack.pop();
+        std::cout << "exprlist popped:" << reg << "\n";
+
+        //mov reg to r0-3
+        std::string newReg = "r" + std::to_string(i);
+        buffer += "    mov "+newReg+", "+reg+"\n";
+    }
+*/
 
     //call function
     buffer += "    bl "+className+"_"+methodName+"\n";
-    
+        
     std::string reg = r_push();
 
-    buffer += "    mov "+reg+", r0\n";
     //push return value onto stack
+    buffer += "    mov "+reg+", r0\n";
     //buffer += "    push {r0}\n";
 }
 
@@ -608,8 +659,8 @@ void IdentifierExp::evaluate() {
     std::cout << "loaded var:" << varname << " at offset:" << offset << std::endl;
 
     //load value of var from stack
-    buffer += "    add "+reg+", sp, #"+std::to_string(offset)+"\n"; //store the address of sp + offset in r0
-    buffer += "    ldr "+reg+", ["+reg+"]\n"; //load into r0 the value store at r0 stack location
+    buffer += "    add r0, sp, #"+std::to_string(offset)+"\n"; //store the address of sp + offset in r0
+    buffer += "    ldr "+reg+", [r0]\n"; //load into r0 the value store at r0 stack location
     //buffer += "    push {r0}\n";
 
     //load var from data
@@ -851,7 +902,7 @@ void Println::evaluate() {
     
     std::string reg = r_pop();
 
-    //buffer += "    pop {r1}\n";
+    buffer += "    mov r1, r4\n";
     buffer += "    ldr r0, =int_println\n";
     buffer += "    bl  printf\n";
 }
@@ -1047,24 +1098,45 @@ void MethodDecl::evaluate() {
     currentClassName = currentClass->getName();
     ///std::string methodName = i->toString();
     currentMethodName = i->toString();
+    //int offset = 0;
+   
+    //prepare function
+    buffer += "    push {lr}\n";     
     int offset = 0;
-    
-    //evaluate Formal Declarations
-/*    std::list<Formal *>::reverse_iterator formalIter;
+ 
+    int block_size = 4*(fl->size() + class_variables.size() + localVariables.size());
+    //make space for offset
+    if(block_size > 0)
+        buffer += "    sub sp, sp, #"+std::to_string(block_size)+"\n\n";
+
+
+    //evaluate parameter Declarations
+    int i = 0;
+    std::list<Formal *>::reverse_iterator formalIter;
     for(formalIter = fl->rbegin(); formalIter != fl->rend(); ++formalIter){
         std::string paramName = (*formalIter)->i->toString();
-        scope[paramName] = offset; //offset in stack
-        std::cout << "added item:" << paramName << " to the stack at offset:" << offset << std::endl;
-        offset += 4;
-        data.push_back(currentClassName+"_"+methodName+"_"+paramName+": .skip 4\n");
+        std::string varname = currentClassName+"_"+currentMethodName+"_"+paramName;
+        scope[varname] = offset; //offset in stack
+        std::cout << "added item:" << varname << " to the stack at offset:" << offset << std::endl;
         
-        buffer += "    pop {r0}\n";
+        std::string reg = "r"+std::to_string(i);
+        //data.push_back(currentClassName+"_"+methodName+"_"+paramName+": .skip 4\n");
+        
+        //buffer += "    pop {r0}\n";
+        
+        //assign onto the stack
+        buffer += "    add r12, sp, #"+std::to_string(offset)+"\n";  //store the location sp + offset in r1
+        buffer += "    str "+reg+", [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
 
+        offset += 4;
+        i++;
         //assign into data
-        buffer += "    ldr r1, ="+currentClassName+"_"+methodName+"_"+paramName+"\n";  //store the location sp + offset in r1
-        buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+        //buffer += "    ldr r0, ="+currentClassName+"_"+methodName+"_"+paramName+"\n";  //store the location sp + offset in r1
+        //buffer += "    str r1, [r0]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
     }
-*/
+
+   
+
 /*
     //allocate parameters
     for (auto const& var : parameters) {
@@ -1082,31 +1154,31 @@ void MethodDecl::evaluate() {
         }
     }
   */  
-    //prepare function
-    buffer += "    push {lr}\n";     
-
-    //allocate class variables
-/*    for (auto const& var : class_variables) {
-        scope[var] = offset; //offset in stack
-        std::cout << "added item:" << var << " to the stack at offset:" << offset << std::endl;
-        offset += 4;
-        data.push_back(currentClassName+"_"+methodName+"_"+var+": .skip 4\n");
+        //allocate class variables
+    for (auto const& var : class_variables) {
+        std::string varname = currentClassName+"_"+currentMethodName+"_"+var;
+        if(scope.count(varname) < 1) {
+            scope[varname] = offset; //offset in stack
+            std::cout << "added item:" << varname << " to the stack at offset:" << offset << std::endl;
+            offset += 4;
+            // data.push_back(currentClassName+"_"+methodName+"_"+var+": .skip 4\n");
+        }
     }
-*/
+
     //allocate local variables
     for (auto const& var : localVariables) {
-        if(scope.count(var.first) < 1) {
-            std::string varname = currentClassName+"_"+currentMethodName+"_"+var.first;
+        std::string varname = currentClassName+"_"+currentMethodName+"_"+var.first;
+        if(scope.count(varname) < 1) {
             scope[varname] = offset; //offset in stack
-            std::cout << "added item:" << var.first << " to the stack at offset:" << offset << std::endl;
+            std::cout << "added item:" << varname << " to the stack at offset:" << offset << std::endl;
             offset += 4;
         //data.push_back(currentClassName+"_"+methodName+"_"+var.first+": .skip 4\n");
         }
     }
    
     //make space for offset
-    if(offset > 0)
-        buffer += "    sub sp, sp, #"+std::to_string(offset)+"\n";
+   // if(offset > 0)
+     //   buffer += "    sub sp, sp, #"+std::to_string(offset)+"\n";
 
     //assign parameters
 
@@ -1130,9 +1202,11 @@ void MethodDecl::evaluate() {
     buffer += "    mov r0, "+reg+"\n";
     
     //restore stack pointer to original location before function
-    if(offset)
-        buffer += "    add sp, sp, #"+std::to_string(offset)+"\n";
-
+    if(offset > 0)
+        buffer += "\n    add sp, sp, #"+std::to_string(offset)+"\n";
+    
+    //reset offset
+    offset = 0;
     //buffer += "    push {r0}\n";
     //return program counter
     buffer += "    pop {pc}\n";
