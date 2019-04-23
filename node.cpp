@@ -790,7 +790,7 @@ void Println::evaluate() {
     
     std::string reg = r_pop();
 
-    buffer += "    mov r1, r4\n";
+    buffer += "    mov r1, "+reg+"\n";
     buffer += "    ldr r0, =int_println\n";
     buffer += "    bl  printf\n";
 }
@@ -979,7 +979,15 @@ void MethodDecl::evaluate() {
     currentMethodName = i->toString();
    
     //prepare function
-    buffer += "    push {lr}\n";     
+//    buffer += "    push {lr}\n";
+
+    buffer += "    str lr, [sp, #-4]!\n";
+    buffer += "    str ip, [sp, #-4]!\n";
+ //   buffer += "    str r0, [sp, #-4]!\n";
+   // buffer += "    str r1, [sp, #-4]!\n";
+    //buffer += "    str r2, [sp, #-4]!\n";
+   // buffer += "    str r3, [sp, #-4]!\n";
+
     int offset = 0;
  
     //make space for offset
@@ -987,7 +995,8 @@ void MethodDecl::evaluate() {
     if(block_size > 0)
         buffer += "    sub sp, sp, #"+std::to_string(block_size)+"\n\n";
 
-
+    buffer += "    mov ip, sp\n";
+    
     //evaluate parameter Declarations
     int i = 0;
     std::list<Formal *>::reverse_iterator formalIter;
@@ -1044,12 +1053,23 @@ void MethodDecl::evaluate() {
     
     //reset offset
     offset = 0;
+     
+
+     
+    //std::string reg = r_pop();
+    //buffer += "    mov r0, "+reg+"\n";
     
     //return program counter
-    buffer += "    pop {pc}\n";
+    //buffer += "    pop {pc}\n";
 
     //return branch stmt
-    buffer += "    bx lr\n";     
+    //buffer += "    bx lr\n";     
+//    buffer += "    ldr r3, [sp], #4\n";
+  //  buffer += "    ldr r2, [sp], #4\n";
+    //buffer += "    ldr r1, [sp], #4\n";
+  //  buffer += "    ldr r0, [sp], #4\n";
+    buffer += "    ldr ip, [sp], #4\n";
+    buffer += "    ldr pc, [sp], #4\n";
 }
 
 /******************    CLASS DECLARATION SUB-CLASS    ************/
@@ -1205,14 +1225,17 @@ void Program::compile() {
 
     //build program
     program += ".section .data\n";
+    
     //fill out data field
     for(auto const& value: data)
         program += value; 
     program += "\n";
 
+    //load hard coded text print formats
     program += ".section .text\n";
     program += "int_print: .asciz \"%d\"\n";
     program += "int_println: .asciz \"%d\\n\"\n";
+    
     //fill out text field
     for(auto const& value: text)
         program += value; 
