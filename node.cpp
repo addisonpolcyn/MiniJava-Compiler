@@ -31,10 +31,18 @@ std::vector<std::string> data;
 
 /******************    REGISTER STACK     ***********************/
 std::stack<std::string> registerStack;
+int reg_offset=0;
 std::string r_pop() {
     std::string reg = registerStack.top();
     registerStack.pop();
     std::cout << "popping: " << reg << std::endl;
+    if(reg == "r12") {
+       // reg_offset -= 4;
+       // buffer += "    ldr "+reg+", [sp, #"+std::to_string(reg_offset)+"]\n";
+//        buffer += "    ldr "+reg+", [sp, #0]\n";
+       // buffer += "    add sp, sp, #4\n";
+       buffer += "    pop {r12}\n";
+    }
     return reg;
 }
 /**
@@ -42,15 +50,19 @@ std::string r_pop() {
  * Registers 1-11 are reserved for the register stack (size: 11)
  * push() allocates a register for reservation, and pushes it to the stack
  * if the stack is full (r11 already reserved) the register must be spilled into stack memory
+
  */
 std::string r_push() {
     int register_number = registerStack.size()+4;
-    if(register_number > 11) {
+    if(register_number > 10) {
         //stack is full, spill the register
         //TODO
-        std::cerr << "register stack full, must spill, not implemented so program is exiting" << std::endl;
-        exit(1);
-    }
+       // buffer += "    sub sp, sp, #4\n";
+        registerStack.push("r12");
+        return "r12";
+        //std::cerr << "register stack full, must spill, not implemented so program is exiting" << std::endl;
+        //exit(1);
+    } 
     std::string reg = "r" + std::to_string(register_number);
     registerStack.push(reg);
     std::cout << "pushing: " << reg << std::endl;
@@ -488,18 +500,35 @@ void Call::evaluate() {
         (*expIter)->evaluate();
     }
     
-    
-    for(int i = 0; i < el->size(); i++){
+    int offset = 0;
+    int n = el->size();
+    int spill = n - 4;
+    if(spill > 0) {
+        offset = spill * 4;
+    }
+    int siz = offset;
+    //buffer += "    sub sp, sp, #"+std::to_string(siz)+"\n";
+
+    for(int i = 0; i < n; i++){
         std::string reg = r_pop();
-        if(i >= 4) {
+     //   if(i > 10) {
             std::cerr << "DANGER more than 4 parameters in call stack unhandled, program exiting.."  << "\n";
-            exit(1);
-        }
+       //     exit(1);
+        //} 
         std::cout << "exprlist popped:" << reg << "\n";
 
         //mov reg to r0-3
         std::string newReg = "r" + std::to_string(i);
-        buffer += "    mov "+newReg+", "+reg+"\n";
+        
+        if(i > 3) {
+            //push to the stack
+            //buffer += "    mov "+newReg+", "+reg+"\n";
+            buffer += "    sub sp, sp, #4\n";
+            offset -= 4;
+            buffer += "    str "+reg+", [sp, #"+std::to_string(offset)+"]\n";
+        } else {
+            buffer += "    mov "+newReg+", "+reg+"\n";
+        }
     }
     //call function
     buffer += "    bl "+className+"_"+methodName+"\n";
@@ -507,6 +536,7 @@ void Call::evaluate() {
     //push return value onto stack
     std::string reg = r_push();
     buffer += "    mov "+reg+", r0\n";
+    buffer += "    add sp, sp, #"+std::to_string(siz)+"\n";
 }
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
@@ -517,6 +547,12 @@ std::string IntegerLiteral::visit() {
 void IntegerLiteral::evaluate() {
     std::string reg = r_push();
     buffer += "    ldr "+reg+", ="+std::to_string(num)+"\n";        //load value into register 0
+    if(reg == "r12") {
+        //buffer += "    str "+reg+", [sp, #"+std::to_string(reg_offset)+"]\n";
+        buffer += "    push {r12}\n";
+        //buffer += "    str "+reg+", [sp, #0]\n";
+        //reg_offset += 4;
+    }
 }
 
 std::string True::visit() {
@@ -990,17 +1026,22 @@ void MethodDecl::evaluate() {
     //buffer += "    str r2, [sp, #-4]!\n";
    // buffer += "    str r3, [sp, #-4]!\n";
 
-    int offset = 4;
+    int offset = 0;
  
     //make space for offset
-    int block_size = 4*(fl->size()+1 + class_variables.size() + localVariables.size());
+    int block_size = 4*(fl->size() + class_variables.size() + localVariables.size());
     if(block_size > 0)
         buffer += "    sub sp, sp, #"+std::to_string(block_size)+"\n\n";
 
     //buffer += "    mov ip, sp\n";
     
     //evaluate parameter Declarations
+    int nums = fl->size() - 4;
     int i = 0;
+    if(nums > 0) {
+     //   offset += nums*4;
+    }
+    int stack_off = block_size + nums * 4;
     std::list<Formal *>::reverse_iterator formalIter;
     for(formalIter = fl->rbegin(); formalIter != fl->rend(); ++formalIter){
         std::string paramName = (*formalIter)->i->toString();
@@ -1012,10 +1053,17 @@ void MethodDecl::evaluate() {
         //assign onto the stack
 //        buffer += "    add r12, sp, #"+std::to_string(offset)+"\n";  //store the location sp + offset in r1
   //      buffer += "    str "+reg+", [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
-        buffer += "    str "+reg+", [sp, #"+std::to_string(offset)+"]\n";
-
-        offset += 4;
-        i++;
+        if(i < 4) { 
+            buffer += "    str "+reg+", [sp, #"+std::to_string(offset)+"]\n";
+            offset += 4;
+            i++;
+        } else  { 
+            //scope[varname] = 0; //offset in stack
+            stack_off -= 4;
+            buffer += "    ldr r12, [sp, #"+std::to_string(stack_off)+"]\n";
+            buffer += "    str r12, [sp, #"+std::to_string(offset)+"]\n";
+            offset += 4;
+        }
     }
 
     //allocate class variables
@@ -1166,12 +1214,12 @@ void MainClass::evaluate() {
     buffer += ".global main\n";
     buffer += ".balign 4\n";
     buffer += "main:\n";
-    buffer += "    push {lr}\n";
+    buffer += "    push {r4-r11, lr}\n";
 
     s->evaluate();    
     PRINTDEBUG("(MainClass)")
     
-    buffer += "    pop {pc}\n";
+    buffer += "    pop {r4-r11, pc}\n";
 }
 
 /*******************    PROGRAM CLASS ****************************/
