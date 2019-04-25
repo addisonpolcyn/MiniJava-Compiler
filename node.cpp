@@ -559,8 +559,9 @@ void IdentifierExp::evaluate() {
     std::cout << "loaded var:" << varname << " at offset:" << offset << std::endl;
 
     //load value of var from stack
-    buffer += "    add r0, sp, #"+std::to_string(offset)+"\n"; //store the address of sp + offset in r0
-    buffer += "    ldr "+reg+", [r0]\n"; //load into r0 the value store at r0 stack location
+    //buffer += "    add r0, sp, #"+std::to_string(offset)+"\n"; //store the address of sp + offset in r0
+    //buffer += "    ldr "+reg+", [r0]\n"; //load into r0 the value store at r0 stack location
+    buffer += "    ldr "+reg+", [sp, #"+std::to_string(offset)+"]\n";
 }
 
 NewArray::NewArray(std::list<Exp *> *el): el(el) {}
@@ -842,8 +843,9 @@ void Assign::evaluate() {
     std::cout << "assigning at sp+" << offset << " to var:" << varname << std::endl;
 
     //assign onto the stack
-    buffer += "    add r0, sp, #"+std::to_string(offset)+"\n";  //store the location sp + offset in r1
-    buffer += "    str "+reg+", [r0]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+    //buffer += "    add r0, sp, #"+std::to_string(offset)+"\n";  //store the location sp + offset in r1
+    //buffer += "    str "+reg+", [r0]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+    buffer += "    str "+reg+", [sp, #"+std::to_string(offset)+"]\n";
 }
 
 ArrayAssign::ArrayAssign(Identifier *i, std::list<Exp *> *el, Exp *e): i(i), el(el), e(e) {}
@@ -979,23 +981,23 @@ void MethodDecl::evaluate() {
     currentMethodName = i->toString();
    
     //prepare function
-//    buffer += "    push {lr}\n";
+    buffer += "    push {r4-r11, lr}\n";
 
-    buffer += "    str lr, [sp, #-4]!\n";
-    buffer += "    str ip, [sp, #-4]!\n";
+   // buffer += "    str lr, [sp, #-4]!\n";
+    //buffer += "    str ip, [sp, #-4]!\n";
  //   buffer += "    str r0, [sp, #-4]!\n";
    // buffer += "    str r1, [sp, #-4]!\n";
     //buffer += "    str r2, [sp, #-4]!\n";
    // buffer += "    str r3, [sp, #-4]!\n";
 
-    int offset = 0;
+    int offset = 4;
  
     //make space for offset
-    int block_size = 4*(fl->size() + class_variables.size() + localVariables.size());
+    int block_size = 4*(fl->size()+1 + class_variables.size() + localVariables.size());
     if(block_size > 0)
         buffer += "    sub sp, sp, #"+std::to_string(block_size)+"\n\n";
 
-    buffer += "    mov ip, sp\n";
+    //buffer += "    mov ip, sp\n";
     
     //evaluate parameter Declarations
     int i = 0;
@@ -1008,8 +1010,9 @@ void MethodDecl::evaluate() {
         std::string reg = "r"+std::to_string(i);
         
         //assign onto the stack
-        buffer += "    add r12, sp, #"+std::to_string(offset)+"\n";  //store the location sp + offset in r1
-        buffer += "    str "+reg+", [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+//        buffer += "    add r12, sp, #"+std::to_string(offset)+"\n";  //store the location sp + offset in r1
+  //      buffer += "    str "+reg+", [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+        buffer += "    str "+reg+", [sp, #"+std::to_string(offset)+"]\n";
 
         offset += 4;
         i++;
@@ -1060,16 +1063,16 @@ void MethodDecl::evaluate() {
     //buffer += "    mov r0, "+reg+"\n";
     
     //return program counter
-    //buffer += "    pop {pc}\n";
+    buffer += "    pop {r4-r11, pc}\n";
 
     //return branch stmt
-    //buffer += "    bx lr\n";     
+    buffer += "    bx lr\n";     
 //    buffer += "    ldr r3, [sp], #4\n";
   //  buffer += "    ldr r2, [sp], #4\n";
     //buffer += "    ldr r1, [sp], #4\n";
   //  buffer += "    ldr r0, [sp], #4\n";
-    buffer += "    ldr ip, [sp], #4\n";
-    buffer += "    ldr pc, [sp], #4\n";
+//    buffer += "    ldr ip, [sp], #4\n";
+  //  buffer += "    ldr pc, [sp], #4\n";
 }
 
 /******************    CLASS DECLARATION SUB-CLASS    ************/
