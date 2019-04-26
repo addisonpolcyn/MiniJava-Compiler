@@ -40,7 +40,10 @@ int reg_offset=0;
 std::string r_pop(std::string pop_reg) {
     std::string reg = registerStack.top();
     registerStack.pop();
-    if(reg == "r0") {
+    if(pop_reg == "SUPPRESS" && reg == "r0") {
+        //do nothing
+        return "SUPPRESSED";
+    } else if(reg == "r0") {
         //top of stack was spilled, pop the register
         buffer += "    pop {"+pop_reg+"}\n";
         return pop_reg;
@@ -569,26 +572,49 @@ void Call::evaluate() {
     std::string className = currentClass->getName();    
     std::string methodName = i->toString();
     
-    //push parameters onto stack
+
     int n = el->size();
+    int k = 0;
+    //push parameters onto stack
+    std::list<Exp *>::iterator expIter = el->end();
+    expIter--; (*expIter)->evaluate();
+    std::string reg = r_pop("SUPPRESS");
+    if(reg != "SUPPRESSED")
+        buffer += "    push {"+reg+"}\n";
+
+
+    for(expIter = el->begin(); expIter != el->end(); ++expIter){
+            if(k == n - 1)
+                break;
+            (*expIter)->evaluate(); k++;
+            reg = r_pop("SUPPRESS");
+            if(reg != "SUPPRESSED")
+                buffer += "    push {"+reg+"}\n";
+
+    }
+
+
+    //push parameters onto stack
+    /*int n = el->size();
     std::list<Exp *>::iterator expIter = el->begin();
     for(expIter = el->begin(); expIter != el->end(); expIter++){
         std::cerr << "param bam\n";
         (*expIter)->evaluate();
-    }
+    }*/
 
     //put arguments on the stack
-    for(int i = 0; i < n; i++) {
-        std::string reg = r_pop("r0");
-        buffer += "    push {"+reg+"}\n";
+ /*   for(int i = 0; i < n; i++) {
+        std::string reg = r_pop("SUPPRESS");
+        if(reg != "SUPPRESSED")
+            buffer += "    push {"+reg+"}\n";
     }
-
+*/
     //call function
     buffer += "    bl "+className+"_"+methodName+"\n";
     
     //push return value onto stack
     //buffer += "    push {r0}\n";
-    std::string reg = r_push();
+    reg = r_push();
     buffer += "    mov "+reg+", r0\n";
     check_spill(reg);
 }
@@ -1100,9 +1126,41 @@ void MethodDecl::evaluate() {
     currentMethodName = methodName;
     int offset = 0;
     
+
+    int n = fl->size();
+    int k = 0;
+    //push parameters onto stack
+    /*
+    std::list<Exp *>::iterator expIter = el->end();
+    expIter--; (*expIter)->evaluate();
+    for(expIter = el->begin(); expIter != el->end(); ++expIter){
+            if(k == n - 1)
+                break;
+            (*expIter)->evaluate(); k++;
+    }*/
+
     //evaluate Formal Declarations
-    std::list<Formal *>::iterator formalIter;
-    for(formalIter = fl->begin(); formalIter != fl->end(); ++formalIter){
+    std::list<Formal *>::reverse_iterator formalIter = fl->rend();
+   /* formalIter--; std::string paramName = (*formalIter)->i->toString();
+        scope[paramName] = offset; //offset in stack
+        std::cout << "added item:" << paramName << " to the stack at offset:" << offset << std::endl;
+        offset += 4;
+        data.push_back(currentClassName+"_"+methodName+"_"+paramName+": .skip 4\n");
+        
+        //  std::string param_reg = r_pop("r1");
+        buffer += "    pop {r1}\n";
+
+        //assign into data
+        buffer += "    ldr r12, ="+currentClassName+"_"+methodName+"_"+paramName+"\n";  //store the location sp + offset in r1
+        buffer += "    str r1, [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+   */ 
+    for(formalIter = fl->rbegin(); formalIter != fl->rend(); ++formalIter){
+        if(k == 0) {
+            formalIter++;
+        }
+    //    if(k == n - 1)
+      //      break;
+        k++;
         std::string paramName = (*formalIter)->i->toString();
         scope[paramName] = offset; //offset in stack
         std::cout << "added item:" << paramName << " to the stack at offset:" << offset << std::endl;
@@ -1116,6 +1174,19 @@ void MethodDecl::evaluate() {
         buffer += "    ldr r12, ="+currentClassName+"_"+methodName+"_"+paramName+"\n";  //store the location sp + offset in r1
         buffer += "    str r1, [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
     }
+    formalIter = fl->rbegin();
+     std::string paramName = (*formalIter)->i->toString();
+        scope[paramName] = offset; //offset in stack
+        std::cout << "added item:" << paramName << " to the stack at offset:" << offset << std::endl;
+        offset += 4;
+        data.push_back(currentClassName+"_"+methodName+"_"+paramName+": .skip 4\n");
+        
+      //  std::string param_reg = r_pop("r1");
+        buffer += "    pop {r1}\n";
+
+        //assign into data
+        buffer += "    ldr r12, ="+currentClassName+"_"+methodName+"_"+paramName+"\n";  //store the location sp + offset in r1
+        buffer += "    str r1, [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
 
 /*
     //allocate parameters
