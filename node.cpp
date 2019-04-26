@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <list>
 #include <string>
+#include <stack>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -11,7 +12,6 @@
 
 bool type_error = false;    //boolean value true denotes type_error present in Tree, false Tree syntax is type valid
 std::string mainClassName;  //string name of the main class 
-
 
 ClassDecl *currentClass;
 std::string currentClassName;
@@ -28,6 +28,53 @@ std::string currentMethodName;
 std::string buffer;
 std::vector<std::string> text;
 std::vector<std::string> data;
+
+/******************    REGISTER STACK     ***********************/
+std::stack<std::string> registerStack;
+int reg_offset=0;
+/**
+ * Input Register of Choice during pop spill
+ * If top of stack is a spill, the pop_reg will 
+ * hold the value of the popped spill
+ */
+std::string r_pop(std::string pop_reg) {
+    std::string reg = registerStack.top();
+    registerStack.pop();
+    if(reg == "r0") {
+        //top of stack was spilled, pop the register
+        buffer += "    pop {"+pop_reg+"}\n";
+        return pop_reg;
+    } else {
+        return reg;
+    }
+}
+/**
+ * Register 0 is reserved for function return
+ * Registers 1-11 are reserved for the register stack (size: 11)
+ * push() allocates a register for reservation, and pushes it to the stack
+ * if the stack is full (r11 already reserved) the register must be spilled into stack memory
+ */
+std::string r_push() {
+    int register_number = registerStack.size()+4;
+    if(register_number > 10) {
+        //stack is full, spill the register, push onto stack
+        registerStack.push("r0");
+        return "r0";
+    } 
+    std::string reg = "r" + std::to_string(register_number);
+    registerStack.push(reg);
+    return reg;
+}
+/**
+ * Checks if the input register is a scratch register
+ * If the input register is a scratch register then it is spilled
+ * the scratch register will be spilled to the stack
+ */
+void check_spill(std::string reg) {
+    if(reg == "r0" || reg == "r1" || reg == "r2" || reg == "r3") {
+        buffer += "    push {"+reg+"}\n";
+    }
+}
 
 /*******************    IDENTIFIER CLASS    *********************/
 Identifier::Identifier(const std::string str): id(str) {}
@@ -51,10 +98,16 @@ void And::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
     
-    buffer += "    pop {r1}\n";       //pop right operand from stack
-    buffer += "    pop {r0}\n";       //pop left operand from stack
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
+
+  //  buffer += "    pop {r1}\n";       //pop right operand from stack
+    //buffer += "    pop {r0}\n";       //pop left operand from stack
     buffer += "    and r0, r0, r1\n"; //add values from r0 and r1, store in r0
-    buffer += "    push {r0}\n";      //push result r0 to the stack
+//    buffer += "    push {r0}\n";      //push result r0 to the stack
+
+    check_spill(reg);
 }
 
 Or::Or(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -72,10 +125,16 @@ void Or::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
     
-    buffer += "    pop {r1}\n";
-    buffer += "    pop {r0}\n";
-    buffer += "    orr r0, r0, r1\n"; //add values from r0 and r1, store in r0
-    buffer += "    push {r0}\n";
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
+
+ //   buffer += "    pop {r1}\n";
+ //   buffer += "    pop {r0}\n";
+    buffer += "    orr "+reg+", "+left+", "+right+"\n"; //add values from r0 and r1, store in r0
+//    buffer += "    push {r0}\n";
+
+    check_spill(reg);
 }
 
 Is::Is(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -92,26 +151,32 @@ std::string Is::visit() {
 void Is::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
-   
+    
+    
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
+ 
     //pop operands from the stack
-    buffer += "    pop {r1}\n";
-    buffer += "    pop {r0}\n";
+ //   buffer += "    pop {r1}\n";
+   // buffer += "    pop {r0}\n";
 
     //compare equality
-    buffer += "    cmp r0, r1\n";
+    buffer += "    cmp "+left+", "+right+"\n";
     buffer += "    beq 1f\n";
-    buffer += "    ldr r0, =0\n";
+    buffer += "    ldr "+reg+", =0\n";
     buffer += "    b 2f\n";
     
     //branch 1
     buffer += "1:      \n";
-    buffer += "    ldr r0, =1\n";
+    buffer += "    ldr "+reg+", =1\n";
     
     //branch 2
     buffer += "2:      \n";
 
     //push result to stack
-    buffer += "    push {r0}\n";
+//    buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 IsNot::IsNot(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -129,25 +194,31 @@ void IsNot::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
     
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
+
+
     //pop operands from the stack
-    buffer += "    pop {r1}\n";
-    buffer += "    pop {r0}\n";
+    //buffer += "    pop {r1}\n";
+    //buffer += "    pop {r0}\n";
 
     //compare equality
-    buffer += "    cmp r0, r1\n";
+    buffer += "    cmp "+left+", "+right+"\n";
     buffer += "    bne 1f\n";
-    buffer += "    ldr r0, =0\n";
+    buffer += "    ldr "+reg+", =0\n";
     buffer += "    b 2f\n";
     
     //branch 1
     buffer += "1:      \n";
-    buffer += "    ldr r0, =1\n";
+    buffer += "    ldr "+reg+", =1\n";
     
     //branch 2
     buffer += "2:      \n";
 
     //push result to the stack
-    buffer += "    push {r0}\n";
+//    buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 LessThan::LessThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -165,25 +236,30 @@ void LessThan::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
     
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
+
     //pop operands from the stack
-    buffer += "    pop {r1}\n";
-    buffer += "    pop {r0}\n";
+//    buffer += "    pop {r1}\n";
+  //  buffer += "    pop {r0}\n";
     
     //compare equality
-    buffer += "    cmp r0, r1\n";
+    buffer += "    cmp "+left+", "+right+"\n";
     buffer += "    blt 1f\n";
-    buffer += "    ldr r0, =0\n";
+    buffer += "    ldr "+reg+", =0\n";
     buffer += "    b 2f\n";
     
     //branch 1
     buffer += "1:      \n";
-    buffer += "    ldr r0, =1\n";
+    buffer += "    ldr "+reg+", =1\n";
     
     //branch 2
     buffer += "2:      \n";
 
     //push result to the stack
-    buffer += "    push {r0}\n";
+//    buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 LessThanEqual::LessThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -202,25 +278,30 @@ void LessThanEqual::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
     
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
+
     //pop operands from the stack
-    buffer += "    pop {r1}\n";
-    buffer += "    pop {r0}\n";
+//    buffer += "    pop {r1}\n";
+  //  buffer += "    pop {r0}\n";
  
     //compare equality
-    buffer += "    cmp r0, r1\n";
+    buffer += "    cmp "+left+", "+right+"\n";
     buffer += "    ble 1f\n";
-    buffer += "    ldr r0, =0\n";
+    buffer += "    ldr "+reg+", =0\n";
     buffer += "    b 2f\n";
     
     //branch 1
     buffer += "1:      \n";
-    buffer += "    ldr r0, =1\n";
+    buffer += "    ldr "+reg+", =1\n";
     
     //branch 2
     buffer += "2:      \n";
 
     //push result to the stack
-    buffer += "    push {r0}\n";
+    //buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 GreaterThan::GreaterThan(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -237,24 +318,29 @@ std::string GreaterThan::visit() {
 void GreaterThan::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
+    
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
 
-    buffer += "    pop {r1}\n";
-    buffer += "    pop {r0}\n";
+    //buffer += "    pop {r1}\n";
+    //buffer += "    pop {r0}\n";
  
     //compare equality
-    buffer += "    cmp r0, r1\n";
+    buffer += "    cmp "+left+", "+right+"\n";
     buffer += "    bgt 1f\n";
-    buffer += "    ldr r0, =0\n";
+    buffer += "    ldr "+reg+", =0\n";
     buffer += "    b 2f\n";
     
     //branch 1
     buffer += "1:      \n";
-    buffer += "    ldr r0, =1\n";
+    buffer += "    ldr "+reg+", =1\n";
     
     //branch 2
     buffer += "2:      \n";
     
-    buffer += "    push {r0}\n";
+    check_spill(reg);
+   // buffer += "    push {r0}\n";
 }
 
 GreaterThanEqual::GreaterThanEqual(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -272,23 +358,28 @@ void GreaterThanEqual::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
 
-    buffer += "    pop {r1}\n";
-    buffer += "    pop {r0}\n";
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
+
+//    buffer += "    pop {r1}\n";
+  //  buffer += "    pop {r0}\n";
  
     //compare equality
-    buffer += "    cmp r0, r1\n";
+    buffer += "    cmp "+left+", "+right+"\n";
     buffer += "    bge 1f\n";
-    buffer += "    ldr r0, =0\n";
+    buffer += "    ldr "+reg+", =0\n";
     buffer += "    b 2f\n";
     
     //branch 1
     buffer += "1:      \n";
-    buffer += "    ldr r0, =1\n";
+    buffer += "    ldr "+reg+", =1\n";
     
     //branch 2
     buffer += "2:      \n";
     
-    buffer += "    push {r0}\n";
+    check_spill(reg);
+//    buffer += "    push {r0}\n";
 }
 
 Plus::Plus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -306,11 +397,16 @@ std::string Plus::visit() {
 void Plus::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
-        
-    buffer += "    pop {r1}\n";    
-    buffer += "    pop {r0}\n";    
-    buffer += "    add r0, r0, r1\n"; //add values from r0 and r1, store in r0
-    buffer += "    push {r0}\n";    
+  
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
+      
+//    buffer += "    pop {r1}\n";    
+  //  buffer += "    pop {r0}\n";    
+    buffer += "    add "+reg+", "+left+", "+right+"\n"; //add values from r0 and r1, store in r0
+    //buffer += "    push {r0}\n";    
+    check_spill(reg);
 }
 
 Minus::Minus(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -329,10 +425,15 @@ void Minus::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
     
-    buffer += "    pop {r1}\n";
-    buffer += "    pop {r0}\n";
-    buffer += "    sub r0, r0, r1\n"; //add values from r0 and r1, store in r0
-    buffer += "    push {r0}\n";
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
+
+//    buffer += "    pop {r1}\n";
+  //  buffer += "    pop {r0}\n";
+    buffer += "    sub "+reg+", "+left+", "+right+"\n"; //add values from r0 and r1, store in r0
+   // buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 Times::Times(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -350,10 +451,15 @@ void Times::evaluate() {
     lhs->evaluate();
     rhs->evaluate();
     
-    buffer += "    pop {r1}\n";
-    buffer += "    pop {r0}\n";
-    buffer += "    mul r0, r0, r1\n"; //add values from r0 and r1, store in r0
-    buffer += "    push {r0}\n";
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push();
+
+//    buffer += "    pop {r1}\n";
+  //  buffer += "    pop {r0}\n";
+    buffer += "    mul "+reg+", "+left+", "+right+"\n"; //add values from r0 and r1, store in r0
+    //buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 Div::Div(Exp *lhs, Exp *rhs, int lineno): lhs(lhs), rhs(rhs), lineno(lineno) {}
@@ -464,17 +570,27 @@ void Call::evaluate() {
     std::string methodName = i->toString();
     
     //push parameters onto stack
+    int n = el->size();
     std::list<Exp *>::iterator expIter = el->begin();
     for(expIter = el->begin(); expIter != el->end(); expIter++){
         std::cerr << "param bam\n";
         (*expIter)->evaluate();
     }
 
+    //put arguments on the stack
+    for(int i = 0; i < n; i++) {
+        std::string reg = r_pop("r0");
+        buffer += "    push {"+reg+"}\n";
+    }
+
     //call function
     buffer += "    bl "+className+"_"+methodName+"\n";
     
     //push return value onto stack
-    buffer += "    push {r0}\n";
+    //buffer += "    push {r0}\n";
+    std::string reg = r_push();
+    buffer += "    mov "+reg+", r0\n";
+    check_spill(reg);
 }
 
 IntegerLiteral::IntegerLiteral(int i): num(i) {}
@@ -483,8 +599,11 @@ std::string IntegerLiteral::visit() {
     return "int";
 }
 void IntegerLiteral::evaluate() {
-    buffer += "    ldr r0, ="+std::to_string(num)+"\n";        //load value into register 0
-    buffer += "    push {r0}\n";
+    std::string reg = r_push();
+    buffer += "    ldr "+reg+", ="+std::to_string(num)+"\n";        //load value into register 0
+
+    check_spill(reg);
+    //buffer += "    push {r0}\n";
 }
 
 std::string True::visit() {
@@ -492,8 +611,10 @@ std::string True::visit() {
     return "boolean";
 }
 void True::evaluate() {
-    buffer += "    ldr r0, =1\n";  //load value into r0    
-    buffer += "    push {r0}\n";
+    std::string reg = r_push();
+    buffer += "    ldr "+reg+", =1\n";  //load value into r0    
+//    buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 std::string False::visit() {
@@ -501,8 +622,10 @@ std::string False::visit() {
     return "boolean";
 }
 void False::evaluate() {
-    buffer += "    ldr r0, =0\n";  //load value into r0    
-    buffer += "    push {r0}\n";
+    std::string reg = r_push();
+    buffer += "    ldr "+reg+", =0\n";  //load value into r0    
+//    buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 std::string This::visit() {
@@ -526,11 +649,13 @@ void IdentifierExp::evaluate() {
    // buffer += "    add r0, sp, #"+std::to_string(offset)+"\n"; //store the address of sp + offset in r0
  //   buffer += "    ldr r0, [r0]\n"; //load into r0 the value store at r0 stack location
    // buffer += "    push {r0}\n";
+    std::string reg = r_push();
 
     //load var from data
-    buffer += "    ldr r0, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n"; //store the address of sp + offset in r0
-    buffer += "    ldr r0, [r0]\n"; //load into r0 the value store at r0 stack location
-    buffer += "    push {r0}\n";
+    buffer += "    ldr "+reg+", ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n"; //store the address of sp + offset in r0
+    buffer += "    ldr "+reg+", ["+reg+"]\n"; //load into r0 the value store at r0 stack location
+//    buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 NewArray::NewArray(std::list<Exp *> *el): el(el) {}
@@ -586,21 +711,24 @@ std::string Not::visit() {
 void Not::evaluate() {
     e->evaluate();
     
-    buffer += "    pop {r0}\n";
+    std::string op = r_pop("r0");
+    std::string reg = r_push();
+//    buffer += "    pop {r0}\n";
     
     //compare equality
-    buffer += "    cmp r0, #0\n";
+    buffer += "    cmp "+op+", #0\n";
     buffer += "    beq 1f\n";
-    buffer += "    ldr r0, =0\n";
+    buffer += "    ldr "+reg+", =0\n";
     buffer += "    b 2f\n";
     
     //branch 1
     buffer += "1:      \n";
-    buffer += "    ldr r0, =1\n";
+    buffer += "    ldr "+reg+", =1\n";
     
     //branch 2
     buffer += "2:      \n";
-    buffer += "    push {r0}\n";
+//    buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 NegativeExp::NegativeExp(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -614,9 +742,14 @@ std::string NegativeExp::visit() {
 }
 void NegativeExp::evaluate() {
     e->evaluate();
-    buffer += "    pop {r0}\n";
-    buffer += "    neg r0, r0\n"; 
-    buffer += "    push {r0}\n";
+
+    std::string op = r_pop("r0");
+    std::string reg = r_push();
+
+//    buffer += "    pop {r0}\n";
+    buffer += "    neg "+reg+", "+op+"\n"; 
+//    buffer += "    push {r0}\n";
+    check_spill(reg);
 }
 
 PositiveExp::PositiveExp(Exp *e, int lineno): e(e), lineno(lineno) {}
@@ -680,10 +813,12 @@ void If::evaluate() {
     //evaluate boolean expr
     e->evaluate();
 
-    buffer += "    pop {r0}\n";
+    std::string reg = r_pop("r0");
+
+//    buffer += "    pop {r0}\n";
 
     //compare equality
-    buffer += "    cmp r0, #1\n";
+    buffer += "    cmp "+reg+", #1\n";
     buffer += "    beq 1f\n";
     s2->evaluate();
     buffer += "    b 2f\n";
@@ -707,10 +842,13 @@ void While::visit() {
 }
 void While::evaluate() {
     e->evaluate();
-    buffer += "    pop {r0}\n";
+
+    std::string reg = r_pop("r0");
+    
+    //buffer += "    pop {r0}\n";
 
     //check if loop should begin
-    buffer += "    cmp r0, #1\n";
+    buffer += "    cmp "+reg+", #1\n";
     buffer += "    beq 3f\n";
     
     //done
@@ -720,8 +858,11 @@ void While::evaluate() {
     buffer += "3:      \n";
     s->evaluate();
     e->evaluate();
-    buffer += "    pop {r1}\n";
-    buffer += "    cmp r1, #1\n";
+    
+    reg = r_pop("r1");
+    
+//    buffer += "    pop {r1}\n";
+    buffer += "    cmp "+reg+", #1\n";
     buffer += "    beq 3b\n";
     buffer += "    b 4f\n";
     
@@ -739,8 +880,11 @@ void Print::visit() {
 }
 void Print::evaluate() {
     e->evaluate();
- 
-    buffer += "    pop {r1}\n";
+    
+    std::string reg = r_pop("r1");
+
+    buffer += "    mov r1, "+reg+"\n";
+//    buffer += "    pop {r1}\n";
     buffer += "    ldr r0, =int_print\n";
     buffer += "    bl  printf\n";
 }
@@ -755,8 +899,11 @@ void Println::visit() {
 }
 void Println::evaluate() {
     e->evaluate();
-    
-    buffer += "    pop {r1}\n";
+  
+    std::string reg = r_pop("r1");
+
+    buffer += "    mov r1, "+reg+"\n";
+//    buffer += "    pop {r1}\n";
     buffer += "    ldr r0, =int_println\n";
     buffer += "    bl  printf\n";
 }
@@ -802,7 +949,9 @@ void Assign::evaluate() {
     std::cerr << "Assign\n";
     //evaluate expr
     e->evaluate();
-    buffer += "    pop {r0}\n";
+    
+    std::string reg = r_pop("r0");
+//    buffer += "    pop {r0}\n";
      
     std::cout << "assigning at sp+" << offset << " to var:" << id << std::endl;
 
@@ -811,8 +960,8 @@ void Assign::evaluate() {
     //buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
 
     //assign into data
-    buffer += "    ldr r1, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n";  //store the location sp + offset in r1
-    buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+    buffer += "    ldr r12, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n";  //store the location sp + offset in r1
+    buffer += "    str "+reg+", [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
 }
 
 ArrayAssign::ArrayAssign(Identifier *i, std::list<Exp *> *el, Exp *e): i(i), el(el), e(e) {}
@@ -952,19 +1101,20 @@ void MethodDecl::evaluate() {
     int offset = 0;
     
     //evaluate Formal Declarations
-    std::list<Formal *>::reverse_iterator formalIter;
-    for(formalIter = fl->rbegin(); formalIter != fl->rend(); ++formalIter){
+    std::list<Formal *>::iterator formalIter;
+    for(formalIter = fl->begin(); formalIter != fl->end(); ++formalIter){
         std::string paramName = (*formalIter)->i->toString();
         scope[paramName] = offset; //offset in stack
         std::cout << "added item:" << paramName << " to the stack at offset:" << offset << std::endl;
         offset += 4;
         data.push_back(currentClassName+"_"+methodName+"_"+paramName+": .skip 4\n");
         
-        buffer += "    pop {r0}\n";
+      //  std::string param_reg = r_pop("r1");
+        buffer += "    pop {r1}\n";
 
         //assign into data
-        buffer += "    ldr r1, ="+currentClassName+"_"+methodName+"_"+paramName+"\n";  //store the location sp + offset in r1
-        buffer += "    str r0, [r1]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+        buffer += "    ldr r12, ="+currentClassName+"_"+methodName+"_"+paramName+"\n";  //store the location sp + offset in r1
+        buffer += "    str r1, [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
     }
 
 /*
@@ -985,8 +1135,8 @@ void MethodDecl::evaluate() {
     }
   */  
     //prepare function
-    buffer += "    push {lr}\n";     
-
+    buffer += "    push {r4-r11, lr}\n";     
+ 
     //allocate class variables
     for (auto const& var : class_variables) {
         scope[var] = offset; //offset in stack
@@ -1026,15 +1176,18 @@ void MethodDecl::evaluate() {
     //void * ptr = &returnVal;
     //evaluate return 
     e->evaluate();
-    buffer += "    pop {r0}\n";
     
+    //buffer += "    pop {r0}\n";
+    std::string reg = r_pop("r1");
+    buffer += "    mov r0, "+reg+"\n";
+
     //restore stack pointer to original location before function
     //if(offset)
         //buffer += "    add sp, sp, #"+std::to_string(offset)+"\n";
 
     //buffer += "    push {r0}\n";
     //return program counter
-    buffer += "    pop {pc}\n";
+    buffer += "    pop {r4-r11, pc}\n";
 
     //return branch stmt
     buffer += "    bx lr\n";     
@@ -1134,12 +1287,12 @@ void MainClass::evaluate() {
     buffer += ".global main\n";
     buffer += ".balign 4\n";
     buffer += "main:\n";
-    buffer += "    push {lr}\n";
+    buffer += "    push {r4-r11, lr}\n";
 
     s->evaluate();    
     PRINTDEBUG("(MainClass)")
     
-    buffer += "    pop {pc}\n";
+    buffer += "    pop {r4-r11, pc}\n";
 }
 
 /*******************    PROGRAM CLASS ****************************/
