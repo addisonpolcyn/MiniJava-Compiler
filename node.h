@@ -1,21 +1,7 @@
 #include <list>
 #include <string>
-#include <stack>
 #include <map>
 #include <iostream>
-
-/*******************    REGISTER STACK      *********************/
-/*
-class RegisterStack {
-protected:
-    std::stack<std::string> registerStack;
-public:
-    std::string push(); //push a used register onto the stack
-    std::string pop();  //pop a used register from the stack
-};
-*/
-std::string r_push(); //push a used register onto the stack
-std::string r_pop();  //pop a used register from the stack
 
 /*******************    IDENTIFIER CLASS    *********************/
 class Identifier {
