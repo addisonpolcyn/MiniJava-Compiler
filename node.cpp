@@ -106,7 +106,7 @@ void And::evaluate() {
     std::string left = r_pop("r0");
     std::string reg = r_push();
 
-    buffer += "    and r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    buffer += "    and "+reg+", "+left+", "+right+"\n"; //add values from r0 and r1, store in r0
     check_spill(reg);
 }
 
