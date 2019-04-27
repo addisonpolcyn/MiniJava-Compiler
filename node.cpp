@@ -438,7 +438,7 @@ void Div::evaluate() {
 ArrayLookup::ArrayLookup(Identifier *i, std::list<Exp *> *el): i(i), el(el) {}
 std::string ArrayLookup::visit() {
     PRINTDEBUG("(ArrayLookup)")
-    return "int";
+    return type_local_scope[i->toString()]->t->getType();
 }
 void ArrayLookup::evaluate() {
     //iterate over index epxressions
@@ -449,13 +449,19 @@ void ArrayLookup::evaluate() {
         break;
         //only works for 1D array TODO
     }
-    //offset stored in r3
-    buffer += "    pop {r3}\n";
+    //calculate index
+    std::string reg = r_pop("r2");
+    buffer += "    mov r1, #4\n"; //add values from r0 and r1, store in r0
+    buffer += "    mul r3, r1, "+reg+"\n"; //add values from r0 and r1, store in r0
+
+    //load value at index of array
+    buffer += "    ldr r12, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n";  //store the location sp + offset in r1
+    buffer += "    add r12, r12, r3\n";
     
-    buffer += "    ldr r1, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n"; //store the address of sp + offset in r0
-//    buffer += "    ldr r0, [r1, #8]!\n"; //load into r0 the value store at r0 stack location
-    buffer += "    ldr r0, [r1, #8]!\n"; //load into r0 the value store at r0 stack location
-    buffer += "    push {r0}\n";
+    //place value at index of array
+    reg = r_push();
+    buffer += "    ldr "+reg+", [r12]\n"; //store the value of r1 on the stack at location r1 (sp + offset)
+    check_spill(reg);
 }
 
 ArrayLength::ArrayLength(Exp *e): e(e) {}
@@ -626,18 +632,18 @@ void NewArray::evaluate() {
         break;
         //only works for 1D array TODO
     }
-    buffer += "    pop {r0}\n"; //add values from r0 and r1, store in r0
+    //calculate size
+    std::string reg = r_pop("r0");
     buffer += "    mov r1, #4\n"; //add values from r0 and r1, store in r0
-    buffer += "    mul r0, r0, r1\n"; //add values from r0 and r1, store in r0
+    buffer += "    mul r0, r1, "+reg+"\n"; //add values from r0 and r1, store in r0
     
-    //push total size
-    //buffer += "    push {r0}\n"; //add values from r0 and r1, store in r0
-
     //malloc
     buffer += "    bl malloc\n"; //add values from r0 and r1, store in r0
     
     //return regist address to malloc memory
-    buffer += "    push {r0}\n"; //add values from r0 and r1, store in r0
+    reg = r_push();
+    buffer += "    mov "+reg+", r0\n"; //add values from r0 and r1, store in r0
+    check_spill(reg);
 }
 
 NewObject::NewObject(Identifier *i): i(i) {}
@@ -729,7 +735,7 @@ void Block::visit() {
     //evaluate Block
     std::list<Statement *>::iterator stmtIter;
     for(stmtIter = sl->begin(); stmtIter != sl->end(); stmtIter++){
-        (*stmtIter)->visit();
+        //(*stmtIter)->visit();
         PRINTDEBUG("(Statement)")
     }
     PRINTDEBUG("(Block)")
@@ -908,6 +914,7 @@ void ArrayAssign::visit() {
 void ArrayAssign::evaluate() {
     PRINTDEBUG("(Statment Evaluation Broken)")
     std::string id = i->toString();
+    
     //iterate over index epxressions
     std::list<Exp *>::iterator expIter = el->begin();
     for(expIter = el->begin(); expIter != el->end(); expIter++){
@@ -915,26 +922,19 @@ void ArrayAssign::evaluate() {
         break;
         //only works for 1D array TODO
     }
-    buffer += "    pop {r0}\n"; //add values from r0 and r1, store in r0
+    //calculate index
+    std::string reg = r_pop("r2");
     buffer += "    mov r1, #4\n"; //add values from r0 and r1, store in r0
-    buffer += "    mul r3, r0, r1\n"; //add values from r0 and r1, store in r0
-    //index is stored in r3
+    buffer += "    mul r3, r1, "+reg+"\n"; //add values from r0 and r1, store in r0
 
-     //evaluate expr
+    //evaluate expr
     e->evaluate();
-    buffer += "    pop {r1}\n";
-    //expr value is stored in r1
-    
-    //assign into data
-    buffer += "    ldr r0, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n";  //store the location sp + offset in r1
-    
-    //load at immediate offset
-    //buffer += "    ldr r0, [r2, +r3]\n";  //store the location sp + offset in r1
-//    buffer += "    ldr r0, [r0]\n";  //store the location sp + offset in r1
-//    buffer += "    str r1, [r0, #8]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
-  //  buffer += "    str r1, [r0, #4]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
-    //buffer += "    str r1, [r0, #12]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
-    buffer += "    str r1, [r0, #8]!\n"; //store the value of r1 on the stack at location r1 (sp + offset)
+    reg = r_pop("r2");
+
+    //assign value into address offset of array
+    buffer += "    ldr r12, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n";  //store the location sp + offset in r1
+    buffer += "    add r12, r12, r3\n";
+    buffer += "    str "+reg+", [r12]\n"; //store the value of r1 on the stack at location r1 (sp + offset)
 }
 
 /*******************    TYPE CLASS    ****************************/
@@ -1239,13 +1239,13 @@ void Program::traverse() {
             classTable[className] = (*classDeclIter);
         }
     }
+
     //iterate over classes
     for (auto const& x : classTable) {
         ClassDecl * clptr = x.second;
         currentClass = clptr;
         (clptr)->visit();
     }
-
 
     //evaluate MainClass    
     m->visit();
