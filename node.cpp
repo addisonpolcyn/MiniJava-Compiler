@@ -45,7 +45,7 @@ int register_number = 4;
  **/
 std::string r_pop(std::string pop_reg) {
     std::string reg = registerStack.top();
-    if(reg.at(0) != '#') {
+    if(reg.at(0) != '#' && reg != "r0") {
         //SYMBOLIC, decrement register_number
         register_number--;
     }
