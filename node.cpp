@@ -72,7 +72,7 @@ std::string r_push(std::string type) {
     //int register_number = registerStack.size()+4;
     if(type == SYMBOLIC) { 
         //type is SYMBOLIC, push register onto stack
-        if(register_number > 10) {
+        if(register_number > 7) {
             //stack is full, spill the register, push onto stack
             registerStack.push("r0");
             return "r0";
@@ -449,8 +449,44 @@ std::string Div::visit() {
     return "int";
 }
 void Div::evaluate(std::string ret_type) {
-    std::cerr << "Division operator '/' is not supported by ARM, and not implemented by compiler\n";
-    exit(1);
+    //std::cerr << "Division operator '/' is not supported by ARM, and not implemented by compiler\n";
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(SYMBOLIC);
+    
+    std::string right = r_pop("r1");
+    std::string left = r_pop("r0");
+    std::string reg = r_push(SYMBOLIC);
+    
+    buffer += "    mov r1, #0\n";
+    buffer += "    mov r3, "+right+"\n";
+    buffer += "    cmp "+left+", "+right+"\n";
+    buffer += "    bge 5f\n";
+    buffer += "    ldr r2, =0\n";
+    buffer += "    b 6f\n";
+    buffer += "5:\n";
+    buffer += "    ldr r2, =1\n";
+    buffer += "6:\n";
+    buffer += "    cmp r2, #1\n";
+    buffer += "    beq 7f\n";
+    buffer += "    b 8f\n";
+    buffer += "7:\n";
+    buffer += "    add "+right+", "+right+", r3\n";
+    buffer += "    add r1, r1, #1\n";
+    buffer += "    cmp "+left+", "+right+"\n";
+    buffer += "    bge 5f\n";
+    buffer += "    ldr r2, =0\n";
+    buffer += "    b 6f\n";
+    buffer += "5:\n";
+    buffer += "    ldr r2, =1\n";
+    buffer += "6:\n";
+    buffer += "    cmp r2, #1\n";
+    buffer += "    beq 7b\n";
+    buffer += "    b 8f\n";
+    buffer += "8:\n";
+    buffer += "    mov "+reg+", r1\n";
+ 
+    //check if register needs to spill, other wise reg should hold value
+    check_spill(reg);
 }
 
 ArrayLookup::ArrayLookup(Identifier *i, std::list<Exp *> *el): i(i), el(el) {}
@@ -463,7 +499,7 @@ void ArrayLookup::evaluate(std::string ret_type) {
     std::string id = i->toString();
     std::list<Exp *>::iterator expIter = el->begin();
     for(expIter = el->begin(); expIter != el->end(); expIter++){
-        (*expIter)->evaluate(LITERAL);   
+        (*expIter)->evaluate(SYMBOLIC);   
         break;
         //only works for 1D array TODO
     }
@@ -658,7 +694,7 @@ void NewArray::evaluate(std::string ret_type) {
     //iterate over index epxressions
     std::list<Exp *>::iterator expIter = el->begin();
     for(expIter = el->begin(); expIter != el->end(); expIter++){
-        (*expIter)->evaluate(LITERAL);   
+        (*expIter)->evaluate(SYMBOLIC);   
         break;
         //only works for 1D array TODO
     }
@@ -948,7 +984,7 @@ void ArrayAssign::evaluate() {
     //iterate over index epxressions
     std::list<Exp *>::iterator expIter = el->begin();
     for(expIter = el->begin(); expIter != el->end(); expIter++){
-        (*expIter)->evaluate(LITERAL);   
+        (*expIter)->evaluate(SYMBOLIC);   
         break;
         //only works for 1D array TODO
     }
