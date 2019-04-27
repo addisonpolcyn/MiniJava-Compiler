@@ -20,7 +20,7 @@ std::map<std::string, VarDecl *> type_class_scope;  //map of fields in current c
 std::map<std::string, VarDecl *> type_local_scope;  //map of variables in current scope inlcuding current class variables and method variables
 std::map<std::string, std::string> scope_type;
 
-std::map<std::string, int> scope;
+std::map<std::string, std::string> scope;
 std::vector<std::string> class_variables;
 
 std::string currentMethodName;
@@ -36,6 +36,7 @@ std::string SUPPRESSED = "SUPPRESSED";
 std::string LITERAL = "LITERAL";
 std::string SYMBOLIC = "SYMBOLIC";
 int register_number = 4;
+int var_count = 7;
 /**
  * Input Register of Choice during pop spill
  * If top of stack is a spill, the pop_reg will 
@@ -674,13 +675,21 @@ std::string IdentifierExp::visit() {
     return type_local_scope[id]->t->getType();
 }
 void IdentifierExp::evaluate(std::string ret_type) {
-    int offset = scope[id];
+    std::string id = currentClass->getName()+"_"+currentMethodName+"_"+id; //store the address of sp + offset in r0
+    std::string storage = scope[id];
     std::string reg = r_push(SYMBOLIC);
+
+    if(storage != "SPILL") {
+        buffer += "    mov "+reg+", "+storage+"\n";
+    } else {
+
+
 
     //load var from data
     buffer += "    ldr "+reg+", ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n"; //store the address of sp + offset in r0
     buffer += "    ldr "+reg+", ["+reg+"]\n"; //load into r0 the value store at r0 stack location
     check_spill(reg);
+    }
 }
 
 NewArray::NewArray(std::list<Exp *> *el): el(el) {}
@@ -957,20 +966,27 @@ void Assign::visit() {
     }
 }
 void Assign::evaluate() {
-    std::string id = i->toString();
-    int offset = scope[id];
+    std::string id = currentClass->getName()+"_"+currentMethodName+"_"+i->toString();  //store the location sp + offset in r1
+    std::string storage = scope[id];
     
-    std::cerr << "Assign\n";
-    
+   
     //evaluate expr
     e->evaluate(SYMBOLIC);
     
     std::string reg = r_pop("r0");
-    std::cout << "assigning at sp+" << offset << " to var:" << id << std::endl;
+    //std::cout << "assigning at sp+" << offset << " to var:" << id << std::endl;
 
-    //assign into data
-    buffer += "    ldr r12, ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n";  //store the location sp + offset in r1
-    buffer += "    str "+reg+", [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+    if(storage != "SPILL") {
+        buffer += "    mov "+storage+", "+reg+"\n";
+    } else if(storage == "SPILL" && var_count <= 10) {
+        buffer += "    mov r"+std::to_string(var_count)+", "+reg+"\n";
+        scope[id] = "r"+std::to_string(var_count);
+        var_count++;
+    } else {
+        //assign into data
+        buffer += "    ldr r12, ="+id+"\n";  //store the location sp + offset in r1
+        buffer += "    str "+reg+", [r12]\n"; //store the value of r0 on the stack at location r1 (sp + offset)
+    }
 }
 
 ArrayAssign::ArrayAssign(Identifier *i, std::list<Exp *> *el, Exp *e): i(i), el(el), e(e) {}
@@ -1114,7 +1130,8 @@ void MethodDecl::evaluate() {
             if(k == 0) { formalIter++; } k++;
             
             std::string paramName = (*formalIter)->i->toString();
-            scope[paramName] = offset; //offset in stack
+            std::string varname = currentClassName+"_"+methodName+"_"+paramName;
+            scope[varname] = "SPILL"; //offset in stack
             //std::cout << "added item:" << paramName << " to the stack at offset:" << offset << std::endl;
             //offset += 4;
             data.push_back(currentClassName+"_"+methodName+"_"+paramName+": .skip 4\n");
@@ -1131,7 +1148,8 @@ void MethodDecl::evaluate() {
         //pop the first param from the stack and assign
         std::list<Formal *>::reverse_iterator formalIter = fl->rbegin();
         std::string paramName = (*formalIter)->i->toString();
-        scope[paramName] = offset; //offset in stack
+        std::string varname = currentClassName+"_"+methodName+"_"+paramName;
+        scope[varname] = "SPILL"; //offset in stack
       //  std::cout << "added item:" << paramName << " to the stack at offset:" << offset << std::endl;
         //offset += 4;
         data.push_back(currentClassName+"_"+methodName+"_"+paramName+": .skip 4\n");
@@ -1149,7 +1167,8 @@ void MethodDecl::evaluate() {
  
     //allocate class variables
     for (auto const& var : class_variables) {
-        scope[var] = offset; //offset in stack
+        std::string varname = currentClassName+"_"+methodName+"_"+var;
+        scope[varname] = "SPILL"; //offset in stack
 //        std::cout << "added item:" << var << " to the stack at offset:" << offset << std::endl;
   //      offset += 4;
         data.push_back(currentClassName+"_"+methodName+"_"+var+": .skip 4\n");
@@ -1158,7 +1177,8 @@ void MethodDecl::evaluate() {
     //allocate local variables
     for (auto const& var : localVariables) {
         if(scope.count(var.first) < 1){
-            scope[var.first] = offset; //offset in stack
+            std::string varname = currentClassName+"_"+methodName+"_"+var.first;
+            scope[varname] = "SPILL"; //offset in stack
  //           std::cout << "added item:" << var.first << " to the stack at offset:" << offset << std::endl;
    //         offset += 4;
         data.push_back(currentClassName+"_"+methodName+"_"+var.first+": .skip 4\n");
@@ -1183,6 +1203,7 @@ void MethodDecl::evaluate() {
 
     //clean scope
     scope.clear();
+    var_count = 7;
 }
 
 /******************    CLASS DECLARATION SUB-CLASS    ************/
