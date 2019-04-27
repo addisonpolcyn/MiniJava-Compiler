@@ -20,7 +20,7 @@ public:
     virtual std::string visit() = 0;
 
     //input string refers to register 0 or 1. r0 is default return register
-    virtual void evaluate() = 0;
+    virtual void evaluate(std::string) = 0;
 };
 
 /* Exp Sub-Classes */
@@ -32,7 +32,7 @@ protected:
 public:
     And(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class Or : public Exp {
@@ -43,7 +43,7 @@ protected:
 public:
     Or(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class Is : public Exp {
@@ -54,7 +54,7 @@ protected:
 public:
     Is(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class IsNot : public Exp {
@@ -65,7 +65,7 @@ protected:
 public:
     IsNot(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class LessThan : public Exp {
@@ -76,7 +76,7 @@ protected:
 public:
     LessThan(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class LessThanEqual : public Exp {
@@ -87,7 +87,7 @@ protected:
 public:
     LessThanEqual(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class GreaterThan : public Exp {
@@ -98,7 +98,7 @@ protected:
 public:
     GreaterThan(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class GreaterThanEqual : public Exp {
@@ -109,7 +109,7 @@ protected:
 public:
     GreaterThanEqual(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class Plus : public Exp {
@@ -120,7 +120,7 @@ protected:
 public:
     Plus(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class Minus : public Exp {
@@ -131,7 +131,7 @@ protected:
 public:
     Minus(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class Times : public Exp {
@@ -142,7 +142,7 @@ protected:
 public:
     Times(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class Div : public Exp {
@@ -153,7 +153,7 @@ protected:
 public:
     Div(Exp *lhs, Exp *rhs, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class ArrayLookup : public Exp {
@@ -165,7 +165,7 @@ protected:
 public:
     ArrayLookup(Identifier *i, std::list<Exp *> * el);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class ArrayLength : public Exp {
@@ -174,7 +174,7 @@ protected:
 public:
     ArrayLength(Exp *e);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class Call : public Exp {
@@ -187,7 +187,7 @@ protected:
 public:
     Call(Exp *e, Identifier *i, std::list<Exp *> *el, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class IntegerLiteral : public Exp {
@@ -196,21 +196,21 @@ protected:
 public:
     IntegerLiteral(int i);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class True : public Exp {
 public:
     True() {}
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class False : public Exp {
 public:
     False() {}
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class IdentifierExp : public Exp {
@@ -219,14 +219,14 @@ protected:
 public:
     IdentifierExp(std::string str);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class This : public Exp {
 public:
     This() {}
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class NewArray : public Exp {
@@ -235,7 +235,7 @@ protected:
 public:
     NewArray(std::list<Exp *> * el);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class NewObject : public Exp {
@@ -244,7 +244,7 @@ protected:
 public:
     NewObject(Identifier *i);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class Not : public Exp {
@@ -254,7 +254,7 @@ protected:
 public:
     Not(Exp *e, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class NegativeExp : public Exp {
@@ -264,7 +264,7 @@ protected:
 public:
     NegativeExp(Exp *e, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class PositiveExp : public Exp {
@@ -274,7 +274,7 @@ protected:
 public:
     PositiveExp(Exp *e, int lineno);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 class Index : public Exp {
@@ -283,7 +283,7 @@ class Index : public Exp {
 public:
     Index(Exp * e);
     std::string visit();
-    void evaluate();
+    void evaluate(std::string);
 };
 
 /*******************    STATEMENT CLASS    ****************************/

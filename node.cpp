@@ -31,19 +31,23 @@ std::vector<std::string> data;
 
 /******************    REGISTER STACK     ***********************/
 std::stack<std::string> registerStack;
+std::string SUPPRESS = "SUPPRESS";
+std::string SUPPRESSED = "SUPPRESSED";
+std::string LITERAL = "LITERAL";
+std::string SYMBOLIC = "SYMBOLIC";
 /**
  * Input Register of Choice during pop spill
  * If top of stack is a spill, the pop_reg will 
  * hold the value of the popped spill
  * SUPPRESS value means pop from the stack silently
  * NON-SUPPRESS means a loud pop with assembly code
- */
+ **/
 std::string r_pop(std::string pop_reg) {
     std::string reg = registerStack.top();
     registerStack.pop();
-    if(pop_reg == "SUPPRESS" && reg == "r0") {
+    if(pop_reg == SUPPRESS && reg == "r0") {
         //do nothing
-        return "SUPPRESSED";
+        return SUPPRESSED;
     } else if(reg == "r0") {
         //top of stack was spilled, pop the register
         buffer += "    pop {"+pop_reg+"}\n";
@@ -57,7 +61,7 @@ std::string r_pop(std::string pop_reg) {
  * Registers 1-11 are reserved for the register stack (size: 11)
  * push() allocates a register for reservation, and pushes it to the stack
  * if the stack is full (r11 already reserved) the register must be spilled into stack memory
- */
+ **/
 std::string r_push() {
     int register_number = registerStack.size()+4;
     if(register_number > 10) {
@@ -73,7 +77,7 @@ std::string r_push() {
  * Checks if the input register is a scratch register
  * If the input register is a scratch register then it is spilled
  * the scratch register will be spilled to the stack
- */
+ **/
 void check_spill(std::string reg) {
     if(reg == "r0" || reg == "r1" || reg == "r2" || reg == "r3") {
         buffer += "    push {"+reg+"}\n";
@@ -539,8 +543,8 @@ void Call::evaluate() {
         //push first parameter
         std::list<Exp *>::iterator expIter = el->end();
         expIter--; (*expIter)->evaluate();
-        std::string reg = r_pop("SUPPRESS");
-        if(reg != "SUPPRESSED")
+        std::string reg = r_pop(SUPPRESS);
+        if(reg != SUPPRESSED)
             buffer += "    push {"+reg+"}\n";
 
         //push remaining paramters
@@ -548,8 +552,8 @@ void Call::evaluate() {
             if(k == n - 1)
                 break;
             (*expIter)->evaluate(); k++;
-            reg = r_pop("SUPPRESS");
-            if(reg != "SUPPRESSED")
+            reg = r_pop(SUPPRESS);
+            if(reg != SUPPRESSED)
                 buffer += "    push {"+reg+"}\n";
         }
     }
