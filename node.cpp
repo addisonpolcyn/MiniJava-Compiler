@@ -35,6 +35,7 @@ std::string SUPPRESS = "SUPPRESS";
 std::string SUPPRESSED = "SUPPRESSED";
 std::string LITERAL = "LITERAL";
 std::string SYMBOLIC = "SYMBOLIC";
+int register_number = 4;
 /**
  * Input Register of Choice during pop spill
  * If top of stack is a spill, the pop_reg will 
@@ -44,6 +45,11 @@ std::string SYMBOLIC = "SYMBOLIC";
  **/
 std::string r_pop(std::string pop_reg) {
     std::string reg = registerStack.top();
+    if(reg.at(0) != '#') {
+        //SYMBOLIC, decrement register_number
+        register_number--;
+    }
+
     registerStack.pop();
     if(pop_reg == SUPPRESS && reg == "r0") {
         //do nothing
@@ -62,16 +68,24 @@ std::string r_pop(std::string pop_reg) {
  * push() allocates a register for reservation, and pushes it to the stack
  * if the stack is full (r11 already reserved) the register must be spilled into stack memory
  **/
-std::string r_push() {
-    int register_number = registerStack.size()+4;
-    if(register_number > 10) {
-        //stack is full, spill the register, push onto stack
-        registerStack.push("r0");
-        return "r0";
-    } 
-    std::string reg = "r" + std::to_string(register_number);
-    registerStack.push(reg);
-    return reg;
+std::string r_push(std::string type) {
+    //int register_number = registerStack.size()+4;
+    if(type == SYMBOLIC) { 
+        //type is SYMBOLIC, push register onto stack
+        if(register_number > 10) {
+            //stack is full, spill the register, push onto stack
+            registerStack.push("r0");
+            return "r0";
+        } 
+        std::string reg = "r" + std::to_string(register_number);
+        registerStack.push(reg);
+        register_number++; 
+        return reg;
+    } else {
+        //type is LITERAL, push literal onto stack
+        registerStack.push(type);
+        return "";
+    }
 }
 /**
  * Checks if the input register is a scratch register
@@ -102,13 +116,13 @@ std::string And::visit() {
     }
     return "boolean";
 }
-void And::evaluate() {
-    lhs->evaluate();
-    rhs->evaluate();
-    
+void And::evaluate(std::string ret_type) {
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(LITERAL);
+
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
 
     buffer += "    and "+reg+", "+left+", "+right+"\n"; //add values from r0 and r1, store in r0
     check_spill(reg);
@@ -125,13 +139,13 @@ std::string Or::visit() {
     }
     return "boolean";
 }
-void Or::evaluate() {
-    lhs->evaluate();
-    rhs->evaluate();
+void Or::evaluate(std::string ret_type) {
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(LITERAL);
     
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
 
     buffer += "    orr "+reg+", "+left+", "+right+"\n"; //add values from r0 and r1, store in r0
     check_spill(reg);
@@ -148,13 +162,13 @@ std::string Is::visit() {
     }
     return "boolean";
 }
-void Is::evaluate() {
-    lhs->evaluate();
-    rhs->evaluate();
+void Is::evaluate(std::string ret_type) {
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(LITERAL);
     
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
 
     //compare equality
     buffer += "    cmp "+left+", "+right+"\n";
@@ -184,13 +198,13 @@ std::string IsNot::visit() {
     }
     return "boolean";
 }
-void IsNot::evaluate() {
-    lhs->evaluate();
-    rhs->evaluate();
+void IsNot::evaluate(std::string ret_type) {
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(LITERAL);
     
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
 
     //compare equality
     buffer += "    cmp "+left+", "+right+"\n";
@@ -220,13 +234,13 @@ std::string LessThan::visit() {
     }
     return "boolean";
 }
-void LessThan::evaluate() {
-    lhs->evaluate();
-    rhs->evaluate();
+void LessThan::evaluate(std::string ret_type) {
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(LITERAL);
     
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
 
     //compare equality
     buffer += "    cmp "+left+", "+right+"\n";
@@ -256,14 +270,14 @@ std::string LessThanEqual::visit() {
     }
     return "boolean";
 }
-void LessThanEqual::evaluate() {
+void LessThanEqual::evaluate(std::string ret_type) {
     //evaluate expr
-    lhs->evaluate();
-    rhs->evaluate();
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(LITERAL);
     
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
  
     //compare equality
     buffer += "    cmp "+left+", "+right+"\n";
@@ -293,13 +307,13 @@ std::string GreaterThan::visit() {
     }
     return "boolean";
 }
-void GreaterThan::evaluate() {
-    lhs->evaluate();
-    rhs->evaluate();
+void GreaterThan::evaluate(std::string ret_type) {
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(LITERAL);
     
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
  
     //compare equality
     buffer += "    cmp "+left+", "+right+"\n";
@@ -328,13 +342,13 @@ std::string GreaterThanEqual::visit() {
     }
     return "boolean";
 }
-void GreaterThanEqual::evaluate() {
-    lhs->evaluate();
-    rhs->evaluate();
+void GreaterThanEqual::evaluate(std::string ret_type) {
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(LITERAL);
 
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
 
     //compare equality
     buffer += "    cmp "+left+", "+right+"\n";
@@ -364,13 +378,13 @@ std::string Plus::visit() {
     return "int";
 
 }
-void Plus::evaluate() {
-    lhs->evaluate();
-    rhs->evaluate();
+void Plus::evaluate(std::string ret_type) {
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(LITERAL);
   
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
       
     buffer += "    add "+reg+", "+left+", "+right+"\n"; //add values from r0 and r1, store in r0
     check_spill(reg);
@@ -388,13 +402,13 @@ std::string Minus::visit() {
     return "int";
 
 }
-void Minus::evaluate() {
-    lhs->evaluate();
-    rhs->evaluate();
+void Minus::evaluate(std::string ret_type) {
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(LITERAL);
     
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
 
     buffer += "    sub "+reg+", "+left+", "+right+"\n"; //add values from r0 and r1, store in r0
     check_spill(reg);
@@ -411,13 +425,13 @@ std::string Times::visit() {
     }
     return "int";
 }
-void Times::evaluate() {
-    lhs->evaluate();
-    rhs->evaluate();
+void Times::evaluate(std::string ret_type) {
+    lhs->evaluate(SYMBOLIC);
+    rhs->evaluate(SYMBOLIC);
     
     std::string right = r_pop("r1");
     std::string left = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
 
     buffer += "    mul "+reg+", "+left+", "+right+"\n"; //add values from r0 and r1, store in r0
     check_spill(reg);
@@ -434,7 +448,7 @@ std::string Div::visit() {
     }
     return "int";
 }
-void Div::evaluate() {
+void Div::evaluate(std::string ret_type) {
     std::cerr << "Division operator '/' is not supported by ARM, and not implemented by compiler\n";
     exit(1);
 }
@@ -444,12 +458,12 @@ std::string ArrayLookup::visit() {
     PRINTDEBUG("(ArrayLookup)")
     return type_local_scope[i->toString()]->t->getType();
 }
-void ArrayLookup::evaluate() {
+void ArrayLookup::evaluate(std::string ret_type) {
     //iterate over index epxressions
     std::string id = i->toString();
     std::list<Exp *>::iterator expIter = el->begin();
     for(expIter = el->begin(); expIter != el->end(); expIter++){
-        (*expIter)->evaluate();   
+        (*expIter)->evaluate(LITERAL);   
         break;
         //only works for 1D array TODO
     }
@@ -463,7 +477,7 @@ void ArrayLookup::evaluate() {
     buffer += "    add r12, r12, r3\n";
     
     //place value at index of array
-    reg = r_push();
+    reg = r_push(SYMBOLIC);
     buffer += "    ldr "+reg+", [r12]\n"; //store the value of r1 on the stack at location r1 (sp + offset)
     check_spill(reg);
 }
@@ -473,7 +487,7 @@ std::string ArrayLength::visit() {
     PRINTDEBUG("(ArrayLength)")
     return "int";
 }
-void ArrayLength::evaluate() {
+void ArrayLength::evaluate(std::string ret_type) {
     int val = 1;
     void *ptr = &val;
 }
@@ -531,7 +545,7 @@ std::string Call::visit() {
     //iterate over exper list for shits
     return returnType;
 }
-void Call::evaluate() {
+void Call::evaluate(std::string ret_type) {
     //init method and class name
     std::string className = currentClass->getName();    
     std::string methodName = i->toString();
@@ -542,7 +556,7 @@ void Call::evaluate() {
         int k = 0;
         //push first parameter
         std::list<Exp *>::iterator expIter = el->end();
-        expIter--; (*expIter)->evaluate();
+        expIter--; (*expIter)->evaluate(SYMBOLIC);
         std::string reg = r_pop(SUPPRESS);
         if(reg != SUPPRESSED)
             buffer += "    push {"+reg+"}\n";
@@ -551,7 +565,7 @@ void Call::evaluate() {
         for(expIter = el->begin(); expIter != el->end(); ++expIter){
             if(k == n - 1)
                 break;
-            (*expIter)->evaluate(); k++;
+            (*expIter)->evaluate(SYMBOLIC); k++;
             reg = r_pop(SUPPRESS);
             if(reg != SUPPRESSED)
                 buffer += "    push {"+reg+"}\n";
@@ -561,7 +575,7 @@ void Call::evaluate() {
     buffer += "    bl "+className+"_"+methodName+"\n";
     
     //push return value onto stack
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
     buffer += "    mov "+reg+", r0\n";
     check_spill(reg);
 }
@@ -571,36 +585,48 @@ std::string IntegerLiteral::visit() {
     PRINTDEBUG("(IntegerLiteral)")
     return "int";
 }
-void IntegerLiteral::evaluate() {
-    std::string reg = r_push();
-    buffer += "    ldr "+reg+", ="+std::to_string(num)+"\n";        //load value into register 0
-    check_spill(reg);
+void IntegerLiteral::evaluate(std::string ret_type) {
+    if(ret_type == LITERAL) {
+        r_push("#"+std::to_string(num));
+    } else {
+        std::string reg = r_push(SYMBOLIC);
+        buffer += "    ldr "+reg+", ="+std::to_string(num)+"\n";        //load value into register 0
+        check_spill(reg);
+    }
 }
 
 std::string True::visit() {
     PRINTDEBUG("(True)")
     return "boolean";
 }
-void True::evaluate() {
-    std::string reg = r_push();
-    buffer += "    ldr "+reg+", =1\n";  //load value into r0    
-    check_spill(reg);
+void True::evaluate(std::string ret_type) {
+    if(ret_type == LITERAL) {
+        r_push("#1");
+    } else {
+        std::string reg = r_push(SYMBOLIC);
+        buffer += "    ldr "+reg+", =1\n";  //load value into r0    
+        check_spill(reg);
+    }
 }
 
 std::string False::visit() {
     PRINTDEBUG("(False)")
     return "boolean";
 }
-void False::evaluate() {
-    std::string reg = r_push();
-    buffer += "    ldr "+reg+", =0\n";  //load value into r0    
-    check_spill(reg);
+void False::evaluate(std::string ret_type) {
+    if(ret_type == LITERAL) {
+        r_push("#0");
+    } else {
+        std::string reg = r_push(SYMBOLIC);
+        buffer += "    ldr "+reg+", =0\n";  //load value into r0    
+        check_spill(reg);
+    }
 }
 
 std::string This::visit() {
     return currentClass->getName();
 }
-void This::evaluate() {
+void This::evaluate(std::string ret_type) {
     ClassDecl *cl = currentClass;
     void *ptr = &(*cl);
     currentClassName = cl->getName();
@@ -611,9 +637,9 @@ std::string IdentifierExp::visit() {
     PRINTDEBUG("(IdentifierExp)")
     return type_local_scope[id]->t->getType();
 }
-void IdentifierExp::evaluate() {
+void IdentifierExp::evaluate(std::string ret_type) {
     int offset = scope[id];
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
 
     //load var from data
     buffer += "    ldr "+reg+", ="+currentClass->getName()+"_"+currentMethodName+"_"+id+"\n"; //store the address of sp + offset in r0
@@ -626,13 +652,13 @@ std::string NewArray::visit() {
     PRINTDEBUG("(NewArray)")
     return "int []";
 }
-void NewArray::evaluate() {
+void NewArray::evaluate(std::string ret_type) {
     std::cerr << "new array\n";
     
     //iterate over index epxressions
     std::list<Exp *>::iterator expIter = el->begin();
     for(expIter = el->begin(); expIter != el->end(); expIter++){
-        (*expIter)->evaluate();   
+        (*expIter)->evaluate(LITERAL);   
         break;
         //only works for 1D array TODO
     }
@@ -645,7 +671,7 @@ void NewArray::evaluate() {
     buffer += "    bl malloc\n"; //add values from r0 and r1, store in r0
     
     //return regist address to malloc memory
-    reg = r_push();
+    reg = r_push(SYMBOLIC);
     buffer += "    mov "+reg+", r0\n"; //add values from r0 and r1, store in r0
     check_spill(reg);
 }
@@ -655,7 +681,7 @@ std::string NewObject::visit() {
     PRINTDEBUG("(NewObject)")
     return i->toString();
 }
-void NewObject::evaluate() {
+void NewObject::evaluate(std::string ret_type) {
     ClassDecl *cl = classTable[i->toString()];
     void *ptr = &(*cl);
     currentClass = cl;
@@ -671,11 +697,11 @@ std::string Not::visit() {
     }
     return "boolean";
 }
-void Not::evaluate() {
-    e->evaluate();
+void Not::evaluate(std::string ret_type) {
+    e->evaluate(SYMBOLIC);
     
     std::string op = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
     
     //compare equality
     buffer += "    cmp "+op+", #0\n";
@@ -701,11 +727,11 @@ std::string NegativeExp::visit() {
     }
     return "int";
 }
-void NegativeExp::evaluate() {
-    e->evaluate();
+void NegativeExp::evaluate(std::string ret_type) {
+    e->evaluate(SYMBOLIC);
 
     std::string op = r_pop("r0");
-    std::string reg = r_push();
+    std::string reg = r_push(SYMBOLIC);
 
     buffer += "    neg "+reg+", "+op+"\n"; 
     check_spill(reg);
@@ -720,16 +746,16 @@ std::string PositiveExp::visit() {
     }
     return "int";
 }
-void PositiveExp::evaluate() {
-    e->evaluate();
+void PositiveExp::evaluate(std::string ret_type) {
+    e->evaluate(SYMBOLIC);
 }
 
 Index::Index(Exp *e): e(e) {}
 std::string Index::visit() {
     PRINTDEBUG("(Index)")
 }
-void Index::evaluate() {
-    e->evaluate();
+void Index::evaluate(std::string ret_type) {
+    e->evaluate(LITERAL);
     std::cerr << "calculating index\n";
 }
 
@@ -770,7 +796,7 @@ void If::visit() {
 }
 void If::evaluate() {
     //evaluate boolean expr
-    e->evaluate();
+    e->evaluate(SYMBOLIC);
 
     std::string reg = r_pop("r0");
 
@@ -798,7 +824,7 @@ void While::visit() {
     PRINTDEBUG("(While)")
 }
 void While::evaluate() {
-    e->evaluate();
+    e->evaluate(SYMBOLIC);
 
     std::string reg = r_pop("r0");
 
@@ -812,7 +838,7 @@ void While::evaluate() {
     //branch 1
     buffer += "3:      \n";
     s->evaluate();
-    e->evaluate();
+    e->evaluate(SYMBOLIC);
     
     reg = r_pop("r1");
     
@@ -833,7 +859,7 @@ void Print::visit() {
     PRINTDEBUG("(Print)")
 }
 void Print::evaluate() {
-    e->evaluate();
+    e->evaluate(LITERAL);
     
     std::string reg = r_pop("r1");
 
@@ -851,7 +877,7 @@ void Println::visit() {
     }
 }
 void Println::evaluate() {
-    e->evaluate();
+    e->evaluate(LITERAL);
   
     std::string reg = r_pop("r1");
 
@@ -901,7 +927,7 @@ void Assign::evaluate() {
     std::cerr << "Assign\n";
     
     //evaluate expr
-    e->evaluate();
+    e->evaluate(SYMBOLIC);
     
     std::string reg = r_pop("r0");
     std::cout << "assigning at sp+" << offset << " to var:" << id << std::endl;
@@ -922,7 +948,7 @@ void ArrayAssign::evaluate() {
     //iterate over index epxressions
     std::list<Exp *>::iterator expIter = el->begin();
     for(expIter = el->begin(); expIter != el->end(); expIter++){
-        (*expIter)->evaluate();   
+        (*expIter)->evaluate(LITERAL);   
         break;
         //only works for 1D array TODO
     }
@@ -932,7 +958,7 @@ void ArrayAssign::evaluate() {
     buffer += "    mul r3, r1, "+reg+"\n"; //add values from r0 and r1, store in r0
 
     //evaluate expr
-    e->evaluate();
+    e->evaluate(SYMBOLIC);
     reg = r_pop("r2");
 
     //assign value into address offset of array
@@ -1109,7 +1135,7 @@ void MethodDecl::evaluate() {
         (*stmtIter)->evaluate();
     }
     //evaluate return 
-    e->evaluate();
+    e->evaluate(SYMBOLIC);
     std::string reg = r_pop("r1");
     buffer += "    mov r0, "+reg+"\n";
 

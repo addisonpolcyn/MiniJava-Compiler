@@ -9,7 +9,7 @@ class operator_test {
         //start test
         System.out.println("Operator Test");
         //boolean ops
-        
+/*        
         System.out.println("Test #1: &&");
         if(true && true) {
             System.out.println("PASSED");
@@ -185,6 +185,7 @@ class operator_test {
         } else {
             System.out.println("FAILED");
         }
+    */
         //ops
         System.out.println("Test #9: +");
         if(1+1==2) {
@@ -219,6 +220,7 @@ class operator_test {
         } else {
             System.out.println("FAILED");
         }
+        //bookmark
         if(-5-5==-10) {
             System.out.println("PASSED");
         } else {
