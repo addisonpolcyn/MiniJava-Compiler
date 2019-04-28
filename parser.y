@@ -6,7 +6,7 @@
 #include "node.h"
 
 #define YYDEBUG 1
-#define PRINTDEBUG(x)  std::cout << x << std::endl;// comment out print statement to remove the printing
+#define PRINTDEBUG(x)  //std::cout << x << std::endl;// comment out print statement to remove the printing
 
 //root of AST
 Program *root;
@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
     root->traverse();
     
     /* Convert AST To ARM */
-    root->compile();
+    root->compile(argv[1]);
 
     /* Finish */
     return 0;

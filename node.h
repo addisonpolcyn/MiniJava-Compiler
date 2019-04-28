@@ -525,7 +525,7 @@ protected:
 public:
     Program(MainClass *m, std::list<ClassDecl *> *cl, int lineno);
     void traverse();
-    void compile();
+    void compile(std::string);
 };
 
 extern std::map<std::string, int> varTable;

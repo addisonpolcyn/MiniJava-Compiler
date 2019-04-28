@@ -7,8 +7,8 @@ YFLAGS= -v -y -d -g -t --debug
 
 RM = /bin/rm -f
 
-parser: y.tab.o lex.yy.o node.o
-	${CCC} -o parser lex.yy.o y.tab.o node.o
+mjavac: y.tab.o lex.yy.o node.o
+	${CCC} -o mjavac lex.yy.o y.tab.o node.o
 
 node.o: node.cpp node.h
 	${CCC} -c node.cpp
@@ -21,4 +21,4 @@ lex.yy.o: parser.l
 	${CCC} ${CCFLAGS} lex.yy.c -c 
 
 clean:
-	/bin/rm -f lex.yy.* y.tab.* *.o exp y.dot y.output node.h.gch parser
+	/bin/rm -f lex.yy.* y.tab.* *.o exp y.dot y.output node.h.gch mjavac
