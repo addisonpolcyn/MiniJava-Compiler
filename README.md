@@ -21,7 +21,7 @@ This will type check, analyze, compile, and produce an ARM Assembly Equivalent f
 $ mjavac factorial.java
 ```
 #### Running an ARM Assembly file
-Not every machine supports ARM Assembly by default. Raspberry Pi does support it. The ARM Assembly file must be assembled and then executed to see proper output.
+Not every machine supports ARM Assembly by default. Raspberry Pi does support it. The ARM Assembly output file must be assembled and then executed to see proper output.
 
 ## Sample MiniJava Program
 ```Java
@@ -111,4 +111,4 @@ INTEGER_LITERAL
 
 Identifier ::= IDENTIFIER
 
-> **Note:** These MiniJava grammar rules are from [http://www.cs.tufts.edu/~sguyer/classes/comp181-2006/minijava.html](http://www.cs.tufts.edu/~sguyer/classes/comp181-2006/minijava.html) and may be share or not share similarities with this MiniJava Compiler. 
+> **Note:** These MiniJava grammar rules are from [http://www.cs.tufts.edu/~sguyer/classes/comp181-2006/minijava.html](http://www.cs.tufts.edu/~sguyer/classes/comp181-2006/minijava.html) and may share or not share similarities with this MiniJava Compiler. 
